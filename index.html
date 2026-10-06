@@ -67,7 +67,7 @@
                     <input type="text" id="name" required class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
                 <div>
-                    <label for="stock" class="block text-sm font-medium text-gray-600 mb-1">Cantidad en Inventario</label>
+                    <label for="stock" class="block text-sm font-medium text-gray-600 mb-1">Cantidad en Inventario (Oculto al cliente)</label>
                     <input type="number" id="stock" min="0" value="0" required class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
                 <div>
@@ -121,7 +121,6 @@
 
         updatePagoMovilUI();
 
-        // Controladores para Pago Móvil (Evita conflictos con formularios principales)
         document.getElementById('togglePmBtn').addEventListener('click', () => {
             const form = document.getElementById('pagoMovilEditForm');
             form.classList.toggle('hidden');
@@ -163,7 +162,6 @@
             renderProducts();
         });
 
-        // Manejo mejorado de imágenes para celulares
         imageFile.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) {
@@ -181,7 +179,6 @@
             e.preventDefault();
             const index = parseInt(document.getElementById('editIndex').value);
             
-            // Verificamos si hay una imagen nueva o mantenemos la existente al editar
             let finalImage = currentImageBase64;
             if (!finalImage && index > -1 && products[index]) {
                 finalImage = products[index].image;
@@ -229,19 +226,28 @@
                         <div class="p-4">
                             <h3 class="font-bold text-lg mb-1">${p.name}</h3>
                             <p class="text-gray-600 text-sm line-clamp-2 mb-2">📝 ${p.description}</p>
+                            
+                            <!-- Control interno de stock (Oculto al cliente al compartir) -->
                             <div class="flex items-center justify-between bg-gray-50 p-2 rounded-lg mb-3 border">
-                                <span class="text-sm text-gray-600">Stock: <b>${p.stock}</b></span>
+                                <span class="text-xs text-gray-500">Stock interno: <b>${p.stock}</b></span>
                                 <div class="flex items-center gap-1">
-                                    <button type="button" onclick="updateStock(${index}, -1)" class="bg-red-100 hover:bg-red-200 text-red-600 w-7 h-7 rounded-md font-bold flex items-center justify-center" title="Vender / Restar 1">-</button>
-                                    <button type="button" onclick="updateStock(${index}, 1)" class="bg-green-100 hover:bg-green-200 text-green-600 w-7 h-7 rounded-md font-bold flex items-center justify-center" title="Sumar 1 stock">+</button>
+                                    <button type="button" onclick="updateStock(${index}, -1)" class="bg-red-100 hover:bg-red-200 text-red-600 w-6 h-6 rounded font-bold flex items-center justify-center text-xs">-</button>
+                                    <button type="button" onclick="updateStock(${index}, 1)" class="bg-green-100 hover:bg-green-200 text-green-600 w-6 h-6 rounded font-bold flex items-center justify-center text-xs">+</button>
                                 </div>
                             </div>
-                            <p class="text-green-600 font-bold text-lg mb-1">💰 Precio: Bs. ${totalBs}</p>
+
+                            <p class="text-green-600 font-bold text-base mb-3">💰 Precio unitario: Bs. ${totalBs}</p>
                             
-                            <!-- Opción para incluir Pago Móvil al compartir -->
-                            <div class="mt-3 pt-2 border-t flex items-center gap-2">
+                            <!-- Selector de Cantidad para el pedido -->
+                            <div class="mb-3 bg-blue-50 p-2 rounded-lg border border-blue-100 flex items-center justify-between">
+                                <label for="qty_${index}" class="text-xs font-semibold text-blue-800"><i class="fas fa-shopping-cart mr-1"></i> Cantidad que piden:</label>
+                                <input type="number" id="qty_${index}" min="1" value="1" class="w-16 border rounded px-2 py-1 text-center font-bold text-sm bg-white">
+                            </div>
+
+                            <!-- Casilla para incluir Pago Móvil -->
+                            <div class="pt-2 border-t flex items-center gap-2">
                                 <input type="checkbox" id="includePM_${index}" checked class="rounded text-blue-600 focus:ring-blue-500 w-4 h-4">
-                                <label for="includePM_${index}" class="text-xs text-gray-600 cursor-pointer">Incluir datos de Pago Móvil al compartir</label>
+                                <label for="includePM_${index}" class="text-xs text-gray-600 cursor-pointer">Incluir Pago Móvil</label>
                             </div>
                         </div>
                     </div>
@@ -266,15 +272,33 @@
 
         function shareWhatsApp(index) {
             const p = products[index];
-            const totalBs = (p.priceUSD * globalExchangeRate).toFixed(2);
+            const priceBsNum = p.priceUSD * globalExchangeRate;
+            
+            // Tomar la cantidad seleccionada en el input del producto
+            const qtyInput = document.getElementById(`qty_${index}`);
+            const cantidad = parseInt(qtyInput ? qtyInput.value : 1) || 1;
+            
+            const totalBsNum = priceBsNum * cantidad;
+            
             const includePMCheckbox = document.getElementById(`includePM_${index}`);
             const includePM = includePMCheckbox ? includePMCheckbox.checked : true;
-            const fechaActual = new Date().toLocaleDateString('es-VE');
+            
+            // Formatear Fecha y Hora local actual de Venezuela
+            const now = new Date();
+            const fechaActual = now.toLocaleDateString('es-VE');
+            const horaActual = now.toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit' });
 
-            let text = `🛒 *${p.name}*%0A%0A`;
-            text += `💰 *Precio: Bs. ${totalBs}*%0A`;
-            text += `📦 *Descripción:* ${p.description}%0A`;
-            text += `📦 *Stock:* ${p.stock} disponible(s)%0A`;
+            // Construir mensaje estructurado exactamente como lo pediste
+            let text = `🛒 *${p.name}*%0A`;
+            text += `💰 Bs. ${priceBsNum.toFixed(2)} c/u%0A%0A`;
+            if (p.description) {
+                text += `📦 *Descripción:* ${p.description}%0A%0A`;
+            }
+            text += `🔢 *${cantidad} unidad(es)*%0A`;
+            text += `✅ *Total a pagar: ${totalBsNum.toFixed(2)} Bs.*%0A%0A`;
+            
+            text += `📅 *Fecha:* ${fechaActual}%0A`;
+            text += `⏰ *Hora:* ${horaActual}%0A`;
 
             if (includePM) {
                 text += `%0A📱 *Pago Móvil:*%0A`;
@@ -283,8 +307,7 @@
                 text += `🆔 Cédula/RIF: ${pagoMovilData.cedula}%0A`;
             }
 
-            text += `%0A📅 *Fecha:* ${fechaActual}%0A%0A`;
-            text += `📲 ¡Contáctanos para más información!`;
+            text += `%0A📲 ¡Contáctanos para más información!`;
 
             window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
         }
@@ -299,7 +322,7 @@
             document.getElementById('formTitle').textContent = 'Editar Producto';
             document.getElementById('saveBtn').textContent = 'Actualizar Producto';
             
-            currentImageBase64 = ''; // Limpiamos temporal para que conserve la imagen si no se cambia
+            currentImageBase64 = ''; 
             if (p.image) {
                 imagePreviewContainer.innerHTML = `<img src="${p.image}" class="w-full h-full object-cover">`;
                 fileName.textContent = 'Imagen actual cargada';
@@ -357,4 +380,4 @@
     </script>
 </body>
 </html>
-            
+     
