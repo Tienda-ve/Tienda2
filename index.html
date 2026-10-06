@@ -329,4 +329,32 @@
 
         importFile.addEventListener('change', (e) => {
             const file = e.target.files[0];
-            if (file
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        products = JSON.parse(event.target.result);
+                        localStorage.setItem('products', JSON.stringify(products));
+                        renderProducts();
+                        showToast('Inventario importado con éxito');
+                    } catch (err) {
+                        alert('Archivo JSON inválido');
+                    }
+                };
+                reader.readAsText(file);
+            }
+        });
+
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg mt-2 text-sm';
+            toast.textContent = message;
+            document.getElementById('toastContainer').appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        renderProducts();
+    </script>
+</body>
+</html>
+            
