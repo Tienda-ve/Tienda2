@@ -72,97 +72,8 @@
                     <p class="text-xs text-gray-500 uppercase font-semibold">Ingresos Totales (Bs.)</p>
                     <h3 id="statTotalIngresos" class="text-2xl font-bold text-emerald-600">Bs. 0.00</h3>
                 </div>
-                <i class="fas fa-money-bill-wave text-emerald-200 text-3xl"></i>
-            </div>
-        </div>
-
-        <!-- CONFIGURACIÓN GLOBAL (TASA Y PAGO MÓVIL) -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-            <section class="bg-white rounded-xl shadow-md p-4 flex items-center justify-between gap-4 border-l-4 border-blue-500">
-                <div class="flex items-center gap-3">
-                    <i class="fas fa-exchange-alt text-blue-500 text-xl"></i>
-                    <div>
-                        <label for="globalExchangeRate" class="block text-sm font-medium text-gray-700">Tasa del Dólar (Bs.)</label>
-                        <span class="text-xs text-gray-400">Actualiza para recalcular precios</span>
-                    </div>
-                </div>
-                <input type="number" id="globalExchangeRate" step="0.01" min="0" value="36.50" class="w-32 border-2 border-blue-200 rounded-lg px-3 py-2 font-bold text-blue-600 text-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-center">
-            </section>
-
-            <section class="bg-white rounded-xl shadow-md p-4 border-l-4 border-green-500">
-                <div class="flex justify-between items-center mb-2">
-                    <span class="text-sm font-semibold text-gray-700"><i class="fas fa-mobile-alt text-green-500 mr-1"></i> Datos de Pago Móvil</span>
-                    <button type="button" id="togglePmBtn" class="text-xs text-blue-600 hover:underline"><i class="fas fa-cog"></i> Editar Datos</button>
-                </div>
-                <div id="pagoMovilDisplay" class="text-xs text-gray-600"></div>
-                <div id="pagoMovilEditForm" class="hidden mt-2 space-y-2">
-                    <input type="text" id="pmBanco" placeholder="Banco (Ej: Banco de Venezuela)" class="w-full text-xs border rounded px-2 py-1.5 focus:ring-2 focus:ring-green-500 focus:outline-none">
-                    <input type="text" id="pmTelefono" placeholder="Teléfono (Ej: 0412-1234567)" class="w-full text-xs border rounded px-2 py-1.5 focus:ring-2 focus:ring-green-500 focus:outline-none">
-                    <input type="text" id="pmCedula" placeholder="Cédula o RIF (Ej: V-12345678)" class="w-full text-xs border rounded px-2 py-1.5 focus:ring-2 focus:ring-green-500 focus:outline-none">
-                    <button type="button" id="savePmBtn" class="bg-green-600 text-white text-xs px-3 py-1.5 rounded hover:bg-green-700 w-full font-semibold">Guardar Datos de Pago</button>
-                </div>
-            </section>
-        </div>
-
-        <!-- FORMULARIO DE PRODUCTOS -->
-        <section class="bg-white rounded-xl shadow-md p-6 mb-8">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-semibold text-gray-700"><i class="fas fa-plus-circle mr-2"></i><span id="formTitle">Agregar Nuevo Producto</span></h2>
-                <button type="button" onclick="openScannerModal()" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-600 border border-indigo-200 px-3 py-1.5 rounded-lg text-sm flex items-center gap-2">
-                    <i class="fas fa-barcode"></i> Escanear Código
-                </button>
-            </div>
-            <form id="productForm" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <input type="hidden" id="editIndex" value="-1">
-                <div>
-                    <label for="name" class="block text-sm font-medium text-gray-600 mb-1">Nombre del Producto</label>
-                    <input type="text" id="name" required class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                </div>
-                <div>
-                    <label for="barcode" class="block text-sm font-medium text-gray-600 mb-1">Código de Barras / SKU</label>
-                    <input type="text" id="barcode" placeholder="Opcional" class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                </div>
-                <div>
-                    <label for="stock" class="block text-sm font-medium text-gray-600 mb-1">Inventario (Cantidad disponible)</label>
-                    <input type="number" id="stock" min="0" value="0" required class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                </div>
-                <div>
-                    <label for="priceUSD" class="block text-sm font-medium text-gray-600 mb-1">Precio en Dólares ($)</label>
-                    <input type="number" id="priceUSD" step="0.01" min="0" required class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                </div>
-                <div class="md:col-span-2">
-                    <label class="block text-sm font-medium text-gray-600 mb-1">Imagen del Producto (Galería o Cámara)</label>
-                    <div class="flex items-center gap-3">
-                        <label for="imageFile" class="cursor-pointer bg-blue-50 hover:bg-blue-100 text-blue-600 border border-blue-200 px-4 py-2 rounded-lg flex items-center gap-2">
-                            <i class="fas fa-camera"></i> Seleccionar o Tomar Foto
-                        </label>
-                        <input type="file" id="imageFile" accept="image/*" class="hidden">
-                        <span id="fileName" class="text-sm text-gray-400 truncate">Ninguna imagen seleccionada</span>
-                    </div>
-                </div>
-                <div class="flex items-center justify-center">
-                    <div id="imagePreviewContainer" class="w-28 h-28 border rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
-                        <span class="text-xs text-gray-400">Sin vista previa</span>
-                    </div>
-                </div>
-                <div class="md:col-span-2 lg:col-span-3">
-                    <label for="description" class="block text-sm font-medium text-gray-600 mb-1">Descripción</label>
-                    <textarea id="description" rows="2" required class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
-                </div>
-                <div class="md:col-span-2 lg:col-span-3 text-right">
-                    <button type="submit" id="saveBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition font-semibold">Guardar Producto</button>
-                </div>
-            </form>
-        </section>
-
-        <!-- LISTADO DE PRODUCTOS -->
-        <section>
-            <h2 class="text-xl font-semibold mb-4 text-gray-700"><i class="fas fa-boxes mr-2"></i>Inventario de Productos</h2>
-            <div id="productList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
-        </section>
-    </div>
-
-    <!-- MODAL DE HISTORIAL DE VENTAS -->
+                <i class="fas fa-money-bill-wave text-emerald-
+                        <!-- MODAL DE HISTORIAL DE VENTAS -->
     <div id="salesModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-xl shadow-xl max-w-2xl w-full p-6 max-h-[80vh] flex flex-col">
             <div class="flex justify-between items-center mb-4 border-b pb-2">
@@ -353,8 +264,7 @@
                 productList.appendChild(card);
             });
         }
-
-        function updateStock(index, amount) {
+                function updateStock(index, amount) {
             products[index].stock += amount;
             if (products[index].stock < 0) products[index].stock = 0;
             localStorage.setItem('products', JSON.stringify(products));
@@ -464,7 +374,7 @@
                 const subtotalBs = item.priceUSD * globalExchangeRate * item.qty;
                 totalGeneralBs += subtotalBs;
 
-                text +=\`• *${item.name}* (x${item.qty})%0A\`;
+                text += `• *${item.name}* (x${item.qty})%0A`;
                 text += `  Precio c/u: ${(item.priceUSD * globalExchangeRate).toFixed(2)} Bs%0A`;
                 text += `  Subtotal: *${subtotalBs.toFixed(2)} Bs*%0A`;
                 if (item.description) {
@@ -475,7 +385,6 @@
                 }
                 text += `%0A`;
 
-                // Descontar automáticamente del stock del inventario
                 if (products[item.productIndex]) {
                     products[item.productIndex].stock -= item.qty;
                     if (products[item.productIndex].stock < 0) products[item.productIndex].stock = 0;
@@ -496,7 +405,6 @@
 
             text += `%0A📲 ¡Esperamos su confirmación para procesar el pedido!`;
 
-            // Registrar en historial general de ventas
             salesHistory.unshift({
                 name: `Pedido Múltiple (${cart.length} productos)`,
                 qty: cart.reduce((acc, i) => acc + i.qty, 0),
@@ -509,7 +417,6 @@
             
             window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
             
-            // Limpiar carrito y refrescar vista
             cart = [];
             renderCart();
             renderProducts();
@@ -671,3 +578,4 @@
     </script>
 </body>
 </html>
+            
