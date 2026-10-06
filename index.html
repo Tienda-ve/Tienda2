@@ -43,16 +43,16 @@
             <section class="bg-white rounded-xl shadow-md p-4 border-l-4 border-green-500">
                 <div class="flex justify-between items-center mb-2">
                     <span class="text-sm font-semibold text-gray-700"><i class="fas fa-mobile-alt text-green-500 mr-1"></i> Datos de Pago Móvil</span>
-                    <button onclick="togglePagoMovilConfig()" class="text-xs text-blue-600 hover:underline"><i class="fas fa-cog"></i> Editar Datos</button>
+                    <button type="button" id="togglePmBtn" class="text-xs text-blue-600 hover:underline"><i class="fas fa-cog"></i> Editar Datos</button>
                 </div>
                 <div id="pagoMovilDisplay" class="text-xs text-gray-600">
                     <!-- Se llena dinámicamente -->
                 </div>
                 <div id="pagoMovilEditForm" class="hidden mt-2 space-y-2">
-                    <input type="text" id="pmBanco" placeholder="Banco (Ej: Banco de Venezuela)" class="w-full text-xs border rounded px-2 py-1">
-                    <input type="text" id="pmTelefono" placeholder="Teléfono (Ej: 0412-1234567)" class="w-full text-xs border rounded px-2 py-1">
-                    <input type="text" id="pmCedula" placeholder="Cédula o RIF (Ej: V-12345678)" class="w-full text-xs border rounded px-2 py-1">
-                    <button onclick="savePagoMovil()" class="bg-green-600 text-white text-xs px-3 py-1 rounded hover:bg-green-700 w-full">Guardar Datos de Pago</button>
+                    <input type="text" id="pmBanco" placeholder="Banco (Ej: Banco de Venezuela)" class="w-full text-xs border rounded px-2 py-1.5 focus:ring-2 focus:ring-green-500 focus:outline-none">
+                    <input type="text" id="pmTelefono" placeholder="Teléfono (Ej: 0412-1234567)" class="w-full text-xs border rounded px-2 py-1.5 focus:ring-2 focus:ring-green-500 focus:outline-none">
+                    <input type="text" id="pmCedula" placeholder="Cédula o RIF (Ej: V-12345678)" class="w-full text-xs border rounded px-2 py-1.5 focus:ring-2 focus:ring-green-500 focus:outline-none">
+                    <button type="button" id="savePmBtn" class="bg-green-600 text-white text-xs px-3 py-1.5 rounded hover:bg-green-700 w-full font-semibold">Guardar Datos de Pago</button>
                 </div>
             </section>
         </div>
@@ -94,7 +94,7 @@
                     <textarea id="description" rows="2" required class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
                 </div>
                 <div class="md:col-span-2 lg:col-span-3 text-right">
-                    <button type="submit" id="saveBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition">Guardar Producto</button>
+                    <button type="submit" id="saveBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition font-semibold">Guardar Producto</button>
                 </div>
             </form>
         </section>
@@ -121,6 +121,34 @@
 
         updatePagoMovilUI();
 
+        // Controladores para Pago Móvil (Evita conflictos con formularios principales)
+        document.getElementById('togglePmBtn').addEventListener('click', () => {
+            const form = document.getElementById('pagoMovilEditForm');
+            form.classList.toggle('hidden');
+            if (!form.classList.contains('hidden')) {
+                document.getElementById('pmBanco').value = pagoMovilData.banco;
+                document.getElementById('pmTelefono').value = pagoMovilData.telefono;
+                document.getElementById('pmCedula').value = pagoMovilData.cedula;
+            }
+        });
+
+        document.getElementById('savePmBtn').addEventListener('click', () => {
+            pagoMovilData = {
+                banco: document.getElementById('pmBanco').value.trim() || 'N/A',
+                telefono: document.getElementById('pmTelefono').value.trim() || 'N/A',
+                cedula: document.getElementById('pmCedula').value.trim() || 'N/A'
+            };
+            localStorage.setItem('pagoMovilData', JSON.stringify(pagoMovilData));
+            updatePagoMovilUI();
+            document.getElementById('pagoMovilEditForm').classList.add('hidden');
+            showToast('Datos de Pago Móvil actualizados');
+        });
+
+        function updatePagoMovilUI() {
+            const display = document.getElementById('pagoMovilDisplay');
+            display.innerHTML = `🏦 <b>${pagoMovilData.banco}</b><br>📱 ${pagoMovilData.telefono}<br>🆔 ${pagoMovilData.cedula}`;
+        }
+
         const productForm = document.getElementById('productForm');
         const imageFile = document.getElementById('imageFile');
         const fileName = document.getElementById('fileName');
@@ -135,33 +163,7 @@
             renderProducts();
         });
 
-        function togglePagoMovilConfig() {
-            const form = document.getElementById('pagoMovilEditForm');
-            form.classList.toggle('hidden');
-            if (!form.classList.contains('hidden')) {
-                document.getElementById('pmBanco').value = pagoMovilData.banco;
-                document.getElementById('pmTelefono').value = pagoMovilData.telefono;
-                document.getElementById('pmCedula').value = pagoMovilData.cedula;
-            }
-        }
-
-        function savePagoMovil() {
-            pagoMovilData = {
-                banco: document.getElementById('pmBanco').value || 'N/A',
-                telefono: document.getElementById('pmTelefono').value || 'N/A',
-                cedula: document.getElementById('pmCedula').value || 'N/A'
-            };
-            localStorage.setItem('pagoMovilData', JSON.stringify(pagoMovilData));
-            updatePagoMovilUI();
-            document.getElementById('pagoMovilEditForm').classList.add('hidden');
-            showToast('Datos de Pago Móvil actualizados');
-        }
-
-        function updatePagoMovilUI() {
-            const display = document.getElementById('pagoMovilDisplay');
-            display.innerHTML = `🏦 <b>${pagoMovilData.banco}</b><br>📱 ${pagoMovilData.telefono}<br>🆔 ${pagoMovilData.cedula}`;
-        }
-
+        // Manejo mejorado de imágenes para celulares
         imageFile.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) {
@@ -177,18 +179,25 @@
 
         productForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            const index = document.getElementById('editIndex').value;
+            const index = parseInt(document.getElementById('editIndex').value);
+            
+            // Verificamos si hay una imagen nueva o mantenemos la existente al editar
+            let finalImage = currentImageBase64;
+            if (!finalImage && index > -1 && products[index]) {
+                finalImage = products[index].image;
+            }
+
             const product = {
-                name: document.getElementById('name').value,
-                stock: parseInt(document.getElementById('stock').value),
-                priceUSD: parseFloat(document.getElementById('priceUSD').value),
-                description: document.getElementById('description').value,
-                image: currentImageBase64 || (index > -1 ? products[index].image : '')
+                name: document.getElementById('name').value.trim(),
+                stock: parseInt(document.getElementById('stock').value) || 0,
+                priceUSD: parseFloat(document.getElementById('priceUSD').value) || 0,
+                description: document.getElementById('description').value.trim(),
+                image: finalImage || ''
             };
 
             if (index > -1) {
                 products[index] = product;
-                document.getElementById('editIndex').value = -1;
+                document.getElementById('editIndex').value = '-1';
                 document.getElementById('formTitle').textContent = 'Agregar Nuevo Producto';
                 document.getElementById('saveBtn').textContent = 'Guardar Producto';
             } else {
@@ -201,7 +210,7 @@
             fileName.textContent = 'Ninguna imagen seleccionada';
             imagePreviewContainer.innerHTML = '<span class="text-xs text-gray-400">Sin vista previa</span>';
             renderProducts();
-            showToast('Producto guardado con éxito');
+            showToast('¡Producto guardado con éxito!');
         });
 
         function renderProducts() {
@@ -223,8 +232,8 @@
                             <div class="flex items-center justify-between bg-gray-50 p-2 rounded-lg mb-3 border">
                                 <span class="text-sm text-gray-600">Stock: <b>${p.stock}</b></span>
                                 <div class="flex items-center gap-1">
-                                    <button onclick="updateStock(${index}, -1)" class="bg-red-100 hover:bg-red-200 text-red-600 w-7 h-7 rounded-md font-bold flex items-center justify-center" title="Vender / Restar 1">-</button>
-                                    <button onclick="updateStock(${index}, 1)" class="bg-green-100 hover:bg-green-200 text-green-600 w-7 h-7 rounded-md font-bold flex items-center justify-center" title="Sumar 1 stock">+</button>
+                                    <button type="button" onclick="updateStock(${index}, -1)" class="bg-red-100 hover:bg-red-200 text-red-600 w-7 h-7 rounded-md font-bold flex items-center justify-center" title="Vender / Restar 1">-</button>
+                                    <button type="button" onclick="updateStock(${index}, 1)" class="bg-green-100 hover:bg-green-200 text-green-600 w-7 h-7 rounded-md font-bold flex items-center justify-center" title="Sumar 1 stock">+</button>
                                 </div>
                             </div>
                             <p class="text-green-600 font-bold text-lg mb-1">💰 Precio: Bs. ${totalBs}</p>
@@ -237,10 +246,10 @@
                         </div>
                     </div>
                     <div class="p-4 bg-gray-50 border-t flex justify-between items-center gap-2">
-                        <button onclick="shareWhatsApp(${index})" class="bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-lg text-sm flex items-center gap-2 w-full justify-center"><i class="fab fa-whatsapp"></i> Compartir WhatsApp</button>
+                        <button type="button" onclick="shareWhatsApp(${index})" class="bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-lg text-sm flex items-center gap-2 w-full justify-center font-semibold"><i class="fab fa-whatsapp"></i> Compartir WhatsApp</button>
                         <div class="flex gap-2">
-                            <button onclick="editProduct(${index})" class="text-blue-500 hover:text-blue-700 px-2" title="Editar"><i class="fas fa-edit"></i></button>
-                            <button onclick="deleteProduct(${index})" class="text-red-500 hover:text-red-700 px-2" title="Eliminar"><i class="fas fa-trash"></i></button>
+                            <button type="button" onclick="editProduct(${index})" class="text-blue-500 hover:text-blue-700 px-2" title="Editar"><i class="fas fa-edit"></i></button>
+                            <button type="button" onclick="deleteProduct(${index})" class="text-red-500 hover:text-red-700 px-2" title="Eliminar"><i class="fas fa-trash"></i></button>
                         </div>
                     </div>
                 `;
@@ -258,7 +267,8 @@
         function shareWhatsApp(index) {
             const p = products[index];
             const totalBs = (p.priceUSD * globalExchangeRate).toFixed(2);
-            const includePM = document.getElementById(`includePM_${index}`).checked;
+            const includePMCheckbox = document.getElementById(`includePM_${index}`);
+            const includePM = includePMCheckbox ? includePMCheckbox.checked : true;
             const fechaActual = new Date().toLocaleDateString('es-VE');
 
             let text = `🛒 *${p.name}*%0A%0A`;
@@ -288,13 +298,35 @@
             document.getElementById('description').value = p.description;
             document.getElementById('formTitle').textContent = 'Editar Producto';
             document.getElementById('saveBtn').textContent = 'Actualizar Producto';
+            
+            currentImageBase64 = ''; // Limpiamos temporal para que conserve la imagen si no se cambia
             if (p.image) {
                 imagePreviewContainer.innerHTML = `<img src="${p.image}" class="w-full h-full object-cover">`;
                 fileName.textContent = 'Imagen actual cargada';
+            } else {
+                imagePreviewContainer.innerHTML = '<span class="text-xs text-gray-400">Sin vista previa</span>';
+                fileName.textContent = 'Ninguna imagen seleccionada';
             }
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function deleteProduct(index) {
-            if (
-        
+            if (confirm('¿Estás seguro de eliminar este producto?')) {
+                products.splice(index, 1);
+                localStorage.setItem('products', JSON.stringify(products));
+                renderProducts();
+                showToast('Producto eliminado');
+            }
+        }
+
+        exportBtn.addEventListener('click', () => {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(products));
+            const dlAnchorElem = document.createElement('a');
+            dlAnchorElem.setAttribute("href", dataStr);
+            dlAnchorElem.setAttribute("download", "inventario_tienda.json");
+            dlAnchorElem.click();
+        });
+
+        importFile.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file
