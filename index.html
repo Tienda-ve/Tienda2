@@ -15,7 +15,7 @@
     <div class="container mx-auto px-4 py-8 max-w-6xl">
         <header class="text-center mb-6">
             <h1 class="text-3xl font-bold text-blue-600 mb-2"><i class="fas fa-store mr-2"></i>Gestor de Mi Tienda</h1>
-            <p class="text-gray-500">Control de inventario, precios en dólares/bolívares y difusión por WhatsApp</p>
+            <p class="text-gray-500">Control de inventario, precios en bolívares y difusión por WhatsApp</p>
             <div class="mt-4 flex justify-center gap-3">
                 <button id="exportBtn" class="bg-indigo-500 hover:bg-indigo-600 text-white px-3 py-1 rounded-md text-sm"><i class="fas fa-file-export mr-2"></i>Exportar JSON</button>
                 <label for="importFile" class="bg-yellow-50 hover:bg-yellow-100 text-yellow-700 border border-yellow-200 px-3 py-1 rounded-md text-sm cursor-pointer">
@@ -25,21 +25,39 @@
             </div>
         </header>
 
-        <!-- TASA DE CAMBIO GLOBAL -->
-        <section class="bg-white rounded-xl shadow-md p-4 mb-6 flex flex-col sm:flex-row items-center justify-between gap-4 border-l-4 border-blue-500">
-            <div class="flex items-center gap-3 w-full sm:w-auto">
-                <i class="fas fa-exchange-alt text-blue-500 text-xl"></i>
-                <div>
-                    <label for="globalExchangeRate" class="block text-sm font-medium text-gray-700">Tasa del Dólar Actual (Bs.)</label>
-                    <span class="text-xs text-gray-400">Actualiza este valor para recalcular toda la tienda</span>
+        <!-- CONFIGURACIÓN GLOBAL (TASA Y PAGO MÓVIL) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <!-- Tasa de Cambio -->
+            <section class="bg-white rounded-xl shadow-md p-4 flex items-center justify-between gap-4 border-l-4 border-blue-500">
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-exchange-alt text-blue-500 text-xl"></i>
+                    <div>
+                        <label for="globalExchangeRate" class="block text-sm font-medium text-gray-700">Tasa del Dólar (Bs.)</label>
+                        <span class="text-xs text-gray-400">Actualiza para recalcular precios</span>
+                    </div>
                 </div>
-            </div>
-            <div class="w-full sm:w-auto">
-                <input type="number" id="globalExchangeRate" step="0.01" min="0" value="36.50" class="w-full sm:w-40 border-2 border-blue-200 rounded-lg px-3 py-2 font-bold text-blue-600 text-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-center">
-            </div>
-        </section>
+                <input type="number" id="globalExchangeRate" step="0.01" min="0" value="36.50" class="w-32 border-2 border-blue-200 rounded-lg px-3 py-2 font-bold text-blue-600 text-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-center">
+            </section>
 
-        <!-- FORMULARIO -->
+            <!-- Datos de Pago Móvil Editables -->
+            <section class="bg-white rounded-xl shadow-md p-4 border-l-4 border-green-500">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-sm font-semibold text-gray-700"><i class="fas fa-mobile-alt text-green-500 mr-1"></i> Datos de Pago Móvil</span>
+                    <button onclick="togglePagoMovilConfig()" class="text-xs text-blue-600 hover:underline"><i class="fas fa-cog"></i> Editar Datos</button>
+                </div>
+                <div id="pagoMovilDisplay" class="text-xs text-gray-600">
+                    <!-- Se llena dinámicamente -->
+                </div>
+                <div id="pagoMovilEditForm" class="hidden mt-2 space-y-2">
+                    <input type="text" id="pmBanco" placeholder="Banco (Ej: Banco de Venezuela)" class="w-full text-xs border rounded px-2 py-1">
+                    <input type="text" id="pmTelefono" placeholder="Teléfono (Ej: 0412-1234567)" class="w-full text-xs border rounded px-2 py-1">
+                    <input type="text" id="pmCedula" placeholder="Cédula o RIF (Ej: V-12345678)" class="w-full text-xs border rounded px-2 py-1">
+                    <button onclick="savePagoMovil()" class="bg-green-600 text-white text-xs px-3 py-1 rounded hover:bg-green-700 w-full">Guardar Datos de Pago</button>
+                </div>
+            </section>
+        </div>
+
+        <!-- FORMULARIO DE PRODUCTOS -->
         <section class="bg-white rounded-xl shadow-md p-6 mb-8">
             <h2 class="text-xl font-semibold mb-4 text-gray-700"><i class="fas fa-plus-circle mr-2"></i><span id="formTitle">Agregar Nuevo Producto</span></h2>
             <form id="productForm" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -95,10 +113,13 @@
     <script>
         let products = JSON.parse(localStorage.getItem('products')) || [];
         let globalExchangeRate = parseFloat(localStorage.getItem('globalExchangeRate')) || 36.50;
+        let pagoMovilData = JSON.parse(localStorage.getItem('pagoMovilData')) || { banco: 'Banco de Venezuela', telefono: '0412-0000000', cedula: 'V-00000000' };
         let currentImageBase64 = '';
 
         const globalExchangeRateInput = document.getElementById('globalExchangeRate');
         globalExchangeRateInput.value = globalExchangeRate;
+
+        updatePagoMovilUI();
 
         const productForm = document.getElementById('productForm');
         const imageFile = document.getElementById('imageFile');
@@ -113,6 +134,33 @@
             localStorage.setItem('globalExchangeRate', globalExchangeRate);
             renderProducts();
         });
+
+        function togglePagoMovilConfig() {
+            const form = document.getElementById('pagoMovilEditForm');
+            form.classList.toggle('hidden');
+            if (!form.classList.contains('hidden')) {
+                document.getElementById('pmBanco').value = pagoMovilData.banco;
+                document.getElementById('pmTelefono').value = pagoMovilData.telefono;
+                document.getElementById('pmCedula').value = pagoMovilData.cedula;
+            }
+        }
+
+        function savePagoMovil() {
+            pagoMovilData = {
+                banco: document.getElementById('pmBanco').value || 'N/A',
+                telefono: document.getElementById('pmTelefono').value || 'N/A',
+                cedula: document.getElementById('pmCedula').value || 'N/A'
+            };
+            localStorage.setItem('pagoMovilData', JSON.stringify(pagoMovilData));
+            updatePagoMovilUI();
+            document.getElementById('pagoMovilEditForm').classList.add('hidden');
+            showToast('Datos de Pago Móvil actualizados');
+        }
+
+        function updatePagoMovilUI() {
+            const display = document.getElementById('pagoMovilDisplay');
+            display.innerHTML = `🏦 <b>${pagoMovilData.banco}</b><br>📱 ${pagoMovilData.telefono}<br>🆔 ${pagoMovilData.cedula}`;
+        }
 
         imageFile.addEventListener('change', (e) => {
             const file = e.target.files[0];
@@ -171,7 +219,7 @@
                         ${p.image ? `<img src="${p.image}" class="w-full h-48 object-cover">` : `<div class="w-full h-48 bg-gray-100 flex items-center justify-center text-gray-400"><i class="fas fa-image fa-2x"></i></div>`}
                         <div class="p-4">
                             <h3 class="font-bold text-lg mb-1">${p.name}</h3>
-                            <p class="text-gray-600 text-sm line-clamp-2 mb-2">${p.description}</p>
+                            <p class="text-gray-600 text-sm line-clamp-2 mb-2">📝 ${p.description}</p>
                             <div class="flex items-center justify-between bg-gray-50 p-2 rounded-lg mb-3 border">
                                 <span class="text-sm text-gray-600">Stock: <b>${p.stock}</b></span>
                                 <div class="flex items-center gap-1">
@@ -179,15 +227,20 @@
                                     <button onclick="updateStock(${index}, 1)" class="bg-green-100 hover:bg-green-200 text-green-600 w-7 h-7 rounded-md font-bold flex items-center justify-center" title="Sumar 1 stock">+</button>
                                 </div>
                             </div>
-                            <p class="text-blue-600 font-bold mb-1">$${p.priceUSD.toFixed(2)} USD</p>
-                            <p class="text-green-600 font-semibold text-sm">Bs. ${totalBs} <span class="text-xs text-gray-400">(Tasa: ${globalExchangeRate})</span></p>
+                            <p class="text-green-600 font-bold text-lg mb-1">💰 Precio: Bs. ${totalBs}</p>
+                            
+                            <!-- Opción para incluir Pago Móvil al compartir -->
+                            <div class="mt-3 pt-2 border-t flex items-center gap-2">
+                                <input type="checkbox" id="includePM_${index}" checked class="rounded text-blue-600 focus:ring-blue-500 w-4 h-4">
+                                <label for="includePM_${index}" class="text-xs text-gray-600 cursor-pointer">Incluir datos de Pago Móvil al compartir</label>
+                            </div>
                         </div>
                     </div>
                     <div class="p-4 bg-gray-50 border-t flex justify-between items-center gap-2">
-                        <button onclick="shareWhatsApp(${index})" class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm flex items-center gap-1"><i class="fab fa-whatsapp"></i> WhatsApp</button>
+                        <button onclick="shareWhatsApp(${index})" class="bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded-lg text-sm flex items-center gap-2 w-full justify-center"><i class="fab fa-whatsapp"></i> Compartir WhatsApp</button>
                         <div class="flex gap-2">
-                            <button onclick="editProduct(${index})" class="text-blue-500 hover:text-blue-700" title="Editar"><i class="fas fa-edit"></i></button>
-                            <button onclick="deleteProduct(${index})" class="text-red-500 hover:text-red-700" title="Eliminar"><i class="fas fa-trash"></i></button>
+                            <button onclick="editProduct(${index})" class="text-blue-500 hover:text-blue-700 px-2" title="Editar"><i class="fas fa-edit"></i></button>
+                            <button onclick="deleteProduct(${index})" class="text-red-500 hover:text-red-700 px-2" title="Eliminar"><i class="fas fa-trash"></i></button>
                         </div>
                     </div>
                 `;
@@ -197,7 +250,7 @@
 
         function updateStock(index, amount) {
             products[index].stock += amount;
-            if (products[index].stock < 0) products[index].stock = 0; // Evitar stock negativo
+            if (products[index].stock < 0) products[index].stock = 0;
             localStorage.setItem('products', JSON.stringify(products));
             renderProducts();
         }
@@ -205,7 +258,24 @@
         function shareWhatsApp(index) {
             const p = products[index];
             const totalBs = (p.priceUSD * globalExchangeRate).toFixed(2);
-            const text = `¡Hola! Me interesa este producto:%0A*${p.name}*%0A📝 ${p.description}%0A💵 Precio: $${p.priceUSD.toFixed(2)} USD (Bs. ${totalBs})%0A📦 Stock disponible: ${p.stock}`;
+            const includePM = document.getElementById(`includePM_${index}`).checked;
+            const fechaActual = new Date().toLocaleDateString('es-VE');
+
+            let text = `🛒 *${p.name}*%0A%0A`;
+            text += `💰 *Precio: Bs. ${totalBs}*%0A`;
+            text += `📦 *Descripción:* ${p.description}%0A`;
+            text += `📦 *Stock:* ${p.stock} disponible(s)%0A`;
+
+            if (includePM) {
+                text += `%0A📱 *Pago Móvil:*%0A`;
+                text += `🏦 Banco: ${pagoMovilData.banco}%0A`;
+                text += `📞 Teléfono: ${pagoMovilData.telefono}%0A`;
+                text += `🆔 Cédula/RIF: ${pagoMovilData.cedula}%0A`;
+            }
+
+            text += `%0A📅 *Fecha:* ${fechaActual}%0A%0A`;
+            text += `📲 ¡Contáctanos para más información!`;
+
             window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
         }
 
@@ -226,49 +296,5 @@
         }
 
         function deleteProduct(index) {
-            if (confirm('¿Estás seguro de eliminar este producto?')) {
-                products.splice(index, 1);
-                localStorage.setItem('products', JSON.stringify(products));
-                renderProducts();
-                showToast('Producto eliminado');
-            }
-        }
-
-        exportBtn.addEventListener('click', () => {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(products));
-            const dlAnchorElem = document.createElement('a');
-            dlAnchorElem.setAttribute("href", dataStr);
-            dlAnchorElem.setAttribute("download", "inventario_tienda.json");
-            dlAnchorElem.click();
-        });
-
-        importFile.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    try {
-                        products = JSON.parse(event.target.result);
-                        localStorage.setItem('products', JSON.stringify(products));
-                        renderProducts();
-                        showToast('Inventario importado con éxito');
-                    } catch (err) {
-                        alert('Archivo JSON inválido');
-                    }
-                };
-                reader.readAsText(file);
-            }
-        });
-
-        function showToast(message) {
-            const toast = document.createElement('div');
-            toast.className = 'bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg mt-2 text-sm';
-            toast.textContent = message;
-            document.getElementById('toastContainer').appendChild(toast);
-            setTimeout(() => toast.remove(), 3000);
-        }
-
-        renderProducts();
-    </script>
-</body>
-</html>
+            if (
+        
