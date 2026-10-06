@@ -299,7 +299,7 @@
             }
 
             localStorage.setItem('products', JSON.stringify(products));
-                        productForm.reset();
+            productForm.reset();
             currentImageBase64 = '';
             fileName.textContent = 'Ninguna imagen seleccionada';
             imagePreviewContainer.innerHTML = '<span class="text-xs text-gray-400">Sin vista previa</span>';
@@ -706,49 +706,48 @@
 
         function deleteProduct(index) {
             if (confirm('¿Estás seguro de eliminar este producto?')) {
-                        if (confirm('¿Estás seguro de eliminar este producto?')) {
-            products.splice(index, 1);
-            localStorage.setItem('products', JSON.stringify(products));
-            renderProducts();
-            showToast('Producto eliminado');
+                products.splice(index, 1);
+                localStorage.setItem('products', JSON.stringify(products));
+                renderProducts();
+                showToast('Producto eliminado');
+            }
         }
-    }
 
-    document.getElementById('exportBtn').addEventListener('click', () => {
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(products));
-        const dlAnchorElem = document.createElement('a');
-        dlAnchorElem.setAttribute("href", dataStr);
-        dlAnchorElem.setAttribute("download", "inventario_tienda.json");
-        dlAnchorElem.click();
-    });
+        document.getElementById('exportBtn').addEventListener('click', () => {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(products));
+            const dlAnchorElem = document.createElement('a');
+            dlAnchorElem.setAttribute("href", dataStr);
+            dlAnchorElem.setAttribute("download", "inventario_tienda.json");
+            dlAnchorElem.click();
+        });
 
-    document.getElementById('importFile').addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                try {
-                    products = JSON.parse(event.target.result);
-                    localStorage.setItem('products', JSON.stringify(products));
-                    renderProducts();
-                    showToast('Inventario importado con éxito');
-                } catch (err) {
-                    alert('Archivo JSON inválido');
-                }
-            };
-            reader.readAsText(file);
+        document.getElementById('importFile').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        products = JSON.parse(event.target.result);
+                        localStorage.setItem('products', JSON.stringify(products));
+                        renderProducts();
+                        showToast('Inventario importado con éxito');
+                    } catch (err) {
+                        alert('Archivo JSON inválido');
+                    }
+                };
+                reader.readAsText(file);
+            }
+        });
+
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg mt-2 text-sm';
+            toast.textContent = message;
+            document.getElementById('toastContainer').appendChild(toast);
+            setTimeout(() => toast.remove(), 3500);
         }
-    });
 
-    function showToast(message) {
-        const toast = document.createElement('div');
-        toast.className = 'bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg mt-2 text-sm';
-        toast.textContent = message;
-        document.getElementById('toastContainer').appendChild(toast);
-        setTimeout(() => toast.remove(), 3500);
-    }
-
-    renderProducts();
-</script>
+        renderProducts();
+    </script>
 </body>
 </html>
