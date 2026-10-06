@@ -51,9 +51,13 @@
                         <input type="checkbox" id="cartIncludePhoto" checked class="rounded text-blue-600 focus:ring-blue-500 w-4 h-4"> Incluir detalle de Fotos/Enlaces
                     </label>
                 </div>
-                <button onclick="sendCartWhatsApp()" class="bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 shadow-lg transition transform hover:scale-105">
-                    <i class="fab fa-whatsapp text-lg"></i> Enviar Carrito por WhatsApp
-                </button>
+                <!-- Campo para introducir el nombre del cliente -->
+                <div class="flex items-center gap-2 w-full md:w-auto mt-2 md:mt-0">
+                    <input type="text" id="clientNameInput" placeholder="Nombre del cliente..." class="text-gray-800 text-xs px-3 py-2 rounded-lg border-0 focus:outline-none focus:ring-2 focus:ring-blue-300 w-full md:w-48">
+                    <button onclick="sendCartWhatsApp()" class="bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 shadow-lg transition transform hover:scale-105 whitespace-nowrap">
+                        <i class="fab fa-whatsapp text-lg"></i> Enviar Pedido
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -183,7 +187,7 @@
                 <h3 class="text-lg font-bold text-gray-800"><i class="fas fa-receipt mr-2 text-blue-600"></i>Detalle de la Venta</h3>
                 <button onclick="closeSaleDetailModal()" class="text-gray-400 hover:text-gray-600 text-xl">&times;</button>
             </div>
-            <div id="saleDetailContent" class="space-y-2 text-sm text-gray-700 max-h-60 overflow-y-auto mb-4"></div>
+            <div id="saleDetailContent" class="space-y-3 text-sm text-gray-700 max-h-80 overflow-y-auto mb-4 pr-1"></div>
             <div class="text-right">
                 <button onclick="closeSaleDetailModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded text-sm font-semibold">Cerrar</button>
             </div>
@@ -461,12 +465,21 @@
         function sendCartWhatsApp() {
             if (cart.length === 0) return;
 
+            const clientNameInput = document.getElementById('clientNameInput');
+            const clienteNombre = clientNameInput ? clientNameInput.value.trim() : '';
+            const clienteFinal = clienteNombre !== '' ? clienteNombre : 'Cliente General';
+
             const now = new Date();
             const fechaActual = now.toLocaleDateString('es-VE');
             const horaActual = now.toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit' });
 
+            // Generar número de orden corto único (Ej: OM-7F3A2)
+            const numeroOrden = 'OM-' + Math.random().toString(36).substring(2, 7).toUpperCase();
+
             let totalGeneralBs = 0;
-            let text = `🛒 *RESIDENCIA / PEDIDO DE TIENDA*%0A`;
+            let text = `🛒 *PEDIDO - EL MAGO STORE*%0A`;
+            text += `🔖 Orden: *${numeroOrden}*%0A`;
+            text += `👤 Cliente: *${clienteFinal}*%0A`;
             text += `📅 Fecha: ${fechaActual} - ${horaActual}%0A%0A`;
             text += `📦 *Detalle del Carrito:*%0A`;
 
@@ -514,12 +527,17 @@
 
             text += `%0A📲 ¡Esperamos su confirmación para procesar el pedido!`;
 
+            // Guardar en el historial incluyendo la orden, el cliente, productos y el estado inicial de pago (no pagado = falso)
             salesHistory.unshift({
+                id: 'venta_' + Date.now(),
+                idOrden: numeroOrden,
                 name: `Pedido Múltiple (${cart.length} productos)`,
+                cliente: clienteFinal,
                 qty: cart.reduce((acc, i) => acc + i.qty, 0),
                 total: totalGeneralBs.toFixed(2),
                 date: `${fechaActual} a las ${horaActual}`,
-                items: itemsDetail
+                items: itemsDetail,
+                pagado: false 
             });
 
             localStorage.setItem('salesHistory', JSON.stringify(salesHistory));
@@ -528,6 +546,7 @@
             window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
             
             cart = [];
+            if(clientNameInput) clientNameInput.value = '';
             renderCart();
             renderProducts();
             updateSalesStats();
@@ -540,7 +559,7 @@
                 return;
             }
 
-            let text = `📋 *CATÁLOGO DE PRECIOS - TIENDA*%0A`;
+            let text = `📋 *CATÁLOGO DE PRECIOS - EL MAGO STORE*%0A`;
             text += `💵 Tasa actual: ${globalExchangeRate} Bs/$%0A%0A`;
 
             products.forEach((p, idx) => {
@@ -587,14 +606,23 @@
             }
             container.innerHTML = '';
             salesHistory.forEach((sale, index) => {
+                const ordenCorta = sale.idOrden || 'OM-XXXX';
+                const clienteNombre = sale.cliente || 'Cliente General';
+                const esPagado = sale.pagado === true;
+                const colorPunto = esPagado ? '#28a745' : '#dc3545';
+                const textoEstado = esPagado ? 'Pagada' : 'Aún no pagada';
+
                 const item = document.createElement('div');
                 item.className = 'bg-gray-50 border p-3 rounded-lg flex justify-between items-center text-sm cursor-pointer hover:bg-blue-50 transition';
                 item.title = 'Haz clic para ver el detalle';
                 item.onclick = () => showSaleDetail(index);
                 item.innerHTML = `
-                    <div>
-                        <p class="font-bold text-gray-800">${sale.name} <span class="text-purple-600 font-semibold">(Cant: ${sale.qty})</span></p>
-                        <p class="text-xs text-gray-500">${sale.date} <i class="fas fa-search-plus ml-1 text-blue-500"></i></p>
+                    <div class="flex items-center gap-3">
+                        <span style="display:inline-block; width:12px; height:12px; background:${colorPunto}; border-radius:50%;" title="${textoEstado}"></span>
+                        <div>
+                            <p class="font-bold text-gray-800"><span class="text-blue-600 font-mono">[${ordenCorta}]</span> ${sale.name} <span class="text-purple-600 font-semibold">(Cant: ${sale.qty})</span></p>
+                            <p class="text-xs text-gray-500"><b>Cliente:</b> ${clienteNombre} | ${sale.date} <i class="fas fa-search-plus ml-1 text-blue-500"></i></p>
+                        </div>
                     </div>
                     <span class="font-bold text-emerald-600">Bs. ${sale.total}</span>
                 `;
@@ -604,28 +632,105 @@
 
         function showSaleDetail(index) {
             const sale = salesHistory[index];
+            const numeroOrden = sale.idOrden || 'OM-XXXX';
+            const clienteNombre = sale.cliente || 'Cliente General';
+            const esPagado = sale.pagado === true;
+
             const content = document.getElementById('saleDetailContent');
-            content.innerHTML = `<p class="font-bold mb-2 text-blue-600">${sale.name}</p><p class="text-xs text-gray-500 mb-3">${sale.date}</p>`;
+            
+            let htmlContent = `
+                <div class="space-y-3">
+                    <div>
+                        <p class="text-xs text-gray-500">Fecha: ${sale.date}</p>
+                        <p class="font-bold text-base text-blue-600 mt-1">${sale.name}</p>
+                    </div>
+
+                    <!-- Número de Orden con Botón Copiar -->
+                    <div class="bg-gray-50 p-2.5 rounded-lg border border-gray-200 flex justify-between items-center">
+                        <span class="text-xs"><strong>Nro. Orden:</strong> <span id="txt-orden-${numeroOrden}" class="font-mono font-bold text-blue-600">${numeroOrden}</span></span>
+                        <button onclick="copiarNumeroOrden('${numeroOrden}')" class="bg-gray-600 hover:bg-gray-700 text-white px-2.5 py-1 rounded text-xs font-semibold"><i class="fas fa-copy mr-1"></i>Copiar</button>
+                    </div>
+
+                    <p class="text-xs"><strong>Cliente:</strong> ${clienteNombre}</p>
+            `;
 
             if (sale.items && sale.items.length > 0) {
-                let listHtml = '<div class="space-y-2 border-t pt-2">';
+                htmlContent += `<div class="border-t pt-2"><strong class="text-xs text-gray-600 block mb-1.5">Productos vendidos:</strong><div class="space-y-1.5">`;
                 sale.items.forEach(i => {
-                    listHtml += `<div class="bg-gray-50 p-2 rounded border flex justify-between items-center">
-                        <div>
-                            <p class="font-bold">${i.name} <span class="text-purple-600">(x${i.qty})</span></p>
-                            <p class="text-xs text-gray-500">C/u: ${i.priceBs} Bs</p>
-                        </div>
-                        <span class="font-semibold text-emerald-600">${i.subtotalBs} Bs</span>
-                    </div>`;
+                    htmlContent += `
+                        <div class="bg-gray-50 p-2 rounded border flex justify-between items-center text-xs">
+                            <div>
+                                <p class="font-bold"><b>${i.qty}x</b> ${i.name}</p>
+                                <p class="text-gray-400">C/u: ${i.priceBs} Bs</p>
+                            </div>
+                            <span class="font-semibold text-emerald-600">${i.subtotalBs} Bs</span>
+                        </div>`;
                 });
-                listHtml += '</div>';
-                content.innerHTML += listHtml;
+                htmlContent += `</div></div>`;
             } else {
-                content.innerHTML += `<p class="text-xs text-gray-500 italic">Detalle no disponible para esta venta antigua.</p>`;
+                htmlContent += `<p class="text-xs text-gray-400 italic border-t pt-2">Detalle de productos no disponible para esta venta antigua.</p>`;
             }
 
-            content.innerHTML += `<div class="mt-4 pt-2 border-t text-right font-bold text-base text-gray-800">Total: Bs. ${sale.total}</div>`;
+            htmlContent += `
+                    <div class="border-t pt-2 flex justify-between items-center">
+                        <span class="font-bold text-gray-800">Total:</span>
+                        <span class="font-bold text-base text-emerald-600">Bs. ${sale.total}</span>
+                    </div>
+
+                    <!-- Botón de Estado de Pago (Verde / Rojo) -->
+                    <div class="border-t pt-3 mt-2">
+                        <p class="text-xs text-gray-500 mb-1.5">Estado de la operación (Control de Morosos):</p>
+                        <button id="btn-estado-${numeroOrden}" 
+                            onclick="alternarEstadoPago('${sale.id || index}', '${numeroOrden}')" 
+                            class="w-full py-2.5 px-4 rounded-lg font-bold text-white text-sm shadow transition"
+                            style="background-color: ${esPagado ? '#28a745' : '#dc3545'};">
+                            ${esPagado ? '✔️ Pagada' : '❌ Aún no pagada'}
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            content.innerHTML = htmlContent;
             document.getElementById('saleDetailModal').classList.remove('hidden');
+                }
+
+        // Función para copiar el número de orden al portapapeles
+        function copiarNumeroOrden(orden) {
+            navigator.clipboard.writeText(orden).then(() => {
+                showToast("¡Número de orden copiado: " + orden + "!");
+            }).catch(err => {
+                console.error("Error al copiar: ", err);
+            });
+        }
+
+        // Función para alternar el estado entre Pagada (Verde) y Aún no pagada (Rojo)
+        function alternarEstadoPago(idVenta, numeroOrden) {
+            const boton = document.getElementById(`btn-estado-${numeroOrden}`);
+            
+            let ventaEncontrada = salesHistory.find(v => (v.id && v.id === idVenta) || v.idOrden === numeroOrden);
+            if (!ventaEncontrada) {
+                // Compatibilidad por índice si fuera una venta antigua sin id único
+                let idxNum = parseInt(idVenta);
+                if (!isNaN(idxNum) && salesHistory[idxNum]) {
+                    ventaEncontrada = salesHistory[idxNum];
+                }
+            }
+
+            if (ventaEncontrada) {
+                ventaEncontrada.pagado = !ventaEncontrada.pagado;
+                localStorage.setItem('salesHistory', JSON.stringify(salesHistory));
+
+                if (ventaEncontrada.pagado) {
+                    boton.style.backgroundColor = '#28a745';
+                    boton.innerText = '✔️ Pagada';
+                } else {
+                    boton.style.backgroundColor = '#dc3545';
+                    boton.innerText = '❌ Aún no pagada';
+                }
+
+                // Refrescar el listado general en segundo plano si está abierto el historial
+                renderSalesHistory();
+            }
         }
 
         function closeSaleDetailModal() {
