@@ -45,7 +45,6 @@
                 </span>
                 <input type="text" id="globalSearchInput" placeholder="Buscar productos, SKU, ventas o clientes..." class="w-full pl-10 pr-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm dark:text-white">
             </div>
-            <!-- Lista de atajos rápidos por cada producto -->
             <div id="quickProductShortcuts" class="flex flex-wrap justify-center gap-1.5 max-w-2xl mx-auto"></div>
         </div>
 
@@ -147,15 +146,15 @@
                     <input type="text" id="barcode" placeholder="Opcional" class="w-full border dark:border-gray-700 dark:bg-gray-900 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
                 <div>
-                    <label for="stock" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Inventario (Cantidad)</label>
-                    <input type="number" id="stock" min="0" value="0" required class="w-full border dark:border-gray-700 dark:bg-gray-900 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <label for="stock" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Inventario (Cantidad / Kilos)</label>
+                    <input type="number" id="stock" step="0.01" min="0" value="0" required class="w-full border dark:border-gray-700 dark:bg-gray-900 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
                 <div>
                     <label for="costUSD" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Costo Base ($)</label>
                     <input type="number" id="costUSD" step="0.01" min="0" placeholder="Precio de compra" class="w-full border dark:border-gray-700 dark:bg-gray-900 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
                 <div>
-                    <label for="priceUSD" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Precio de Venta ($)</label>
+                    <label for="priceUSD" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Precio de Venta ($ <span id="priceUnitLabel">unidad</span>)</label>
                     <input type="number" id="priceUSD" step="0.01" min="0" required class="w-full border dark:border-gray-700 dark:bg-gray-900 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
                 <div>
@@ -164,6 +163,16 @@
                         0.00%
                     </div>
                 </div>
+
+                <!-- CASILLA OPCIONAL PARA PRODUCTOS POR PESO / GRAMERA -->
+                <div class="md:col-span-2 lg:col-span-3 bg-blue-50 dark:bg-gray-900 p-3 rounded-lg border border-blue-200 dark:border-gray-700 flex items-center gap-3">
+                    <input type="checkbox" id="isWeighted" class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500">
+                    <div>
+                        <label for="isWeighted" class="text-sm font-bold text-gray-800 dark:text-gray-200 cursor-pointer">⚖️ ¿Este producto se vende por peso / gramera (Ej: Queso, Jamón)?</label>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Si se marca, el precio de arriba corresponderá a <b>1 Kilo</b> y el cliente podrá pedir en gramos (ej. 200g).</p>
+                    </div>
+                </div>
+
                 <div class="md:col-span-2">
                     <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Imagen del Producto (Galería o Cámara)</label>
                     <div class="flex items-center gap-3">
@@ -207,7 +216,6 @@
                 </div>
             </div>
             
-            <!-- TARJETA DE CIERRE DE CAJA -->
             <div class="bg-purple-50 dark:bg-gray-900 border border-purple-200 dark:border-gray-700 rounded-xl p-4 mb-4 grid grid-cols-2 gap-4">
                 <div>
                     <span class="text-xs font-bold text-purple-700 dark:text-purple-400 uppercase block mb-1">✔️ Total Cobrado (Pagado)</span>
@@ -306,6 +314,7 @@
         const storeNameInput = document.getElementById('storeNameInput');
         const costUSDInput = document.getElementById('costUSD');
         const priceUSDInput = document.getElementById('priceUSD');
+        const isWeightedCheckbox = document.getElementById('isWeighted');
         
         globalExchangeRateInput.value = globalExchangeRate;
         storeNameInput.value = storeName;
@@ -313,33 +322,16 @@
         updatePagoMovilUI();
         updateSalesStats();
 
+        isWeightedCheckbox.addEventListener('change', () => {
+            const label = document.getElementById('priceUnitLabel');
+            label.textContent = isWeightedCheckbox.checked ? 'por Kilo (Kg)' : 'unidad';
+        });
+
         storeNameInput.addEventListener('input', (e) => {
             storeName = e.target.value.trim() || 'Mi Tienda';
             localStorage.setItem('storeName', storeName);
             updateStoreNameUI();
         });
-
-        function updateStoreNameUI() {
-            document.getElementById('pageTitle').textContent = `${storeName} - Gestor`;
-            document.getElementById('storeTitleHeader').innerHTML = `<i class="fas fa-store mr-2"></i>${storeName}`;
-        }
-
-        function calculateProfitMargin() {
-            const cost = parseFloat(costUSDInput.value) || 0;
-            const price = parseFloat(priceUSDInput.value) || 0;
-            const badge = document.getElementById('profitPercentageBadge');
-            if (cost > 0 && price > cost) {
-                const profit = ((price - cost) / cost) * 100;
-                badge.textContent = `${profit.toFixed(2)}% (Ganancia: $${(price - cost).toFixed(2)})`;
-                badge.className = "w-full bg-gray-100 dark:bg-gray-900 border dark:border-gray-700 rounded-lg px-3 py-2 font-bold text-emerald-600 flex items-center text-sm";
-            } else if (cost > 0 && price <= cost) {
-                badge.textContent = `Pérdida o sin margen`;
-                badge.className = "w-full bg-gray-100 dark:bg-gray-900 border dark:border-gray-700 rounded-lg px-3 py-2 font-bold text-red-600 flex items-center text-sm";
-            } else {
-                badge.textContent = `0.00%`;
-                badge.className = "w-full bg-gray-100 dark:bg-gray-900 border dark:border-gray-700 rounded-lg px-3 py-2 font-bold text-emerald-600 flex items-center text-sm";
-            }
-        }
 
         costUSDInput.addEventListener('input', calculateProfitMargin);
         priceUSDInput.addEventListener('input', calculateProfitMargin);
@@ -414,9 +406,10 @@
             const product = {
                 name: document.getElementById('name').value.trim(),
                 barcode: document.getElementById('barcode').value.trim(),
-                stock: parseInt(document.getElementById('stock').value) || 0,
+                stock: parseFloat(document.getElementById('stock').value) || 0,
                 costUSD: parseFloat(document.getElementById('costUSD').value) || 0,
                 priceUSD: parseFloat(document.getElementById('priceUSD').value) || 0,
+                isWeighted: document.getElementById('isWeighted').checked,
                 description: document.getElementById('description').value.trim(),
                 image: finalImage || ''
             };
@@ -432,6 +425,8 @@
 
             localStorage.setItem('products', JSON.stringify(products));
             productForm.reset();
+            document.getElementById('isWeighted').checked = false;
+            document.getElementById('priceUnitLabel').textContent = 'unidad';
             currentImageBase64 = '';
             fileName.textContent = 'Ninguna imagen seleccionada';
             imagePreviewContainer.innerHTML = '<span class="text-xs text-gray-400">Sin vista previa</span>';
@@ -461,34 +456,61 @@
                 const totalBs = (p.priceUSD * globalExchangeRate).toFixed(2);
                 const card = document.createElement('div');
                 card.className = 'bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden flex flex-col justify-between';
+                
+                let selectorHtml = '';
+                if (p.isWeighted) {
+                    selectorHtml = `
+                        <div class="mb-3 bg-amber-50 dark:bg-gray-900 p-2.5 rounded-lg border border-amber-200 dark:border-gray-700">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="text-xs font-bold text-amber-700 dark:text-amber-400"><i class="fas fa-weight-scale mr-1"></i>Venta por Gramera:</span>
+                                <span class="text-[10px] text-gray-500">Ej: 200 para 200g</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <input type="number" id="gramsVal_${index}" value="200" step="10" min="1" class="w-full text-xs font-bold px-2 py-1.5 border dark:border-gray-700 dark:bg-gray-800 rounded text-center focus:outline-none">
+                                <span class="text-xs font-semibold text-gray-600 dark:text-gray-400">gramos</span>
+                                <button type="button" onclick="addWeightedToCart(${index})" class="bg-amber-600 hover:bg-amber-700 text-white text-xs px-3 py-1.5 rounded font-bold shadow whitespace-nowrap">
+                                    <i class="fas fa-cart-plus"></i> Añadir
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    selectorHtml = `
+                        <div class="mb-3 bg-blue-50 dark:bg-gray-900 p-2.5 rounded-lg border border-blue-100 dark:border-gray-700 flex items-center justify-between">
+                            <div class="flex items-center gap-1">
+                                <button type="button" onclick="changeQty(${index}, -1)" class="bg-blue-200 dark:bg-blue-900 hover:bg-blue-300 text-blue-800 dark:text-blue-200 w-7 h-7 rounded font-bold flex items-center justify-center text-sm">-</button>
+                                <span id="qtyVal_${index}" class="font-bold text-sm w-7 text-center dark:text-white">1</span>
+                                <button type="button" onclick="changeQty(${index}, 1)" class="bg-blue-200 dark:bg-blue-900 hover:bg-blue-300 text-blue-800 dark:text-blue-200 w-7 h-7 rounded font-bold flex items-center justify-center text-sm">+</button>
+                            </div>
+                            <button type="button" onclick="addToCart(${index})" class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-2 rounded-lg font-bold flex items-center gap-1.5 shadow">
+                                <i class="fas fa-cart-plus"></i> Añadir
+                            </button>
+                        </div>
+                    `;
+                }
+
                 card.innerHTML = `
                     <div>
                         ${p.image ? `<img src="${p.image}" class="w-full h-48 object-cover">` : `<div class="w-full h-48 bg-gray-100 dark:bg-gray-900 flex items-center justify-center text-gray-400"><i class="fas fa-image fa-2x"></i></div>`}
                         <div class="p-4">
-                            <h3 class="font-bold text-lg mb-1 dark:text-white">${p.name}</h3>
+                            <div class="flex justify-between items-start mb-1">
+                                <h3 class="font-bold text-lg dark:text-white">${p.name}</h3>
+                                ${p.isWeighted ? `<span class="bg-amber-100 text-amber-800 text-[10px] px-2 py-0.5 rounded font-bold">Por Kilo</span>` : ''}
+                            </div>
                             ${p.barcode ? `<p class="text-xs text-gray-400 mb-1"><i class="fas fa-barcode"></i> SKU: ${p.barcode}</p>` : ''}
                             <p class="text-gray-600 dark:text-gray-300 text-sm line-clamp-2 mb-2">📝 ${p.description}</p>
                             
                             <div class="flex items-center justify-between bg-gray-50 dark:bg-gray-900 p-2 rounded-lg mb-3 border dark:border-gray-700">
-                                <span class="text-xs text-gray-500 dark:text-gray-400 font-medium">Inventario: <b>${p.stock}</b></span>
+                                <span class="text-xs text-gray-500 dark:text-gray-400 font-medium">Inventario: <b>${p.stock} ${p.isWeighted ? 'Kg' : 'unid.'}</b></span>
                                 <div class="flex items-center gap-1">
-                                    <button type="button" onclick="updateStock(${index}, -1)" class="bg-red-100 dark:bg-red-900 hover:bg-red-200 text-red-600 dark:text-red-300 w-6 h-6 rounded font-bold flex items-center justify-center text-xs">-</button>
-                                    <button type="button" onclick="updateStock(${index}, 1)" class="bg-green-100 dark:bg-green-900 hover:bg-green-200 text-green-600 dark:text-green-300 w-6 h-6 rounded font-bold flex items-center justify-center text-xs">+</button>
+                                    <button type="button" onclick="updateStock(${index}, ${p.isWeighted ? '-0.25' : '-1'})" class="bg-red-100 dark:bg-red-900 hover:bg-red-200 text-red-600 dark:text-red-300 w-6 h-6 rounded font-bold flex items-center justify-center text-xs">-</button>
+                                    <button type="button" onclick="updateStock(${index}, ${p.isWeighted ? '0.25' : '1'})" class="bg-green-100 dark:bg-green-900 hover:bg-green-200 text-green-600 dark:text-green-300 w-6 h-6 rounded font-bold flex items-center justify-center text-xs">+</button>
                                 </div>
                             </div>
 
-                            <p class="text-green-600 dark:text-green-400 font-bold text-base mb-3">💰 Bs. ${totalBs} <span class="text-xs text-gray-400">($${p.priceUSD.toFixed(2)})</span></p>
+                            <p class="text-green-600 dark:text-green-400 font-bold text-base mb-3">💰 Bs. ${totalBs} <span class="text-xs text-gray-400">($${p.priceUSD.toFixed(2)} ${p.isWeighted ? '/kg' : ''})</span></p>
                             
-                            <div class="mb-3 bg-blue-50 dark:bg-gray-900 p-2.5 rounded-lg border border-blue-100 dark:border-gray-700 flex items-center justify-between">
-                                <div class="flex items-center gap-1">
-                                    <button type="button" onclick="changeQty(${index}, -1)" class="bg-blue-200 dark:bg-blue-900 hover:bg-blue-300 text-blue-800 dark:text-blue-200 w-7 h-7 rounded font-bold flex items-center justify-center text-sm">-</button>
-                                    <span id="qtyVal_${index}" class="font-bold text-sm w-7 text-center dark:text-white">1</span>
-                                    <button type="button" onclick="changeQty(${index}, 1)" class="bg-blue-200 dark:bg-blue-900 hover:bg-blue-300 text-blue-800 dark:text-blue-200 w-7 h-7 rounded font-bold flex items-center justify-center text-sm">+</button>
-                                </div>
-                                <button type="button" onclick="addToCart(${index})" class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-2 rounded-lg font-bold flex items-center gap-1.5 shadow">
-                                    <i class="fas fa-cart-plus"></i> Añadir
-                                </button>
-                            </div>
+                            ${selectorHtml}
                         </div>
                     </div>
                     <div class="p-3 bg-gray-50 dark:bg-gray-900 border-t dark:border-gray-700 flex justify-between items-center">
@@ -515,17 +537,22 @@
                 const btn = document.createElement('button');
                 btn.type = 'button';
                 btn.className = 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-blue-500 text-xs px-2.5 py-1 rounded-md shadow-sm text-gray-700 dark:text-gray-200 truncate max-w-[150px] transition';
-                btn.title = `Añadir ${p.name} al carrito`;
+                btn.title = `Añadir ${p.name}`;
                 btn.innerHTML = `<i class="fas fa-plus text-blue-500 mr-1 text-[10px]"></i>${p.name}`;
                 btn.onclick = () => {
-                    addToCart(idx);
+                    if (p.isWeighted) {
+                        // Por defecto añade 250g si se usa desde el atajo rápido
+                        addWeightedCustomCart(idx, 250);
+                    } else {
+                        addToCart(idx);
+                    }
                 };
                 container.appendChild(btn);
             });
         }
 
         function updateStock(index, amount) {
-            products[index].stock += amount;
+            products[index].stock = parseFloat((products[index].stock + amount).toFixed(2));
             if (products[index].stock < 0) products[index].stock = 0;
             localStorage.setItem('products', JSON.stringify(products));
             renderProducts();
@@ -541,6 +568,46 @@
             }
         }
 
+        function addWeightedToCart(index) {
+            const gramsInput = document.getElementById(`gramsVal_${index}`);
+            const grams = parseFloat(gramsInput ? gramsInput.value : 200) || 200;
+            addWeightedCustomCart(index, grams);
+        }
+
+        function addWeightedCustomCart(index, grams) {
+            const p = products[index];
+            const kgFraction = grams / 1000; // Ej: 200g = 0.2 kg
+
+            if (p.stock < kgFraction) {
+                alert(`Inventario insuficiente. Solo quedan ${p.stock} Kg disponibles.`);
+                return;
+            }
+
+            const customName = `${p.name} (${grams}g)`;
+            const existingIndex = cart.findIndex(item => item.productIndex === index && item.customName === customName);
+            
+            if (existingIndex > -1) {
+                cart[existingIndex].qtyFraction += kgFraction;
+                cart[existingIndex].gramsTotal += grams;
+            } else {
+                cart.push({
+                    productIndex: index,
+                    name: customName,
+                    baseName: p.name,
+                    costUSD: p.costUSD || 0,
+                    priceUSD: p.priceUSD, // Precio por kilo
+                    qtyFraction: kgFraction, // Fracción en kilos
+                    gramsTotal: grams,
+                    isWeighted: true,
+                    description: p.description,
+                    image: p.image
+                });
+            }
+
+            renderCart();
+            showToast(`¡Agregado al carrito: ${p.name} (${grams}g)!`);
+        }
+
         function addToCart(index) {
             const p = products[index];
             const qtySpan = document.getElementById(`qtyVal_${index}`);
@@ -551,16 +618,18 @@
                 return;
             }
 
-            const existingIndex = cart.findIndex(item => item.productIndex === index);
+            const existingIndex = cart.findIndex(item => item.productIndex === index && !item.isWeighted);
             if (existingIndex > -1) {
                 cart[existingIndex].qty += cantidad;
             } else {
                 cart.push({
                     productIndex: index,
                     name: p.name,
+                    baseName: p.name,
                     costUSD: p.costUSD || 0,
                     priceUSD: p.priceUSD,
                     qty: cantidad,
+                    isWeighted: false,
                     description: p.description,
                     image: p.image
                 });
@@ -585,8 +654,9 @@
             let totalGeneralUSD = 0;
 
             cart.forEach((item, cartIdx) => {
-                const subtotalBs = item.priceUSD * globalExchangeRate * item.qty;
-                const subtotalUSD = item.priceUSD * item.qty;
+                const multiplier = item.isWeighted ? item.qtyFraction : item.qty;
+                const subtotalBs = item.priceUSD * globalExchangeRate * multiplier;
+                const subtotalUSD = item.priceUSD * multiplier;
                 totalGeneralBs += subtotalBs;
                 totalGeneralUSD += subtotalUSD;
 
@@ -594,7 +664,7 @@
                 row.className = 'bg-blue-800 bg-opacity-40 p-2.5 rounded-lg flex items-center justify-between text-xs';
                 row.innerHTML = `
                     <div class="flex items-center gap-2 truncate">
-                        <span class="font-bold bg-blue-900 px-2 py-1 rounded">x${item.qty}</span>
+                        <span class="font-bold bg-blue-900 px-2 py-1 rounded">${item.isWeighted ? `${item.gramsTotal}g` : `x${item.qty}`}</span>
                         <span class="truncate"><b>${item.name}</b></span>
                     </div>
                     <div class="flex items-center gap-3">
@@ -644,15 +714,16 @@
             let itemsDetail = [];
 
             cart.forEach(item => {
-                const subtotalBs = item.priceUSD * globalExchangeRate * item.qty;
-                const subtotalUSD = item.priceUSD * item.qty;
+                const multiplier = item.isWeighted ? item.qtyFraction : item.qty;
+                const subtotalBs = item.priceUSD * globalExchangeRate * multiplier;
+                const subtotalUSD = item.priceUSD * multiplier;
                 totalGeneralBs += subtotalBs;
                 totalGeneralUSD += subtotalUSD;
-                totalCostUSD += (item.costUSD || 0) * item.qty;
+                totalCostUSD += (item.costUSD || 0) * multiplier;
 
                 itemsDetail.push({
                     name: item.name,
-                    qty: item.qty,
+                    qty: item.isWeighted ? `${item.gramsTotal}g` : item.qty,
                     costUSD: item.costUSD || 0,
                     priceUSD: item.priceUSD,
                     priceBs: (item.priceUSD * globalExchangeRate).toFixed(2),
@@ -660,7 +731,7 @@
                     subtotalUSD: subtotalUSD.toFixed(2)
                 });
 
-                text += `• *${item.name}* (x${item.qty})%0A`;
+                text += `• *${item.name}*%0A`;
                 text += `  Subtotal: *${subtotalBs.toFixed(2)} Bs* ($${subtotalUSD.toFixed(2)})%0A`;
                 if (item.description) {
                     text += `  📝 ${item.description}%0A`;
@@ -668,7 +739,7 @@
                 text += `%0A`;
 
                 if (products[item.productIndex]) {
-                    products[item.productIndex].stock -= item.qty;
+                    products[item.productIndex].stock -= multiplier;
                     if (products[item.productIndex].stock < 0) products[item.productIndex].stock = 0;
                 }
             });
@@ -692,7 +763,7 @@
                 idOrden: numeroOrden,
                 name: `Pedido Múltiple (${cart.length} productos)`,
                 cliente: clienteFinal,
-                qty: cart.reduce((acc, i) => acc + i.qty, 0),
+                qty: cart.reduce((acc, i) => acc + (i.isWeighted ? 1 : i.qty), 0),
                 total: totalGeneralBs.toFixed(2),
                 totalUSD: totalGeneralUSD.toFixed(2),
                 costUSD: totalCostUSD.toFixed(2),
@@ -725,8 +796,8 @@
 
             products.forEach((p, idx) => {
                 const totalBs = (p.priceUSD * globalExchangeRate).toFixed(2);
-                text += `${idx + 1}. *${p.name}*%0A`;
-                text += `   💰 Precio: *${totalBs} Bs* ($${p.priceUSD.toFixed(2)})%0A`;
+                text += `${idx + 1}. *${p.name}* ${p.isWeighted ? '(Por Kilo)' : ''}%0A`;
+                text += `   💰 Precio: *${totalBs} Bs* ($${p.priceUSD.toFixed(2)}${p.isWeighted ? '/kg' : ''})%0A`;
                 if (p.description) {
                     text += `   📝 ${p.description}%0A`;
                 }
@@ -810,7 +881,7 @@
                     <div class="flex items-center gap-3">
                         <span style="display:inline-block; width:12px; height:12px; background:${colorPunto}; border-radius:50%;" title="${textoEstado}"></span>
                         <div>
-                            <p class="font-bold text-gray-800 dark:text-gray-200"><span class="text-blue-600 font-mono">[${ordenCorta}]</span> ${sale.name} <span class="text-purple-600 dark:text-purple-400 font-semibold">(Cant: ${sale.qty})</span></p>
+                            <p class="font-bold text-gray-800 dark:text-gray-200"><span class="text-blue-600 font-mono">[${ordenCorta}]</span> ${sale.name}</p>
                             <p class="text-xs text-gray-500 dark:text-gray-400"><b>Cliente:</b> ${clienteNombre} | ${sale.date} <i class="fas fa-search-plus ml-1 text-blue-500"></i></p>
                         </div>
                     </div>
@@ -852,15 +923,14 @@
             if (sale.items && sale.items.length > 0) {
                 htmlContent += `<div class="border-t dark:border-gray-700 pt-2"><strong class="text-xs text-gray-600 dark:text-gray-300 block mb-1.5">Productos vendidos:</strong><div class="space-y-1.5">`;
                 sale.items.forEach(i => {
-                    let subItemBs = esPagado ? i.subtotalBs : (i.priceUSD * globalExchangeRate * i.qty).toFixed(2);
-                    let subItemUSD = i.subtotalUSD || (i.priceUSD * i.qty).toFixed(2);
-                    let precioCiuBs = esPagado ? i.priceBs : (i.priceUSD * globalExchangeRate).toFixed(2);
+                    let subItemBs = esPagado ? i.subtotalBs : (i.priceUSD * globalExchangeRate * (typeof i.qty === 'string' && i.qty.includes('g') ? parseFloat(i.qty)/1000 : i.qty)).toFixed(2);
+                    let subItemUSD = i.subtotalUSD || (i.priceUSD * (typeof i.qty === 'string' && i.qty.includes('g') ? parseFloat(i.qty)/1000 : i.qty)).toFixed(2);
 
                     htmlContent += `
                         <div class="bg-gray-50 dark:bg-gray-900 p-2 rounded border dark:border-gray-700 flex justify-between items-center text-xs">
                             <div>
-                                <p class="font-bold"><b>${i.qty}x</b> ${i.name}</p>
-                                <p class="text-gray-400">C/u: ${precioCiuBs} Bs ($${i.priceUSD})</p>
+                                <p class="font-bold"><b>${i.qty}</b> ${i.name}</p>
+                                <p class="text-gray-400">Precio/kg: $${i.priceUSD}</p>
                             </div>
                             <div class="text-right">
                                 <span class="font-semibold text-emerald-600 block">${subItemBs} Bs</span>
@@ -1021,6 +1091,7 @@
                     document.getElementById('name').value = found.name;
                     document.getElementById('costUSD').value = found.costUSD || 0;
                     document.getElementById('priceUSD').value = found.priceUSD;
+                    document.getElementById('isWeighted').checked = found.isWeighted || false;
                     document.getElementById('description').value = found.description;
                     calculateProfitMargin();
                     showToast('¡Producto encontrado en inventario!');
@@ -1044,6 +1115,8 @@
             document.getElementById('stock').value = p.stock;
             document.getElementById('costUSD').value = p.costUSD || '';
             document.getElementById('priceUSD').value = p.priceUSD;
+            document.getElementById('isWeighted').checked = p.isWeighted || false;
+            document.getElementById('priceUnitLabel').textContent = p.isWeighted ? 'por Kilo (Kg)' : 'unidad';
             document.getElementById('description').value = p.description;
             document.getElementById('formTitle').textContent = 'Editar Producto';
             document.getElementById('saveBtn').textContent = 'Actualizar Producto';
@@ -1081,3 +1154,25 @@
     </script>
 </body>
 </html>
+
+        function updateStoreNameUI() {
+            document.getElementById('pageTitle').textContent = `${storeName} - Gestor`;
+            document.getElementById('storeTitleHeader').innerHTML = `<i class="fas fa-store mr-2"></i>${storeName}`;
+        }
+
+        function calculateProfitMargin() {
+            const cost = parseFloat(costUSDInput.value) || 0;
+            const price = parseFloat(priceUSDInput.value) || 0;
+            const badge = document.getElementById('profitPercentageBadge');
+            if (cost > 0 && price > cost) {
+                const profit = ((price - cost) / cost) * 100;
+                badge.textContent = `${profit.toFixed(2)}% (Ganancia: $${(price - cost).toFixed(2)})`;
+                badge.className = "w-full bg-gray-100 dark:bg-gray-900 border dark:border-gray-700 rounded-lg px-3 py-2 font-bold text-emerald-600 flex items-center text-sm";
+            } else if (cost > 0 && price <= cost) {
+                badge.textContent = `Pérdida o sin margen`;
+                badge.className = "w-full bg-gray-100 dark:bg-gray-900 border dark:border-gray-700 rounded-lg px-3 py-2 font-bold text-red-600 flex items-center text-sm";
+            } else {
+                badge.textContent = `0.00%`;
+                badge.className = "w-full bg-gray-100 dark:bg-gray-900 border dark:border-gray-700 rounded-lg px-3 py-2 font-bold text-emerald-600 flex items-center text-sm";
+            }
+        }
