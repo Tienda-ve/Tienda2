@@ -7,21 +7,39 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
+    <!-- Librería html2canvas para capturas de pantalla de modales -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
     <style>
         .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
         #toastContainer { position: fixed; right: 1rem; bottom: 1rem; z-index: 60; }
         #scanner-container video { width: 100%; height: auto; border-radius: 0.5rem; }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-800">
+<body class="bg-gray-50 text-gray-800 dark:bg-gray-900 dark:text-gray-100 transition-colors duration-200">
     <div class="container mx-auto px-4 py-8 max-w-6xl">
+        <!-- BARRA SUPERIOR CON BOTONES DE TEMA -->
+        <div class="flex justify-end items-center mb-2 gap-2">
+            <span class="text-xs text-gray-500 dark:text-gray-400 font-medium"><i class="fas fa-adjust mr-1"></i>Tema:</span>
+            <button onclick="setTheme('light')" class="bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 text-gray-700 dark:text-gray-200 px-2.5 py-1 rounded-md text-xs font-semibold shadow flex items-center gap-1">
+                <i class="fas fa-sun text-amber-500"></i> Claro
+            </button>
+            <button onclick="setTheme('dark')" class="bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 text-gray-700 dark:text-gray-200 px-2.5 py-1 rounded-md text-xs font-semibold shadow flex items-center gap-1">
+                <i class="fas fa-moon text-indigo-400"></i> Oscuro
+            </button>
+        </div>
+
         <header class="text-center mb-6">
-            <h1 id="storeTitleHeader" class="text-3xl font-bold text-blue-600 mb-2"><i class="fas fa-store mr-2"></i>Mi Tienda</h1>
-            <p class="text-gray-500">Control de inventario, catálogo general y difusión por WhatsApp</p>
+            <h1 id="storeTitleHeader" class="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-2"><i class="fas fa-store mr-2"></i>Mi Tienda</h1>
+            <p class="text-gray-500 dark:text-gray-400">Control de inventario, catálogo general y difusión por WhatsApp</p>
             <div class="mt-4 flex flex-wrap justify-center gap-3">
                 <button onclick="sendCatalogWhatsApp()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1 rounded-md text-sm font-semibold shadow"><i class="fab fa-whatsapp mr-1"></i> Enviar Catálogo</button>
                 <button id="exportBtn" class="bg-indigo-500 hover:bg-indigo-600 text-white px-3 py-1 rounded-md text-sm"><i class="fas fa-file-export mr-2"></i>Exportar JSON</button>
-                <label for="importFile" class="bg-yellow-50 hover:bg-yellow-100 text-yellow-700 border border-yellow-200 px-3 py-1 rounded-md text-sm cursor-pointer">
+                <label for="importFile" class="bg-yellow-50 dark:bg-gray-800 hover:bg-yellow-100 text-yellow-700 dark:text-yellow-300 border border-yellow-200 dark:border-gray-700 px-3 py-1 rounded-md text-sm cursor-pointer">
                     <i class="fas fa-file-import mr-2"></i>Importar JSON
                 </label>
                 <input id="importFile" accept="application/json" type="file" class="hidden">
@@ -35,7 +53,7 @@
                 <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
                     <i class="fas fa-search"></i>
                 </span>
-                <input type="text" id="globalSearchInput" placeholder="Buscar productos, SKU, ventas o clientes en la aplicación..." class="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                <input type="text" id="globalSearchInput" placeholder="Buscar productos, SKU, ventas o clientes en la aplicación..." class="w-full pl-10 pr-4 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm dark:text-white">
             </div>
         </div>
 
@@ -70,88 +88,101 @@
 
         <!-- RESUMEN DE VENTAS Y ESTADÍSTICAS -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-            <div class="bg-white rounded-xl shadow-md p-4 border-l-4 border-purple-500 flex items-center justify-between">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 border-l-4 border-purple-500 flex items-center justify-between">
                 <div>
-                    <p class="text-xs text-gray-500 uppercase font-semibold">Total Ventas Realizadas</p>
-                    <h3 id="statTotalVentas" class="text-2xl font-bold text-purple-600">0</h3>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 uppercase font-semibold">Total Ventas Realizadas</p>
+                    <h3 id="statTotalVentas" class="text-2xl font-bold text-purple-600 dark:text-purple-400">0</h3>
                 </div>
-                <i class="fas fa-shopping-bag text-purple-200 text-3xl"></i>
+                <i class="fas fa-shopping-bag text-purple-200 dark:text-purple-900 text-3xl"></i>
             </div>
-            <div class="bg-white rounded-xl shadow-md p-4 border-l-4 border-emerald-500 flex items-center justify-between">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 border-l-4 border-emerald-500 flex items-center justify-between">
                 <div>
-                    <p class="text-xs text-gray-500 uppercase font-semibold">Ingresos Totales</p>
-                    <h3 id="statTotalIngresos" class="text-xl font-bold text-emerald-600">Bs. 0.00 <span class="text-xs text-gray-400">($0.00)</span></h3>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 uppercase font-semibold">Ingresos Totales</p>
+                    <h3 id="statTotalIngresos" class="text-xl font-bold text-emerald-600 dark:text-emerald-400">Bs. 0.00 <span class="text-xs text-gray-400">($0.00)</span></h3>
                 </div>
-                <i class="fas fa-money-bill-wave text-emerald-200 text-3xl"></i>
+                <i class="fas fa-money-bill-wave text-emerald-200 dark:text-emerald-900 text-3xl"></i>
             </div>
         </div>
 
         <!-- CONFIGURACIÓN GLOBAL (NOMBRE DE TIENDA, TASA Y PAGO MÓVIL) -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <!-- Nombre de la Tienda -->
-            <section class="bg-white rounded-xl shadow-md p-4 border-l-4 border-indigo-500 flex flex-col justify-between">
+            <section class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 border-l-4 border-indigo-500 flex flex-col justify-between">
                 <div>
-                    <label for="storeNameInput" class="block text-sm font-medium text-gray-700 mb-1"><i class="fas fa-store text-indigo-500 mr-1"></i> Nombre de la Tienda</label>
+                    <label for="storeNameInput" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"><i class="fas fa-store text-indigo-500 mr-1"></i> Nombre de la Tienda</label>
                     <span class="text-xs text-gray-400 block mb-2">Ej: Bodega de Carolina / El Mago Store</span>
                 </div>
-                <input type="text" id="storeNameInput" placeholder="Nombre de tu tienda..." class="w-full border-2 border-indigo-100 rounded-lg px-3 py-1.5 font-bold text-indigo-600 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <input type="text" id="storeNameInput" placeholder="Nombre de tu tienda..." class="w-full border-2 border-indigo-100 dark:border-gray-700 dark:bg-gray-900 rounded-lg px-3 py-1.5 font-bold text-indigo-600 dark:text-indigo-400 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
             </section>
 
             <!-- Tasa de Cambio -->
-            <section class="bg-white rounded-xl shadow-md p-4 flex items-center justify-between gap-4 border-l-4 border-blue-500">
+            <section class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 flex items-center justify-between gap-4 border-l-4 border-blue-500">
                 <div>
-                    <label for="globalExchangeRate" class="block text-sm font-medium text-gray-700">Tasa del Dólar (Bs.)</label>
+                    <label for="globalExchangeRate" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Tasa del Dólar (Bs.)</label>
                     <span class="text-xs text-gray-400">Actualiza para recalcular precios</span>
                 </div>
-                <input type="number" id="globalExchangeRate" step="0.01" min="0" value="36.50" class="w-28 border-2 border-blue-200 rounded-lg px-2 py-2 font-bold text-blue-600 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 text-center">
+                <input type="number" id="globalExchangeRate" step="0.01" min="0" value="36.50" class="w-28 border-2 border-blue-200 dark:border-gray-700 dark:bg-gray-900 rounded-lg px-2 py-2 font-bold text-blue-600 dark:text-blue-400 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 text-center">
             </section>
 
             <!-- Pago Móvil -->
-            <section class="bg-white rounded-xl shadow-md p-4 border-l-4 border-green-500">
+            <section class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 border-l-4 border-green-500">
                 <div class="flex justify-between items-center mb-1">
-                    <span class="text-xs font-semibold text-gray-700"><i class="fas fa-mobile-alt text-green-500 mr-1"></i> Pago Móvil</span>
-                    <button type="button" id="togglePmBtn" class="text-xs text-blue-600 hover:underline"><i class="fas fa-cog"></i> Editar</button>
+                    <span class="text-xs font-semibold text-gray-700 dark:text-gray-300"><i class="fas fa-mobile-alt text-green-500 mr-1"></i> Pago Móvil</span>
+                    <button type="button" id="togglePmBtn" class="text-xs text-blue-600 dark:text-blue-400 hover:underline"><i class="fas fa-cog"></i> Editar</button>
                 </div>
-                <div id="pagoMovilDisplay" class="text-[11px] text-gray-600 leading-tight"></div>
+                <div id="pagoMovilDisplay" class="text-[11px] text-gray-600 dark:text-gray-400 leading-tight"></div>
                 <div id="pagoMovilEditForm" class="hidden mt-2 space-y-1.5">
-                    <input type="text" id="pmBanco" placeholder="Banco" class="w-full text-xs border rounded px-2 py-1 focus:outline-none">
-                    <input type="text" id="pmTelefono" placeholder="Teléfono" class="w-full text-xs border rounded px-2 py-1 focus:outline-none">
-                    <input type="text" id="pmCedula" placeholder="Cédula/RIF" class="w-full text-xs border rounded px-2 py-1 focus:outline-none">
+                    <input type="text" id="pmBanco" placeholder="Banco" class="w-full text-xs border dark:border-gray-700 dark:bg-gray-900 rounded px-2 py-1 focus:outline-none">
+                    <input type="text" id="pmTelefono" placeholder="Teléfono" class="w-full text-xs border dark:border-gray-700 dark:bg-gray-900 rounded px-2 py-1 focus:outline-none">
+                    <input type="text" id="pmCedula" placeholder="Cédula/RIF" class="w-full text-xs border dark:border-gray-700 dark:bg-gray-900 rounded px-2 py-1 focus:outline-none">
                     <button type="button" id="savePmBtn" class="bg-green-600 text-white text-xs px-2 py-1 rounded hover:bg-green-700 w-full font-semibold">Guardar</button>
                 </div>
             </section>
         </div>
 
-        <!-- FORMULARIO DE PRODUCTOS -->
-        <section class="bg-white rounded-xl shadow-md p-6 mb-8">
+        <!-- FORMULARIO DE PRODUCTOS CON PRECIO BASE Y GANANCIA -->
+        <section class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 mb-8">
             <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-semibold text-gray-700"><i class="fas fa-plus-circle mr-2"></i><span id="formTitle">Agregar Nuevo Producto</span></h2>
-                <button type="button" onclick="openScannerModal()" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-600 border border-indigo-200 px-3 py-1.5 rounded-lg text-sm flex items-center gap-2">
+                <h2 class="text-xl font-semibold text-gray-700 dark:text-gray-200"><i class="fas fa-plus-circle mr-2"></i><span id="formTitle">Agregar Nuevo Producto</span></h2>
+                <button type="button" onclick="openScannerModal()" class="bg-indigo-50 dark:bg-gray-700 hover:bg-indigo-100 dark:hover:bg-gray-600 text-indigo-600 dark:text-indigo-300 border border-indigo-200 dark:border-gray-600 px-3 py-1.5 rounded-lg text-sm flex items-center gap-2">
                     <i class="fas fa-barcode"></i> Escanear Código
                 </button>
             </div>
             <form id="productForm" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <input type="hidden" id="editIndex" value="-1">
                 <div>
-                    <label for="name" class="block text-sm font-medium text-gray-600 mb-1">Nombre del Producto</label>
-                    <input type="text" id="name" required class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <label for="name" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Nombre del Producto</label>
+                    <input type="text" id="name" required class="w-full border dark:border-gray-700 dark:bg-gray-900 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
                 <div>
-                    <label for="barcode" class="block text-sm font-medium text-gray-600 mb-1">Código de Barras / SKU</label>
-                    <input type="text" id="barcode" placeholder="Opcional" class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <label for="barcode" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Código de Barras / SKU</label>
+                    <input type="text" id="barcode" placeholder="Opcional" class="w-full border dark:border-gray-700 dark:bg-gray-900 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
                 <div>
-                    <label for="stock" class="block text-sm font-medium text-gray-600 mb-1">Inventario (Cantidad disponible)</label>
-                    <input type="number" id="stock" min="0" value="0" required class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <label for="stock" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Inventario (Cantidad disponible)</label>
+                    <input type="number" id="stock" min="0" value="0" required class="w-full border dark:border-gray-700 dark:bg-gray-900 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+
+                <!-- NUEVOS CAMPOS: PRECIO BASE Y PRECIO DE VENTA CON CÁLCULO DE GANANCIA -->
+                <div>
+                    <label for="costUSD" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Precio Base / Costo ($)</label>
+                    <input type="number" id="costUSD" step="0.01" min="0" value="0" required class="w-full border dark:border-gray-700 dark:bg-gray-900 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
                 <div>
-                    <label for="priceUSD" class="block text-sm font-medium text-gray-600 mb-1">Precio en Dólares ($)</label>
-                    <input type="number" id="priceUSD" step="0.01" min="0" required class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <label for="priceUSD" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Precio de Venta ($)</label>
+                    <input type="number" id="priceUSD" step="0.01" min="0" required class="w-full border dark:border-gray-700 dark:bg-gray-900 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Ganancia Estimada</label>
+                    <div id="profitPreview" class="w-full border border-dashed border-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 rounded-lg px-3 py-2 text-xs font-bold text-emerald-600 dark:text-emerald-400 flex flex-col justify-center h-[38px]">
+                        0% ($0.00)
+                    </div>
+                </div>
+
                 <div class="md:col-span-2">
-                    <label class="block text-sm font-medium text-gray-600 mb-1">Imagen del Producto (Galería o Cámara)</label>
+                    <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Imagen del Producto (Galería o Cámara)</label>
                     <div class="flex items-center gap-3">
-                        <label for="imageFile" class="cursor-pointer bg-blue-50 hover:bg-blue-100 text-blue-600 border border-blue-200 px-4 py-2 rounded-lg flex items-center gap-2">
+                        <label for="imageFile" class="cursor-pointer bg-blue-50 dark:bg-gray-700 hover:bg-blue-100 dark:hover:bg-gray-600 text-blue-600 dark:text-blue-300 border border-blue-200 dark:border-gray-600 px-4 py-2 rounded-lg flex items-center gap-2">
                             <i class="fas fa-camera"></i> Seleccionar o Tomar Foto
                         </label>
                         <input type="file" id="imageFile" accept="image/*" class="hidden">
@@ -159,13 +190,13 @@
                     </div>
                 </div>
                 <div class="flex items-center justify-center">
-                    <div id="imagePreviewContainer" class="w-28 h-28 border rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
+                    <div id="imagePreviewContainer" class="w-28 h-28 border dark:border-gray-700 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-900 flex items-center justify-center">
                         <span class="text-xs text-gray-400">Sin vista previa</span>
                     </div>
                 </div>
                 <div class="md:col-span-2 lg:col-span-3">
-                    <label for="description" class="block text-sm font-medium text-gray-600 mb-1">Descripción</label>
-                    <textarea id="description" rows="2" required class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                    <label for="description" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Descripción</label>
+                    <textarea id="description" rows="2" required class="w-full border dark:border-gray-700 dark:bg-gray-900 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
                 </div>
                 <div class="md:col-span-2 lg:col-span-3 text-right">
                     <button type="submit" id="saveBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition font-semibold">Guardar Producto</button>
@@ -175,49 +206,57 @@
 
         <!-- LISTADO DE PRODUCTOS -->
         <section>
-            <h2 class="text-xl font-semibold mb-4 text-gray-700"><i class="fas fa-boxes mr-2"></i>Inventario de Productos</h2>
+            <h2 class="text-xl font-semibold mb-4 text-gray-700 dark:text-gray-200"><i class="fas fa-boxes mr-2"></i>Inventario de Productos</h2>
             <div id="productList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
         </section>
     </div>
 
     <!-- MODAL DE HISTORIAL DE VENTAS Y CIERRE DE CAJA -->
     <div id="salesModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-xl shadow-xl max-w-2xl w-full p-6 max-h-[85vh] flex flex-col">
-            <div class="flex justify-between items-center mb-3 border-b pb-2">
-                <h3 class="text-lg font-bold text-gray-800"><i class="fas fa-chart-pie mr-2 text-purple-600"></i>Cierre de Caja e Historial</h3>
+        <div id="salesModalContentArea" class="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-2xl w-full p-6 max-h-[85vh] flex flex-col">
+            <div class="flex justify-between items-center mb-3 border-b dark:border-gray-700 pb-2">
+                <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100"><i class="fas fa-chart-pie mr-2 text-purple-600"></i>Cierre de Caja e Historial</h3>
                 <button onclick="toggleSalesHistoryModal()" class="text-gray-400 hover:text-gray-600 text-xl">&times;</button>
             </div>
             
             <!-- TARJETA DE CIERRE DE CAJA -->
-            <div class="bg-purple-50 border border-purple-200 rounded-xl p-4 mb-4 grid grid-cols-2 gap-4">
+            <div class="bg-purple-50 dark:bg-purple-950/40 border border-purple-200 dark:border-purple-900 rounded-xl p-4 mb-4 grid grid-cols-2 gap-4">
                 <div>
-                    <span class="text-xs font-bold text-purple-700 uppercase block mb-1">✔️ Total Cobrado (Pagado)</span>
-                    <h4 id="cierreCobrado" class="text-lg font-bold text-emerald-600">Bs. 0.00 ($0.00)</h4>
+                    <span class="text-xs font-bold text-purple-700 dark:text-purple-300 uppercase block mb-1">✔️ Total Cobrado (Pagado)</span>
+                    <h4 id="cierreCobrado" class="text-lg font-bold text-emerald-600 dark:text-emerald-400">Bs. 0.00 ($0.00)</h4>
                 </div>
                 <div>
-                    <span class="text-xs font-bold text-red-700 uppercase block mb-1">❌ Por Cobrar (Aún no pagada)</span>
-                    <h4 id="cierrePendiente" class="text-lg font-bold text-red-600">Bs. 0.00 ($0.00)</h4>
+                    <span class="text-xs font-bold text-red-700 dark:text-red-300 uppercase block mb-1">❌ Por Cobrar (Aún no pagada)</span>
+                    <h4 id="cierrePendiente" class="text-lg font-bold text-red-600 dark:text-red-400">Bs. 0.00 ($0.00)</h4>
                 </div>
             </div>
 
             <div id="salesHistoryList" class="overflow-y-auto flex-1 space-y-3 pr-2"></div>
             
-            <div class="mt-4 pt-3 border-t flex justify-between items-center">
-                <button onclick="clearSalesHistory()" class="bg-red-100 hover:bg-red-200 text-red-600 px-3 py-1.5 rounded text-xs font-semibold">Borrar Historial</button>
-                <button onclick="toggleSalesHistoryModal()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-1.5 rounded text-sm font-semibold">Cerrar</button>
+            <div class="mt-4 pt-3 border-t dark:border-gray-700 flex flex-wrap justify-between items-center gap-2">
+                <div class="flex gap-2">
+                    <button onclick="clearSalesHistory()" class="bg-red-100 dark:bg-red-950 text-red-600 dark:text-red-300 px-3 py-1.5 rounded text-xs font-semibold">Borrar Historial</button>
+                    <button onclick="downloadElementScreenshot('salesModalContentArea', 'cierre_de_caja.png')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded text-xs font-semibold flex items-center gap-1"><i class="fas fa-camera"></i> Descargar Captura</button>
+                    <button onclick="printElementContent('salesModalContentArea')" class="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1.5 rounded text-xs font-semibold flex items-center gap-1"><i class="fas fa-print"></i> Imprimir</button>
+                </div>
+                <button onclick="toggleSalesHistoryModal()" class="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 text-gray-700 dark:text-gray-200 px-4 py-1.5 rounded text-sm font-semibold">Cerrar</button>
             </div>
         </div>
     </div>
 
     <!-- MODAL DE DETALLE DE VENTA -->
     <div id="saleDetailModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-xl shadow-xl max-w-md w-full p-6 flex flex-col">
-            <div class="flex justify-between items-center mb-4 border-b pb-2">
-                <h3 class="text-lg font-bold text-gray-800"><i class="fas fa-receipt mr-2 text-blue-600"></i>Detalle de la Venta</h3>
+        <div id="saleDetailModalContentArea" class="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-md w-full p-6 flex flex-col">
+            <div class="flex justify-between items-center mb-4 border-b dark:border-gray-700 pb-2">
+                <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100"><i class="fas fa-receipt mr-2 text-blue-600"></i>Detalle de la Venta</h3>
                 <button onclick="closeSaleDetailModal()" class="text-gray-400 hover:text-gray-600 text-xl">&times;</button>
             </div>
-            <div id="saleDetailContent" class="space-y-3 text-sm text-gray-700 max-h-80 overflow-y-auto mb-4 pr-1"></div>
-            <div class="text-right">
+            <div id="saleDetailContent" class="space-y-3 text-sm text-gray-700 dark:text-gray-300 max-h-80 overflow-y-auto mb-4 pr-1"></div>
+            <div class="flex justify-between items-center pt-2 border-t dark:border-gray-700">
+                <div class="flex gap-2">
+                    <button onclick="downloadElementScreenshot('saleDetailModalContentArea', 'detalle_venta.png')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded text-xs font-semibold flex items-center gap-1"><i class="fas fa-camera"></i> Captura</button>
+                    <button onclick="printElementContent('saleDetailModalContentArea')" class="bg-gray-600 hover:bg-gray-700 text-white px-3 py-1.5 rounded text-xs font-semibold flex items-center gap-1"><i class="fas fa-print"></i> Imprimir</button>
+                </div>
                 <button onclick="closeSaleDetailModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded text-sm font-semibold">Cerrar</button>
             </div>
         </div>
@@ -225,12 +264,12 @@
 
     <!-- MODAL DE ESCÁNER DE CÓDIGO DE BARRAS -->
     <div id="scannerModal" class="fixed inset-0 bg-black bg-opacity-70 hidden z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-xl shadow-xl max-w-md w-full p-6 text-center">
+        <div class="bg-white dark:bg-gray-800 dark:text-white rounded-xl shadow-xl max-w-md w-full p-6 text-center">
             <h3 class="text-lg font-bold mb-2">Escanear Código de Barras</h3>
-            <p class="text-xs text-gray-500 mb-4">Apunta la cámara de tu celular al código de barras del producto</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">Apunta la cámara de tu celular al código de barras del producto</p>
             <div id="scanner-container" class="bg-black rounded-lg overflow-hidden mb-4 relative min-h-[200px]"></div>
             <div class="flex justify-center gap-3">
-                <button onclick="stopScanner()" class="bg-gray-300 hover:bg-gray-400 text-gray-700 px-4 py-2 rounded-lg text-sm font-semibold">Cancelar / Cerrar</button>
+                <button onclick="stopScanner()" class="bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-lg text-sm font-semibold">Cancelar / Cerrar</button>
             </div>
         </div>
     </div>
@@ -246,8 +285,25 @@
         let pagoMovilData = JSON.parse(localStorage.getItem('pagoMovilData')) || { banco: 'Banco de Venezuela', telefono: '0412-0000000', cedula: 'V-00000000' };
         let currentImageBase64 = '';
 
+        // Gestión de Tema Claro/Oscuro
+        let currentTheme = localStorage.getItem('theme') || 'light';
+        setTheme(currentTheme);
+
+        function setTheme(theme) {
+            currentTheme = theme;
+            localStorage.setItem('theme', theme);
+            if (theme === 'dark') {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        }
+
         const globalExchangeRateInput = document.getElementById('globalExchangeRate');
         const storeNameInput = document.getElementById('storeNameInput');
+        const costUSDInput = document.getElementById('costUSD');
+        const priceUSDInput = document.getElementById('priceUSD');
+        const profitPreview = document.getElementById('profitPreview');
         
         globalExchangeRateInput.value = globalExchangeRate;
         storeNameInput.value = storeName;
@@ -264,8 +320,24 @@
 
         function updateStoreNameUI() {
             document.getElementById('pageTitle').textContent = `${storeName} - Gestor`;
-            document.getElementById('storeTitleHeader').innerHTML = `<i class="fas fa-store mr-2"></i>${storeName}`;
+            document.getElementById('storeTitleHeader']?.innerHTML = `<i class="fas fa-store mr-2"></i>${storeName}`;
         }
+
+        // Cálculo dinámico del porcentaje de ganancia en el formulario
+        function calculateProfitMargin() {
+            const cost = parseFloat(costUSDInput.value) || 0;
+            const price = parseFloat(priceUSDInput.value) || 0;
+            if (cost <= 0) {
+                profitPreview.innerHTML = price > 0 ? `100% (Venta neta)` : `0% ($0.00)`;
+                return;
+            }
+            const profitUSD = price - cost;
+            const profitPercent = ((profitUSD / cost) * 100).toFixed(1);
+            profitPreview.innerHTML = `<span class="${profitPercent >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500'}">${profitPercent}%</span> <span class="text-gray-500 text-[10px]">($${profitUSD.toFixed(2)})</span>`;
+        }
+
+        costUSDInput.addEventListener('input', calculateProfitMargin);
+        priceUSDInput.addEventListener('input', calculateProfitMargin);
 
         document.getElementById('togglePmBtn').addEventListener('click', () => {
             const form = document.getElementById('pagoMovilEditForm');
@@ -291,7 +363,7 @@
 
         function updatePagoMovilUI() {
             const display = document.getElementById('pagoMovilDisplay');
-            display.innerHTML = `🏦 <b>${pagoMovilData.banco}</b><br>📱 ${pagoMovilData.telefono}<br>🆔 ${pagoMovilData.cedula}`;
+            if(display) display.innerHTML = `🏦 <b>${pagoMovilData.banco}</b><br>📱 ${pagoMovilData.telefono}<br>🆔 ${pagoMovilData.cedula}`;
         }
 
         const productForm = document.getElementById('productForm');
@@ -334,11 +406,19 @@
                 finalImage = products[index].image;
             }
 
+            const costUSD = parseFloat(document.getElementById('costUSD').value) || 0;
+            const priceUSD = parseFloat(document.getElementById('priceUSD').value) || 0;
+            const profitUSD = priceUSD - costUSD;
+            const profitPercent = costUSD > 0 ? ((profitUSD / costUSD) * 100).toFixed(1) : (priceUSD > 0 ? 100 : 0);
+
             const product = {
                 name: document.getElementById('name').value.trim(),
                 barcode: document.getElementById('barcode').value.trim(),
                 stock: parseInt(document.getElementById('stock').value) || 0,
-                priceUSD: parseFloat(document.getElementById('priceUSD').value) || 0,
+                costUSD: costUSD,
+                priceUSD: priceUSD,
+                profitUSD: profitUSD,
+                profitPercent: profitPercent,
                 description: document.getElementById('description').value.trim(),
                 image: finalImage || ''
             };
@@ -357,6 +437,7 @@
             currentImageBase64 = '';
             fileName.textContent = 'Ninguna imagen seleccionada';
             imagePreviewContainer.innerHTML = '<span class="text-xs text-gray-400">Sin vista previa</span>';
+            profitPreview.innerHTML = '0% ($0.00)';
             renderProducts();
             showToast('¡Producto guardado con éxito!');
         });
@@ -378,31 +459,43 @@
             filteredProducts.forEach((p) => {
                 const index = products.indexOf(p);
                 const totalBs = (p.priceUSD * globalExchangeRate).toFixed(2);
+                const costBs = ((p.costUSD || 0) * globalExchangeRate).toFixed(2);
+                const profitP = p.profitPercent !== undefined ? p.profitPercent : (p.costUSD ? (((p.priceUSD - p.costUSD)/p.costUSD)*100).toFixed(1) : 0);
+
                 const card = document.createElement('div');
-                card.className = 'bg-white rounded-xl shadow-md overflow-hidden flex flex-col justify-between';
+                card.className = 'bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden flex flex-col justify-between border dark:border-gray-700';
                 card.innerHTML = `
                     <div>
-                        ${p.image ? `<img src="${p.image}" class="w-full h-48 object-cover">` : `<div class="w-full h-48 bg-gray-100 flex items-center justify-center text-gray-400"><i class="fas fa-image fa-2x"></i></div>`}
+                        ${p.image ? `<img src="${p.image}" class="w-full h-48 object-cover">` : `<div class="w-full h-48 bg-gray-100 dark:bg-gray-900 flex items-center justify-center text-gray-400"><i class="fas fa-image fa-2x"></i></div>`}
                         <div class="p-4">
-                            <h3 class="font-bold text-lg mb-1">${p.name}</h3>
+                            <h3 class="font-bold text-lg mb-1 dark:text-gray-100">${p.name}</h3>
                             ${p.barcode ? `<p class="text-xs text-gray-400 mb-1"><i class="fas fa-barcode"></i> SKU: ${p.barcode}</p>` : ''}
-                            <p class="text-gray-600 text-sm line-clamp-2 mb-2">📝 ${p.description}</p>
+                            <p class="text-gray-600 dark:text-gray-400 text-sm line-clamp-2 mb-2">📝 ${p.description}</p>
                             
-                            <div class="flex items-center justify-between bg-gray-50 p-2 rounded-lg mb-3 border">
-                                <span class="text-xs text-gray-500 font-medium">Inventario: <b>${p.stock}</b></span>
+                            <div class="flex items-center justify-between bg-gray-50 dark:bg-gray-900 p-2 rounded-lg mb-2 border dark:border-gray-700">
+                                <span class="text-xs text-gray-500 dark:text-gray-400 font-medium">Inventario: <b>${p.stock}</b></span>
                                 <div class="flex items-center gap-1">
-                                    <button type="button" onclick="updateStock(${index}, -1)" class="bg-red-100 hover:bg-red-200 text-red-600 w-6 h-6 rounded font-bold flex items-center justify-center text-xs">-</button>
-                                    <button type="button" onclick="updateStock(${index}, 1)" class="bg-green-100 hover:bg-green-200 text-green-600 w-6 h-6 rounded font-bold flex items-center justify-center text-xs">+</button>
+                                    <button type="button" onclick="updateStock(${index}, -1)" class="bg-red-100 dark:bg-red-950 hover:bg-red-200 text-red-600 w-6 h-6 rounded font-bold flex items-center justify-center text-xs">-</button>
+                                    <button type="button" onclick="updateStock(${index}, 1)" class="bg-green-100 dark:bg-green-950 hover:bg-green-200 text-green-600 w-6 h-6 rounded font-bold flex items-center justify-center text-xs">+</button>
                                 </div>
                             </div>
 
-                            <p class="text-green-600 font-bold text-base mb-3">💰 Bs. ${totalBs} <span class="text-xs text-gray-400">($${p.priceUSD.toFixed(2)})</span></p>
+                            <!-- Costo, Venta y Ganancia -->
+                            <div class="text-xs bg-emerald-50 dark:bg-emerald-950/30 p-2 rounded-lg border border-emerald-100 dark:border-emerald-900 mb-3 flex justify-between items-center">
+                                <div>
+                                    <span class="text-gray-500 dark:text-gray-400 block">Costo: Bs. ${costBs} ($${(p.costUSD || 0).toFixed(2)})</span>
+                                    <span class="font-bold text-emerald-600 dark:text-emerald-400">Venta: Bs. ${totalBs} ($${p.priceUSD.toFixed(2)})</span>
+                                </div>
+                                <div class="text-right">
+                                    <span class="bg-emerald-200 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-200 px-2 py-0.5 rounded font-bold text-[10px]">Gain: ${profitP}%</span>
+                                </div>
+                            </div>
                             
-                            <div class="mb-3 bg-blue-50 p-2.5 rounded-lg border border-blue-100 flex items-center justify-between">
+                            <div class="mb-3 bg-blue-50 dark:bg-blue-950/30 p-2.5 rounded-lg border border-blue-100 dark:border-blue-900 flex items-center justify-between">
                                 <div class="flex items-center gap-1">
-                                    <button type="button" onclick="changeQty(${index}, -1)" class="bg-blue-200 hover:bg-blue-300 text-blue-800 w-7 h-7 rounded font-bold flex items-center justify-center text-sm">-</button>
-                                    <span id="qtyVal_${index}" class="font-bold text-sm w-7 text-center">1</span>
-                                    <button type="button" onclick="changeQty(${index}, 1)" class="bg-blue-200 hover:bg-blue-300 text-blue-800 w-7 h-7 rounded font-bold flex items-center justify-center text-sm">+</button>
+                                    <button type="button" onclick="changeQty(${index}, -1)" class="bg-blue-200 dark:bg-blue-900 hover:bg-blue-300 text-blue-800 dark:text-blue-200 w-7 h-7 rounded font-bold flex items-center justify-center text-sm">-</button>
+                                    <span id="qtyVal_${index}" class="font-bold text-sm w-7 text-center dark:text-white">1</span>
+                                    <button type="button" onclick="changeQty(${index}, 1)" class="bg-blue-200 dark:bg-blue-900 hover:bg-blue-300 text-blue-800 dark:text-blue-200 w-7 h-7 rounded font-bold flex items-center justify-center text-sm">+</button>
                                 </div>
                                 <button type="button" onclick="addToCart(${index})" class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-2 rounded-lg font-bold flex items-center gap-1.5 shadow">
                                     <i class="fas fa-cart-plus"></i> Añadir
@@ -410,7 +503,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="p-3 bg-gray-50 border-t flex justify-between items-center">
+                    <div class="p-3 bg-gray-50 dark:bg-gray-900 border-t dark:border-gray-700 flex justify-between items-center">
                         <span class="text-xs text-gray-400">Opciones:</span>
                         <div class="flex gap-3">
                             <button type="button" onclick="editProduct(${index})" class="text-blue-500 hover:text-blue-700 text-sm" title="Editar"><i class="fas fa-edit"></i></button>
@@ -420,13 +513,6 @@
                 `;
                 productList.appendChild(card);
             });
-        }
-
-        function updateStock(index, amount) {
-            products[index].stock += amount;
-            if (products[index].stock < 0) products[index].stock = 0;
-            localStorage.setItem('products', JSON.stringify(products));
-            renderProducts();
         }
 
         function changeQty(index, delta) {
@@ -697,19 +783,19 @@
                 const totalUSDCalc = sale.totalUSD ? `($${sale.totalUSD})` : `($${(sale.total / globalExchangeRate).toFixed(2)})`;
 
                 const item = document.createElement('div');
-                item.className = 'bg-gray-50 border p-3 rounded-lg flex justify-between items-center text-sm cursor-pointer hover:bg-blue-50 transition';
+                item.className = 'bg-gray-50 dark:bg-gray-900 border dark:border-gray-700 p-3 rounded-lg flex justify-between items-center text-sm cursor-pointer hover:bg-blue-50 dark:hover:bg-gray-700 transition';
                 item.title = 'Haz clic para ver el detalle';
                 item.onclick = () => showSaleDetail(index);
                 item.innerHTML = `
                     <div class="flex items-center gap-3">
                         <span style="display:inline-block; width:12px; height:12px; background:${colorPunto}; border-radius:50%;" title="${textoEstado}"></span>
                         <div>
-                            <p class="font-bold text-gray-800"><span class="text-blue-600 font-mono">[${ordenCorta}]</span> ${sale.name} <span class="text-purple-600 font-semibold">(Cant: ${sale.qty})</span></p>
-                            <p class="text-xs text-gray-500"><b>Cliente:</b> ${clienteNombre} | ${sale.date} <i class="fas fa-search-plus ml-1 text-blue-500"></i></p>
+                            <p class="font-bold text-gray-800 dark:text-gray-200"><span class="text-blue-600 dark:text-blue-400 font-mono">[${ordenCorta}]</span> ${sale.name} <span class="text-purple-600 dark:text-purple-400 font-semibold">(Cant: ${sale.qty})</span></p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400"><b>Cliente:</b> ${clienteNombre} | ${sale.date} <i class="fas fa-search-plus ml-1 text-blue-500"></i></p>
                         </div>
                     </div>
                     <div class="text-right">
-                        <span class="font-bold text-emerald-600 block">Bs. ${sale.total}</span>
+                        <span class="font-bold text-emerald-600 dark:text-emerald-400 block">Bs. ${sale.total}</span>
                         <span class="text-xs text-gray-400">${totalUSDCalc}</span>
                     </div>
                 `;
@@ -731,56 +817,56 @@
             let htmlContent = `
                 <div class="space-y-3">
                     <div>
-                        <p class="text-xs text-gray-500">Fecha: ${sale.date}</p>
-                        <p class="font-bold text-base text-blue-600 mt-1">${sale.name}</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Fecha: ${sale.date}</p>
+                        <p class="font-bold text-base text-blue-600 dark:text-blue-400 mt-1">${sale.name}</p>
                     </div>
 
-                    <div class="bg-gray-50 p-2.5 rounded-lg border border-gray-200 flex justify-between items-center">
-                        <span class="text-xs"><strong>Nro. Orden:</strong> <span class="font-mono font-bold text-blue-600">${numeroOrden}</span></span>
+                    <div class="bg-gray-50 dark:bg-gray-900 p-2.5 rounded-lg border dark:border-gray-700 flex justify-between items-center">
+                        <span class="text-xs dark:text-gray-300"><strong>Nro. Orden:</strong> <span class="font-mono font-bold text-blue-600 dark:text-blue-400">${numeroOrden}</span></span>
                         <button onclick="copiarNumeroOrden('${numeroOrden}')" class="bg-gray-600 hover:bg-gray-700 text-white px-2.5 py-1 rounded text-xs font-semibold"><i class="fas fa-copy mr-1"></i>Copiar</button>
                     </div>
 
-                    <p class="text-xs"><strong>Cliente:</strong> ${clienteNombre}</p>
+                    <p class="text-xs dark:text-gray-300"><strong>Cliente:</strong> ${clienteNombre}</p>
             `;
 
             if (sale.items && sale.items.length > 0) {
-                htmlContent += `<div class="border-t pt-2"><strong class="text-xs text-gray-600 block mb-1.5">Productos vendidos:</strong><div class="space-y-1.5">`;
+                htmlContent += `<div class="border-t dark:border-gray-700 pt-2"><strong class="text-xs text-gray-600 dark:text-gray-400 block mb-1.5">Productos vendidos:</strong><div class="space-y-1.5">`;
                 sale.items.forEach(i => {
                     let subItemBs = esPagado ? i.subtotalBs : (i.priceUSD * globalExchangeRate * i.qty).toFixed(2);
                     let subItemUSD = i.subtotalUSD || (i.priceUSD * i.qty).toFixed(2);
                     let precioCiuBs = esPagado ? i.priceBs : (i.priceUSD * globalExchangeRate).toFixed(2);
 
                     htmlContent += `
-                        <div class="bg-gray-50 p-2 rounded border flex justify-between items-center text-xs">
+                        <div class="bg-gray-50 dark:bg-gray-900 p-2 rounded border dark:border-gray-700 flex justify-between items-center text-xs">
                             <div>
-                                <p class="font-bold"><b>${i.qty}x</b> ${i.name}</p>
+                                <p class="font-bold dark:text-gray-200"><b>${i.qty}x</b> ${i.name}</p>
                                 <p class="text-gray-400">C/u: ${precioCiuBs} Bs ($${i.priceUSD})</p>
                             </div>
                             <div class="text-right">
-                                <span class="font-semibold text-emerald-600 block">${subItemBs} Bs</span>
+                                <span class="font-semibold text-emerald-600 dark:text-emerald-400 block">${subItemBs} Bs</span>
                                 <span class="text-[10px] text-gray-400">($${subItemUSD})</span>
                             </div>
                         </div>`;
                 });
                 htmlContent += `</div></div>`;
             } else {
-                htmlContent += `<p class="text-xs text-gray-400 italic border-t pt-2">Detalle de productos no disponible para esta venta antigua.</p>`;
+                htmlContent += `<p class="text-xs text-gray-400 italic border-t dark:border-gray-700 pt-2">Detalle de productos no disponible para esta venta antigua.</p>`;
             }
 
             htmlContent += `
-                    <div class="border-t pt-2 flex justify-between items-center">
+                    <div class="border-t dark:border-gray-700 pt-2 flex justify-between items-center">
                         <div>
-                            <span class="font-bold text-gray-800 block">Total a pagar:</span>
-                            ${!esPagado ? `<span class="text-[10px] text-amber-600 font-semibold">*Calculado con tasa actual (${globalExchangeRate} Bs/$)</span>` : ''}
+                            <span class="font-bold text-gray-800 dark:text-gray-200 block">Total a pagar:</span>
+                            ${!esPagado ? `<span class="text-[10px] text-amber-600 dark:text-amber-400 font-semibold">*Calculado con tasa actual (${globalExchangeRate} Bs/$)</span>` : ''}
                         </div>
                         <div class="text-right">
-                            <span class="font-bold text-base text-emerald-600 block">Bs. ${totalBsActual}</span>
-                            <span class="text-xs font-semibold text-gray-500">($${totalUSDRef})</span>
+                            <span class="font-bold text-base text-emerald-600 dark:text-emerald-400 block">Bs. ${totalBsActual}</span>
+                            <span class="text-xs font-semibold text-gray-500 dark:text-gray-400">($${totalUSDRef})</span>
                         </div>
                     </div>
 
-                    <div class="border-t pt-3 mt-2">
-                        <p class="text-xs text-gray-500 mb-1.5">Estado de la operación (Control de Cobros):</p>
+                    <div class="border-t dark:border-gray-700 pt-3 mt-2">
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mb-1.5">Estado de la operación (Control de Cobros):</p>
                         <button id="btn-estado-${numeroOrden}" 
                             onclick="alternarEstadoPago('${sale.id || index}', '${numeroOrden}')" 
                             class="w-full py-2.5 px-4 rounded-lg font-bold text-white text-sm shadow transition"
@@ -844,6 +930,35 @@
             }
         }
 
+        // Funciones para Captura de Pantalla e Impresión
+        function downloadElementScreenshot(elementId, filename) {
+            const element = document.getElementById(elementId);
+            if (!element) return;
+            html2canvas(element, { scale: 2, backgroundColor: currentTheme === 'dark' ? '#1f2937' : '#ffffff' }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = filename;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                showToast('¡Captura descargada con éxito!');
+            });
+        }
+
+        function printElementContent(elementId) {
+            const element = document.getElementById(elementId);
+            if (!element) return;
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write('<html><head><title>Imprimir Detalle</title>');
+            printWindow.document.write('<script src="https://cdn.tailwindcss.com"><\/script>');
+            printWindow.document.write('</head><body class="bg-white p-6 text-gray-800">');
+            printWindow.document.write(element.innerHTML);
+            printWindow.document.write('</body></html>');
+            printWindow.document.close();
+            setTimeout(() => {
+                printWindow.print();
+                printWindow.close();
+            }, 500);
+        }
+
         function openScannerModal() {
             document.getElementById('scannerModal').classList.remove('hidden');
             Quagga.init({
@@ -872,8 +987,10 @@
                 const found = products.find(p => p.barcode === code);
                 if (found) {
                     document.getElementById('name').value = found.name;
+                    document.getElementById('costUSD').value = found.costUSD || 0;
                     document.getElementById('priceUSD').value = found.priceUSD;
                     document.getElementById('description').value = found.description;
+                    calculateProfitMargin();
                     showToast('¡Producto encontrado en inventario!');
                 }
             });
@@ -890,10 +1007,12 @@
             document.getElementById('name').value = p.name;
             document.getElementById('barcode').value = p.barcode || '';
             document.getElementById('stock').value = p.stock;
+            document.getElementById('costUSD').value = p.costUSD || 0;
             document.getElementById('priceUSD').value = p.priceUSD;
             document.getElementById('description').value = p.description;
             document.getElementById('formTitle').textContent = 'Editar Producto';
             document.getElementById('saveBtn').textContent = 'Actualizar Producto';
+            calculateProfitMargin();
             
             currentImageBase64 = ''; 
             if (p.image) {
@@ -953,5 +1072,3 @@
     </script>
 </body>
 </html>
-        
-            
