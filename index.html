@@ -164,7 +164,7 @@
                     </div>
                 </div>
 
-                <!-- CASILLA OPCIONAL PARA PRODUCTOS POR PESO / GRAMERA -->
+                <!-- CASILLA OPCIONAL PARA PRODUCTOS POR PESO / GRAMERA (QUESO, JAMÓN, ETC.) -->
                 <div class="md:col-span-2 lg:col-span-3 bg-blue-50 dark:bg-gray-900 p-3 rounded-lg border border-blue-200 dark:border-gray-700 flex items-center gap-3">
                     <input type="checkbox" id="isWeighted" class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500">
                     <div>
@@ -279,6 +279,15 @@
 
     <script>
         let products = JSON.parse(localStorage.getItem('products')) || [];
+        // Blindaje para asegurar propiedades booleanas y evitar errores con datos antiguos
+        products = products.map(p => ({
+            ...p,
+            isWeighted: !!p.isWeighted,
+            costUSD: p.costUSD || 0,
+            priceUSD: p.priceUSD || 0,
+            stock: p.stock || 0
+        }));
+
         let salesHistory = JSON.parse(localStorage.getItem('salesHistory')) || [];
         let cart = [];
         let globalExchangeRate = parseFloat(localStorage.getItem('globalExchangeRate')) || 36.50;
@@ -332,6 +341,28 @@
             localStorage.setItem('storeName', storeName);
             updateStoreNameUI();
         });
+
+        function updateStoreNameUI() {
+            document.getElementById('pageTitle').textContent = `${storeName} - Gestor`;
+            document.getElementById('storeTitleHeader').innerHTML = `<i class="fas fa-store mr-2"></i>${storeName}`;
+        }
+
+        function calculateProfitMargin() {
+            const cost = parseFloat(costUSDInput.value) || 0;
+            const price = parseFloat(priceUSDInput.value) || 0;
+            const badge = document.getElementById('profitPercentageBadge');
+            if (cost > 0 && price > cost) {
+                const profit = ((price - cost) / cost) * 100;
+                badge.textContent = `${profit.toFixed(2)}% (Ganancia: $${(price - cost).toFixed(2)})`;
+                badge.className = "w-full bg-gray-100 dark:bg-gray-900 border dark:border-gray-700 rounded-lg px-3 py-2 font-bold text-emerald-600 flex items-center text-sm";
+            } else if (cost > 0 && price <= cost) {
+                badge.textContent = `Pérdida o sin margen`;
+                badge.className = "w-full bg-gray-100 dark:bg-gray-900 border dark:border-gray-700 rounded-lg px-3 py-2 font-bold text-red-600 flex items-center text-sm";
+            } else {
+                badge.textContent = `0.00%`;
+                badge.className = "w-full bg-gray-100 dark:bg-gray-900 border dark:border-gray-700 rounded-lg px-3 py-2 font-bold text-emerald-600 flex items-center text-sm";
+            }
+        }
 
         costUSDInput.addEventListener('input', calculateProfitMargin);
         priceUSDInput.addEventListener('input', calculateProfitMargin);
@@ -438,9 +469,9 @@
         function renderProducts() {
             const searchTerm = globalSearchInput.value.toLowerCase().trim();
             const filteredProducts = products.filter(p => 
-                p.name.toLowerCase().includes(searchTerm) || 
+                (p.name && p.name.toLowerCase().includes(searchTerm)) || 
                 (p.barcode && p.barcode.toLowerCase().includes(searchTerm)) ||
-                p.description.toLowerCase().includes(searchTerm)
+                (p.description && p.description.toLowerCase().includes(searchTerm))
             );
 
             renderQuickShortcuts();
@@ -498,7 +529,7 @@
                                 ${p.isWeighted ? `<span class="bg-amber-100 text-amber-800 text-[10px] px-2 py-0.5 rounded font-bold">Por Kilo</span>` : ''}
                             </div>
                             ${p.barcode ? `<p class="text-xs text-gray-400 mb-1"><i class="fas fa-barcode"></i> SKU: ${p.barcode}</p>` : ''}
-                            <p class="text-gray-600 dark:text-gray-300 text-sm line-clamp-2 mb-2">📝 ${p.description}</p>
+                            <p class="text-gray-600 dark:text-gray-300 text-sm line-clamp-2 mb-2">📝 ${p.description || ''}</p>
                             
                             <div class="flex items-center justify-between bg-gray-50 dark:bg-gray-900 p-2 rounded-lg mb-3 border dark:border-gray-700">
                                 <span class="text-xs text-gray-500 dark:text-gray-400 font-medium">Inventario: <b>${p.stock} ${p.isWeighted ? 'Kg' : 'unid.'}</b></span>
@@ -541,7 +572,6 @@
                 btn.innerHTML = `<i class="fas fa-plus text-blue-500 mr-1 text-[10px]"></i>${p.name}`;
                 btn.onclick = () => {
                     if (p.isWeighted) {
-                        // Por defecto añade 250g si se usa desde el atajo rápido
                         addWeightedCustomCart(idx, 250);
                     } else {
                         addToCart(idx);
@@ -576,7 +606,7 @@
 
         function addWeightedCustomCart(index, grams) {
             const p = products[index];
-            const kgFraction = grams / 1000; // Ej: 200g = 0.2 kg
+            const kgFraction = grams / 1000;
 
             if (p.stock < kgFraction) {
                 alert(`Inventario insuficiente. Solo quedan ${p.stock} Kg disponibles.`);
@@ -595,8 +625,8 @@
                     name: customName,
                     baseName: p.name,
                     costUSD: p.costUSD || 0,
-                    priceUSD: p.priceUSD, // Precio por kilo
-                    qtyFraction: kgFraction, // Fracción en kilos
+                    priceUSD: p.priceUSD,
+                    qtyFraction: kgFraction,
                     gramsTotal: grams,
                     isWeighted: true,
                     description: p.description,
@@ -772,7 +802,7 @@
                 pagado: false 
             });
 
-            localStorage.setItem('salesHistory', JSON.stringify(salesHistory));
+        localStorage.setItem('salesHistory', JSON.stringify(salesHistory));
             localStorage.setItem('products', JSON.stringify(products));
             
             window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
@@ -825,8 +855,6 @@
 
         function renderSalesHistory() {
             const container = document.getElementById('salesHistoryList');
-            const filteredSales = salesHistory;
-
             let cobradoBs = 0, cobradoUSD = 0;
             let pendienteBs = 0, pendienteUSD = 0;
             let totalGananciaUSD = 0;
@@ -858,13 +886,13 @@
             document.getElementById('cierreGananciaNeta').textContent = `Bs. ${(totalGananciaUSD * globalExchangeRate).toFixed(2)} ($${totalGananciaUSD.toFixed(2)})`;
             document.getElementById('cierrePorcentajeGanancia').textContent = `${porcentajeGananciaPromedio.toFixed(2)}%`;
 
-            if (filteredSales.length === 0) {
+            if (salesHistory.length === 0) {
                 container.innerHTML = '<p class="text-gray-400 text-center py-6 text-sm">No hay ventas registradas.</p>';
                 return;
             }
 
             container.innerHTML = '';
-            filteredSales.forEach((sale) => {
+            salesHistory.forEach((sale) => {
                 const index = salesHistory.indexOf(sale);
                 const ordenCorta = sale.idOrden || 'OM-XXXX';
                 const clienteNombre = sale.cliente || 'Cliente General';
@@ -1117,7 +1145,7 @@
             document.getElementById('priceUSD').value = p.priceUSD;
             document.getElementById('isWeighted').checked = p.isWeighted || false;
             document.getElementById('priceUnitLabel').textContent = p.isWeighted ? 'por Kilo (Kg)' : 'unidad';
-            document.getElementById('description').value = p.description;
+            document.getElementById('description').value = p.description || '';
             document.getElementById('formTitle').textContent = 'Editar Producto';
             document.getElementById('saveBtn').textContent = 'Actualizar Producto';
             
@@ -1154,25 +1182,3 @@
     </script>
 </body>
 </html>
-
-        function updateStoreNameUI() {
-            document.getElementById('pageTitle').textContent = `${storeName} - Gestor`;
-            document.getElementById('storeTitleHeader').innerHTML = `<i class="fas fa-store mr-2"></i>${storeName}`;
-        }
-
-        function calculateProfitMargin() {
-            const cost = parseFloat(costUSDInput.value) || 0;
-            const price = parseFloat(priceUSDInput.value) || 0;
-            const badge = document.getElementById('profitPercentageBadge');
-            if (cost > 0 && price > cost) {
-                const profit = ((price - cost) / cost) * 100;
-                badge.textContent = `${profit.toFixed(2)}% (Ganancia: $${(price - cost).toFixed(2)})`;
-                badge.className = "w-full bg-gray-100 dark:bg-gray-900 border dark:border-gray-700 rounded-lg px-3 py-2 font-bold text-emerald-600 flex items-center text-sm";
-            } else if (cost > 0 && price <= cost) {
-                badge.textContent = `Pérdida o sin margen`;
-                badge.className = "w-full bg-gray-100 dark:bg-gray-900 border dark:border-gray-700 rounded-lg px-3 py-2 font-bold text-red-600 flex items-center text-sm";
-            } else {
-                badge.textContent = `0.00%`;
-                badge.className = "w-full bg-gray-100 dark:bg-gray-900 border dark:border-gray-700 rounded-lg px-3 py-2 font-bold text-emerald-600 flex items-center text-sm";
-            }
-        }
