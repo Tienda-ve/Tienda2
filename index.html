@@ -8,6 +8,11 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
     <style>
         .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
         #toastContainer { position: fixed; right: 1rem; bottom: 1rem; z-index: 60; }
@@ -288,12 +293,12 @@
             const themeText = document.getElementById('themeText');
             if (isDarkMode) {
                 htmlRoot.classList.add('dark');
-                themeIcon.className = 'fas fa-sun';
-                themeText.textContent = 'Modo Claro';
+                if (themeIcon) themeIcon.className = 'fas fa-sun';
+                if (themeText) themeText.textContent = 'Modo Claro';
             } else {
                 htmlRoot.classList.remove('dark');
-                themeIcon.className = 'fas fa-moon';
-                themeText.textContent = 'Modo Oscuro';
+                if (themeIcon) themeIcon.className = 'fas fa-moon';
+                if (themeText) themeText.textContent = 'Modo Oscuro';
             }
         }
 
@@ -892,7 +897,7 @@
                 </div>
             `;
 
-        content.innerHTML = htmlContent;
+            content.innerHTML = htmlContent;
             document.getElementById('saleDetailModal').classList.remove('hidden');
         }
 
