@@ -27,7 +27,7 @@
             <div class="text-center mb-6">
                 <i class="fas fa-store text-4xl text-blue-600 dark:text-blue-400 mb-2"></i>
                 <h2 class="text-2xl font-bold dark:text-white">Gestor de Mi Tienda</h2>
-                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Inicia sesión para acceder a tu espacio de trabajo en la nube</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Acceso seguro con control de suscripción anual</p>
             </div>
             <div class="space-y-4">
                 <div>
@@ -40,7 +40,7 @@
                 </div>
                 <div id="authError" class="text-red-500 text-xs text-center font-semibold"></div>
                 <button id="loginBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg font-bold text-sm shadow transition">Iniciar Sesión</button>
-                <button id="registerBtn" class="w-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 py-2.5 rounded-lg font-semibold text-sm transition">Crear Cuenta Nueva</button>
+                <button id="registerBtn" class="w-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 py-2.5 rounded-lg font-semibold text-sm transition">Crear Cuenta Nueva (Requiere Aprobación)</button>
             </div>
         </div>
     </div>
@@ -194,11 +194,22 @@
                     </div>
                 </div>
 
-                <div class="md:col-span-2 lg:col-span-3 bg-blue-50 dark:bg-gray-900 p-3 rounded-lg border border-blue-200 dark:border-gray-700 flex items-center gap-3">
-                    <input type="checkbox" id="isWeighted" class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500">
-                    <div>
-                        <label for="isWeighted" class="text-sm font-bold text-gray-800 dark:text-gray-200 cursor-pointer">⚖️ ¿Este producto se vende por peso o volumen fraccionado (Ej: Queso en gramos, Cloro en mililitros)?</label>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">Si se marca, el precio corresponde a 1 Kilo o 1 Litro y el cliente podrá pedir por gramos o mililitros (ej. 500g o 500ml).</p>
+                <!-- SELECTOR INDEPENDIENTE DE KILOS O LITROS -->
+                <div class="md:col-span-2 lg:col-span-3 bg-blue-50 dark:bg-gray-900 p-4 rounded-lg border border-blue-200 dark:border-gray-700">
+                    <label class="block text-sm font-bold text-gray-800 dark:text-gray-200 mb-2">⚖️ ¿Cómo se vende este producto fraccionado?</label>
+                    <div class="flex flex-wrap gap-6">
+                        <label class="flex items-center space-x-2 cursor-pointer">
+                            <input type="radio" id="unitNone" name="fractionUnit" value="none" checked class="text-blue-600 focus:ring-blue-500 w-4 h-4">
+                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Unidad Normal (Por piezas)</span>
+                        </label>
+                        <label class="flex items-center space-x-2 cursor-pointer">
+                            <input type="radio" id="unitKg" name="fractionUnit" value="kg" class="text-blue-600 focus:ring-blue-500 w-4 h-4">
+                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Por Kilos (ej. Queso, Carne)</span>
+                        </label>
+                        <label class="flex items-center space-x-2 cursor-pointer">
+                            <input type="radio" id="unitLt" name="fractionUnit" value="lt" class="text-blue-600 focus:ring-blue-500 w-4 h-4">
+                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Por Litros (ej. Cloro, Aceite)</span>
+                        </label>
                     </div>
                 </div>
 
@@ -245,7 +256,6 @@
                 </div>
             </div>
             
-            <!-- CIERRE MÁS PEQUEÑO Y COMPACTO CON BOTÓN DE FILTRAR PENDIENTES -->
             <div class="bg-purple-50 dark:bg-gray-900 border border-purple-200 dark:border-gray-700 rounded-lg p-3 mb-3 grid grid-cols-2 gap-2 text-xs">
                 <div>
                     <span class="font-bold text-purple-700 dark:text-purple-400 uppercase block">✔️ Cobrado:</span>
@@ -279,7 +289,7 @@
         </div>
     </div>
 
-    <!-- MODAL DE DETALLE DE VENTA CON ABONOS Y RECALCULO -->
+    <!-- MODAL DE DETALLE DE VENTA -->
     <div id="saleDetailModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
         <div id="saleDetailCard" class="bg-white dark:bg-gray-800 dark:text-gray-100 rounded-xl shadow-xl max-w-md w-full p-6 flex flex-col max-h-[90vh]">
             <div class="flex justify-between items-center mb-4 border-b dark:border-gray-700 pb-2">
@@ -314,9 +324,9 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, getDocs, doc, setDoc, getDoc, updateDoc, deleteDoc, query, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-                const firebaseConfig = {
+        const firebaseConfig = {
             apiKey: "AIzaSyAryObeeWoCFkuJ1Vb91YN8G8WAKcxaFto",
             authDomain: "gestor-de-tienda-36a96.firebaseapp.com",
             projectId: "gestor-de-tienda-36a96",
@@ -343,24 +353,52 @@
 
         applyTheme();
 
+        // CONTROL DE SESIÓN Y VERIFICACIÓN DE APROBACIÓN
         onAuthStateChanged(auth, async (user) => {
             if (user) {
-                currentUser = user;
-                document.getElementById('authScreen').classList.add('hidden');
-                document.getElementById('mainAppContainer').classList.remove('hidden');
-                document.getElementById('userEmailDisplay').textContent = user.email;
-                
-                globalExchangeRate = parseFloat(localStorage.getItem(`exchangeRate_${user.uid}`)) || 36.50;
-                storeName = localStorage.getItem(`storeName_${user.uid}`) || 'Mi Tienda';
-                const pmSaved = localStorage.getItem(`pagoMovil_${user.uid}`);
-                if (pmSaved) pagoMovilData = JSON.parse(pmSaved);
+                try {
+                    const userDocRef = doc(db, "users", user.uid);
+                    const userSnap = await getDoc(userDocRef);
 
-                document.getElementById('globalExchangeRate').value = globalExchangeRate;
-                document.getElementById('storeNameInput').value = storeName;
-                updateStoreNameUI();
-                updatePagoMovilUI();
+                    let isApproved = false;
+                    if (userSnap.exists()) {
+                        const userData = userSnap.data();
+                        if (userData.status === 'approved') {
+                            isApproved = true;
+                        }
+                    } else {
+                        await setDoc(userDocRef, { email: user.email, status: 'approved', createdAt: new Date() });
+                        isApproved = true;
+                    }
 
-                await loadUserDataFromFirebase();
+                    if (!isApproved) {
+                        await signOut(auth);
+                        alert('⏳ Tu cuenta está registrada pero pendiente de aprobación por el administrador (Suscripción anual). Serás notificado cuando se active.');
+                        document.getElementById('authScreen').classList.remove('hidden');
+                        document.getElementById('mainAppContainer').classList.add('hidden');
+                        return;
+                    }
+
+                    currentUser = user;
+                    document.getElementById('authScreen').classList.add('hidden');
+                    document.getElementById('mainAppContainer').classList.remove('hidden');
+                    document.getElementById('userEmailDisplay').textContent = user.email;
+                    
+                    globalExchangeRate = parseFloat(localStorage.getItem(`exchangeRate_${user.uid}`)) || 36.50;
+                    storeName = localStorage.getItem(`storeName_${user.uid}`) || 'Mi Tienda';
+                    const pmSaved = localStorage.getItem(`pagoMovil_${user.uid}`);
+                    if (pmSaved) pagoMovilData = JSON.parse(pmSaved);
+
+                    document.getElementById('globalExchangeRate').value = globalExchangeRate;
+                    document.getElementById('storeNameInput').value = storeName;
+                    updateStoreNameUI();
+                    updatePagoMovilUI();
+
+                    await loadUserDataFromFirebase();
+                } catch (err) {
+                    console.error("Error verificando estatus:", err);
+                    signOut(auth);
+                }
             } else {
                 currentUser = null;
                 document.getElementById('authScreen').classList.remove('hidden');
@@ -380,14 +418,23 @@
             }
         });
 
+        // REGISTRO CON ESTADO PENDIENTE
         document.getElementById('registerBtn').addEventListener('click', async () => {
             const email = document.getElementById('authEmail').value.trim();
             const pass = document.getElementById('authPassword').value.trim();
             const errEl = document.getElementById('authError');
             try {
                 errEl.textContent = '';
-                await createUserWithEmailAndPassword(auth, email, pass);
-                showToast('¡Cuenta creada con éxito!');
+                const cred = await createUserWithEmailAndPassword(auth, email, pass);
+                
+                await setDoc(doc(db, "users", cred.user.uid), {
+                    email: email,
+                    status: 'pending',
+                    createdAt: new Date()
+                });
+
+                await signOut(auth);
+                alert('🎉 ¡Cuenta creada con éxito! Tu acceso está pendiente de aprobación por suscripción anual. Por favor comunícate con el administrador.');
             } catch (e) {
                 errEl.textContent = 'Error al registrarse: ' + e.message;
             }
@@ -442,10 +489,18 @@
         const storeNameInput = document.getElementById('storeNameInput');
         const costUSDInput = document.getElementById('costUSD');
         const priceUSDInput = document.getElementById('priceUSD');
-        const isWeightedCheckbox = document.getElementById('isWeighted');
 
-        isWeightedCheckbox.addEventListener('change', () => {
-            document.getElementById('priceUnitLabel').textContent = isWeightedCheckbox.checked ? 'por Kilo/Litro' : 'unidad';
+        document.querySelectorAll('input[name="fractionUnit"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                const val = e.target.value;
+                if (val === 'kg') {
+                    document.getElementById('priceUnitLabel').textContent = 'por Kilo (kg)';
+                } else if (val === 'lt') {
+                    document.getElementById('priceUnitLabel').textContent = 'por Litro (lt)';
+                } else {
+                    document.getElementById('priceUnitLabel').textContent = 'unidad';
+                }
+            });
         });
 
         storeNameInput.addEventListener('input', (e) => {
@@ -544,6 +599,8 @@
                 if (existing) finalImage = existing.image;
             }
 
+            const selectedUnit = document.querySelector('input[name="fractionUnit"]:checked').value;
+
             const productData = {
                 userId: currentUser.uid,
                 name: document.getElementById('name').value.trim(),
@@ -551,7 +608,7 @@
                 stock: parseFloat(document.getElementById('stock').value) || 0,
                 costUSD: parseFloat(document.getElementById('costUSD').value) || 0,
                 priceUSD: parseFloat(document.getElementById('priceUSD').value) || 0,
-                isWeighted: document.getElementById('isWeighted').checked,
+                fractionUnit: selectedUnit,
                 description: document.getElementById('description').value.trim(),
                 image: finalImage || ''
             };
@@ -569,8 +626,8 @@
                     products.push({ id: docRef.id, ...productData });
                 }
 
-                productForm.reset();
-                document.getElementById('isWeighted').checked = false;
+            productForm.reset();
+                document.getElementById('unitNone').checked = true;
                 document.getElementById('priceUnitLabel').textContent = 'unidad';
                 currentImageBase64 = '';
                 fileName.textContent = 'Ninguna imagen seleccionada';
@@ -606,16 +663,19 @@
                 card.className = 'bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden flex flex-col justify-between';
                 
                 let selectorHtml = '';
-                if (p.isWeighted) {
+                const isFrac = p.fractionUnit && p.fractionUnit !== 'none';
+                
+                if (isFrac) {
+                    const unitAbbr = p.fractionUnit === 'kg' ? 'g' : 'ml';
                     selectorHtml = `
                         <div class="mb-3 bg-amber-50 dark:bg-gray-900 p-2.5 rounded-lg border border-amber-200 dark:border-gray-700">
                             <div class="flex justify-between items-center mb-1">
-                                <span class="text-xs font-bold text-amber-700 dark:text-amber-400"><i class="fas fa-weight-scale mr-1"></i>Gramera / Mililitros:</span>
-                                <span class="text-[10px] text-gray-500">Ej: 500 (g o ml)</span>
+                                <span class="text-xs font-bold text-amber-700 dark:text-amber-400"><i class="fas fa-weight-scale mr-1"></i>Venta por ${p.fractionUnit.toUpperCase()}:</span>
+                                <span class="text-[10px] text-gray-500">Ej: 500 (${unitAbbr})</span>
                             </div>
                             <div class="flex items-center gap-2">
                                 <input type="number" id="gramsVal_${p.id}" value="250" step="10" min="1" class="w-full text-xs font-bold px-2 py-1.5 border dark:border-gray-700 dark:bg-gray-800 rounded text-center focus:outline-none">
-                                <span class="text-xs font-semibold text-gray-600 dark:text-gray-400">g / ml</span>
+                                <span class="text-xs font-semibold text-gray-600 dark:text-gray-400">${unitAbbr}</span>
                                 <button type="button" onclick="addWeightedToCart('${p.id}')" class="bg-amber-600 hover:bg-amber-700 text-white text-xs px-3 py-1.5 rounded font-bold shadow whitespace-nowrap">
                                     <i class="fas fa-cart-plus"></i> Añadir
                                 </button>
@@ -637,26 +697,28 @@
                     `;
                 }
 
+                const badgeTag = isFrac ? `<span class="bg-amber-100 text-amber-800 text-[10px] px-2 py-0.5 rounded font-bold">${p.fractionUnit.toUpperCase()}</span>` : '';
+
                 card.innerHTML = `
                     <div>
                         ${p.image ? `<img src="${p.image}" class="w-full h-48 object-cover">` : `<div class="w-full h-48 bg-gray-100 dark:bg-gray-900 flex items-center justify-center text-gray-400"><i class="fas fa-image fa-2x"></i></div>`}
                         <div class="p-4">
                             <div class="flex justify-between items-start mb-1">
                                 <h3 class="font-bold text-lg dark:text-white">${p.name}</h3>
-                                ${p.isWeighted ? `<span class="bg-amber-100 text-amber-800 text-[10px] px-2 py-0.5 rounded font-bold">Fraccionado</span>` : ''}
+                                ${badgeTag}
                             </div>
                             ${p.barcode ? `<p class="text-xs text-gray-400 mb-1"><i class="fas fa-barcode"></i> SKU: ${p.barcode}</p>` : ''}
                             <p class="text-gray-600 dark:text-gray-300 text-sm line-clamp-2 mb-2">📝 ${p.description || ''}</p>
                             
                             <div class="flex items-center justify-between bg-gray-50 dark:bg-gray-900 p-2 rounded-lg mb-3 border dark:border-gray-700">
-                                <span class="text-xs text-gray-500 dark:text-gray-400 font-medium">Inventario: <b>${p.stock} ${p.isWeighted ? 'Kg/Litros' : 'unid.'}</b></span>
+                                <span class="text-xs text-gray-500 dark:text-gray-400 font-medium">Inventario: <b>${p.stock} ${isFrac ? (p.fractionUnit === 'kg' ? 'Kg' : 'Litros') : 'unid.'}</b></span>
                                 <div class="flex items-center gap-1">
-                                    <button type="button" onclick="updateStock('${p.id}', ${p.isWeighted ? '-0.25' : '-1'})" class="bg-red-100 dark:bg-red-900 hover:bg-red-200 text-red-600 dark:text-red-300 w-6 h-6 rounded font-bold flex items-center justify-center text-xs">-</button>
-                                    <button type="button" onclick="updateStock('${p.id}', ${p.isWeighted ? '0.25' : '1'})" class="bg-green-100 dark:bg-green-900 hover:bg-green-200 text-green-600 dark:text-green-300 w-6 h-6 rounded font-bold flex items-center justify-center text-xs">+</button>
+                                    <button type="button" onclick="updateStock('${p.id}', ${isFrac ? '-0.25' : '-1'})" class="bg-red-100 dark:bg-red-900 hover:bg-red-200 text-red-600 dark:text-red-300 w-6 h-6 rounded font-bold flex items-center justify-center text-xs">-</button>
+                                    <button type="button" onclick="updateStock('${p.id}', ${isFrac ? '0.25' : '1'})" class="bg-green-100 dark:bg-green-900 hover:bg-green-200 text-green-600 dark:text-green-300 w-6 h-6 rounded font-bold flex items-center justify-center text-xs">+</button>
                                 </div>
                             </div>
 
-                            <p class="text-green-600 dark:text-green-400 font-bold text-base mb-3">💰 Bs. ${totalBs} <span class="text-xs text-gray-400">($${p.priceUSD.toFixed(2)} ${p.isWeighted ? '/kg-l' : ''})</span></p>
+                            <p class="text-green-600 dark:text-green-400 font-bold text-base mb-3">💰 Bs. ${totalBs} <span class="text-xs text-gray-400">($${p.priceUSD.toFixed(2)} ${isFrac ? '/' + p.fractionUnit : ''})</span></p>
                             
                             ${selectorHtml}
                         </div>
@@ -684,7 +746,7 @@
                 btn.title = `Añadir ${p.name}`;
                 btn.innerHTML = `<i class="fas fa-plus text-blue-500 mr-1 text-[10px]"></i>${p.name}`;
                 btn.onclick = () => {
-                    if (p.isWeighted) {
+                    if (p.fractionUnit && p.fractionUnit !== 'none') {
                         addWeightedCustomCart(p.id, 250);
                     } else {
                         addToCart(p.id);
@@ -730,7 +792,8 @@
                 return;
             }
 
-            const customName = `${p.name} (${grams}g/ml)`;
+            const unitLabelCart = p.fractionUnit === 'kg' ? 'g' : 'ml';
+            const customName = `${p.name} (${grams}${unitLabelCart})`;
             const existingIndex = cart.findIndex(item => item.productId === id && item.customName === customName);
             
             if (existingIndex > -1) {
@@ -746,13 +809,14 @@
                     qtyFraction: fraction,
                     gramsTotal: grams,
                     isWeighted: true,
+                    fractionUnit: p.fractionUnit,
                     description: p.description,
                     image: p.image
                 });
             }
 
             renderCart();
-            showToast(`¡Agregado: ${p.name} (${grams})!`);
+            showToast(`¡Agregado: ${p.name} (${grams}${unitLabelCart})!`);
         }
 
         window.addToCart = function(id) {
@@ -766,7 +830,7 @@
                 return;
             }
 
-            const existingIndex = cart.findIndex(item => item.productId === id && !item.isWeighted);
+            const existingIndex = cart.findIndex(item => item.productId === id && (!item.isWeighted));
             if (existingIndex > -1) {
                 cart[existingIndex].qty += cantidad;
             } else {
@@ -778,6 +842,7 @@
                     priceUSD: p.priceUSD,
                     qty: cantidad,
                     isWeighted: false,
+                    fractionUnit: 'none',
                     description: p.description,
                     image: p.image
                 });
@@ -808,11 +873,14 @@
                 totalGeneralBs += subtotalBs;
                 totalGeneralUSD += subtotalUSD;
 
+                const unitAbbr = item.fractionUnit === 'kg' ? 'g' : 'ml';
+                const rowBadge = item.isWeighted ? `${item.gramsTotal}${unitAbbr}` : `x${item.qty}`;
+
                 const row = document.createElement('div');
                 row.className = 'bg-blue-800 bg-opacity-40 p-2.5 rounded-lg flex items-center justify-between text-xs';
                 row.innerHTML = `
                     <div class="flex items-center gap-2 truncate">
-                        <span class="font-bold bg-blue-900 px-2 py-1 rounded">${item.isWeighted ? `${item.gramsTotal}g/ml` : `x${item.qty}`}</span>
+                        <span class="font-bold bg-blue-900 px-2 py-1 rounded">${rowBadge}</span>
                         <span class="truncate"><b>${item.name}</b></span>
                     </div>
                     <div class="flex items-center gap-3">
@@ -867,18 +935,20 @@
                 totalGeneralUSD += subtotalUSD;
                 totalCostUSD += (item.costUSD || 0) * multiplier;
 
+                const unitAbbr = item.fractionUnit === 'kg' ? 'g' : 'ml';
                 itemsDetail.push({
                     name: item.name,
                     baseName: item.baseName,
-                    qty: item.isWeighted ? `${item.gramsTotal}g/ml` : item.qty,
+                    qty: item.isWeighted ? `${item.gramsTotal}${unitAbbr}` : item.qty,
                     isWeighted: item.isWeighted || false,
+                    fractionUnit: item.fractionUnit || 'none',
                     costUSD: item.costUSD || 0,
                     priceUSD: item.priceUSD,
                     subtotalBs: subtotalBs.toFixed(2),
                     subtotalUSD: subtotalUSD.toFixed(2)
                 });
 
-                text += `• *${item.name}*%0A`;
+            text += `• *${item.name}*%0A`;
                 text += `  Subtotal: *${subtotalBs.toFixed(2)} Bs* ($${subtotalUSD.toFixed(2)})%0A`;
                 if (item.description) text += `  📝 ${item.description}%0A`;
                 text += `%0A`;
@@ -945,8 +1015,9 @@
 
             products.forEach((p, idx) => {
                 const totalBs = (p.priceUSD * globalExchangeRate).toFixed(2);
-                text += `${idx + 1}. *${p.name}* ${p.isWeighted ? '(Fraccionado)' : ''}%0A`;
-                text += `   💰 Precio: *${totalBs} Bs* ($${p.priceUSD.toFixed(2)}${p.isWeighted ? '/kg-l' : ''})%0A`;
+                const isFrac = p.fractionUnit && p.fractionUnit !== 'none';
+                text += `${idx + 1}. *${p.name}* ${isFrac ? '(' + p.fractionUnit.toUpperCase() + ')' : ''}%0A`;
+                text += `   💰 Precio: *${totalBs} Bs* ($${p.priceUSD.toFixed(2)}${isFrac ? '/' + p.fractionUnit : ''})%0A`;
                 if (p.description) text += `   📝 ${p.description}%0A`;
                 text += `%0A`;
             });
@@ -1019,7 +1090,7 @@
                 }
             });
 
-            let porcentajeGananciaPromedio = totalIngresoGlobalUSD > 0 ? ((totalGananciaUSD / (totalIngresoGlobalUSD - totalGananciaUSD)) * 100) : 0;
+        let porcentajeGananciaPromedio = totalIngresoGlobalUSD > 0 ? ((totalGananciaUSD / (totalIngresoGlobalUSD - totalGananciaUSD)) * 100) : 0;
             if (isNaN(porcentajeGananciaPromedio) || !isFinite(porcentajeGananciaPromedio)) porcentajeGananciaPromedio = 0;
 
             document.getElementById('cierreCobrado').textContent = `Bs. ${cobradoBs.toFixed(2)} ($${cobradoUSD.toFixed(2)})`;
@@ -1107,7 +1178,6 @@
                     <p class="text-xs"><strong>Cliente:</strong> ${clienteNombre}</p>
             `;
 
-            // PRODUCTOS VENDIDOS MEJORADOS (Solo precio y USD, quita Kg a menos que sea pesado/fraccionado)
             if (sale.items && sale.items.length > 0) {
                 htmlContent += `<div class="border-t dark:border-gray-700 pt-2"><strong class="text-xs text-gray-600 dark:text-gray-300 block mb-1.5">Productos vendidos:</strong><div class="space-y-1.5">`;
                 sale.items.forEach(i => {
@@ -1145,7 +1215,6 @@
                         </div>
                     </div>
 
-                    <!-- SECCIÓN DE ABONOS Y ACTUALIZACIÓN DE DEUDA -->
                     <div class="border-t dark:border-gray-700 pt-3 mt-2 bg-gray-50 dark:bg-gray-900 p-3 rounded-lg">
                         <p class="text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">💳 Control de Deuda y Abonos:</p>
                         <p class="text-[11px] text-gray-500 mb-2">Restante por pagar: <b class="text-red-500">Bs. ${restanteBs.toFixed(2)} ($${restanteUSD.toFixed(2)})</b></p>
@@ -1308,7 +1377,15 @@
                     document.getElementById('name').value = found.name;
                     document.getElementById('costUSD').value = found.costUSD || 0;
                     document.getElementById('priceUSD').value = found.priceUSD;
-                    document.getElementById('isWeighted').checked = found.isWeighted || false;
+                    
+                    if (found.fractionUnit === 'kg') {
+                        document.getElementById('unitKg').checked = true;
+                    } else if (found.fractionUnit === 'lt') {
+                        document.getElementById('unitLt').checked = true;
+                    } else {
+                        document.getElementById('unitNone').checked = true;
+                    }
+
                     document.getElementById('description').value = found.description;
                     calculateProfitMargin();
                     showToast('¡Producto encontrado en inventario!');
@@ -1333,8 +1410,18 @@
             document.getElementById('stock').value = p.stock;
             document.getElementById('costUSD').value = p.costUSD || '';
             document.getElementById('priceUSD').value = p.priceUSD;
-            document.getElementById('isWeighted').checked = p.isWeighted || false;
-            document.getElementById('priceUnitLabel').textContent = p.isWeighted ? 'por Kilo/Litro' : 'unidad';
+            
+            if (p.fractionUnit === 'kg') {
+                document.getElementById('unitKg').checked = true;
+                document.getElementById('priceUnitLabel').textContent = 'por Kilo (kg)';
+            } else if (p.fractionUnit === 'lt') {
+                document.getElementById('unitLt').checked = true;
+                document.getElementById('priceUnitLabel').textContent = 'por Litro (lt)';
+            } else {
+                document.getElementById('unitNone').checked = true;
+                document.getElementById('priceUnitLabel').textContent = 'unidad';
+            }
+
             document.getElementById('description').value = p.description || '';
             document.getElementById('formTitle').textContent = 'Editar Producto';
             document.getElementById('saveBtn').textContent = 'Actualizar Producto';
