@@ -920,64 +920,131 @@
             }
         };
 
-        window.sendCartWhatsApp = async function() {
-            if (cart.length === 0) return;
-            const cliente = document.getElementById('clientNameInput').value.trim() || 'Cliente General';
-            let totalGeneralUSD = 0;
-            let totalCostUSD = 0;
-            
-            let itemsDetail = cart.map(i => {
-                let mult = i.isWeighted ? i.qtyFraction : i.qty;
-                let sub = i.priceUSD * mult;
-                totalGeneralUSD += sub;
-                totalCostUSD += (i.costUSD || 0) * mult;
-                return { name: i.name, qty: i.isWeighted ? i.gramsTotal + 'g' : i.qty, priceUSD: i.priceUSD, subtotalUSD: sub.toFixed(2) };
-            });
+        window.sendCartWhatsApp = async function () {
+    if (!Array.isArray(cart) || cart.length === 0) return;
 
-            const now = new Date();
-            const fechaStr = now.toLocaleDateString('es-VE') + ' a las ' + now.toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit' });
-            const ordenId = 'OM-' + Math.random().toString(36).substring(2, 7).toUpperCase();
+    const clientInput = document.getElementById('clientNameInput');
+    const cliente = (clientInput?.value || '').trim() || 'Cliente General';
 
-            const nuevaVenta = {
-                userId: currentUser.id,
-                idOrden: ordenId,
-                name: `Pedido (${cart.length} productos)`,
-                cliente: cliente,
-                totalUSDOriginal: totalGeneralUSD.toFixed(2),
-                totalUSD: totalGeneralUSD.toFixed(2),
-                total: (totalGeneralUSD * rate1Value).toFixed(2),
-                costUSD: totalCostUSD.toFixed(2),
-                date: fechaStr,
-                timestamp: Date.now(),
-                items: itemsDetail,
-                pagado: false,
-                abonoUSD: 0
-            };
+    const formatMoneySafe = typeof formatMoney === 'function' ? formatMoney : (value) => Number(value || 0).toFixed(2);
+    const rate = Number(rate1Value || 1);
+    const current = currentUser || { id: null };
+    const shopName = storeName || 'Tienda';
 
-            await supabase.from('sales').insert([nuevaVenta]);
+    let totalGeneralUSD = 0;
+    let totalCostUSD = 0;
+
+    const itemsDetail = cart.map((i) => {
+        const isWeighted = Boolean(i.isWeighted);
+        const mult = Number(isWeighted ? (i.qtyFraction ?? i.qty ?? 0) : (i.qty ?? 0));
+        const priceUSD = Number(i.priceUSD ?? 0);
+        const costUSD = Number(i.costUSD ?? 0);
+        const subtotal = priceUSD * mult;
+
+        totalGeneralUSD += subtotal;
+        totalCostUSD += costUSD * mult;
+
+        return {
+            name: i.name || 'Producto',
+            qty: isWeighted ? `${i.gramsTotal ?? mult * 1000 ?? 0}g` : (i.qty ?? 0),
+            priceUSD,
+            subtotalUSD: subtotal
+        };
+    });
+
+    const now = new Date();
+    const fechaStr =
+        now.toLocaleDateString('es-VE') +
+        ' a las ' +
+        now.toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit' });
+
+    const ordenId =
+        'OM-' +
+        now.getTime().toString(36).toUpperCase() +
+        '-' +
+        Math.random().toString(36).substring(2, 6).toUpperCase();
+
+    const nuevaVenta = {
+        userId: current.id,
+        idOrden: ordenId,
+        name: `Pedido (${cart.length} productos)`,
+        cliente,
+        totalUSDOriginal: Number(totalGeneralUSD.toFixed(2)),
+        totalUSD: Number(totalGeneralUSD.toFixed(2)),
+        total: Number((totalGeneralUSD * rate).toFixed(2)),
+        costUSD: Number(totalCostUSD.toFixed(2)),
+        date: fechaStr,
+        timestamp: Date.now(),
+        items: itemsDetail.map((it) => ({
+            name: it.name,
+            qty: it.qty,
+            priceUSD: Number(it.priceUSD.toFixed(2)),
+            subtotalUSD: Number(it.subtotalUSD.toFixed(2))
+        })),
+        pagado: false,
+        abonoUSD: 0
+    };
+
+    try {
+        if (window.supabase && typeof window.supabase.from === 'function') {
+            const { data, error } = await supabase.from('sales').insert([nuevaVenta]).select();
+
+            if (error) {
+                console.error('Error al registrar venta en Supabase:', error);
+                alert('Error al guardar en Supabase: ' + (error.message || error));
+                return;
+            }
+
+            console.log('Venta registrada:', data);
+        } else {
+            console.warn('Supabase no está disponible, se omite el registro a la base de datos.');
+        }
+
+        if (typeof loadUserDataFromSupabase === 'function') {
             await loadUserDataFromSupabase();
+        }
 
-            let text = `🛒 *PEDIDO - ${storeName.toUpperCase()}*%0A🔖 Orden: *${ordenId}*%0A👤 Cliente: *${cliente}*%0A%0A`;
-            cart.forEach(i => {
-                let mult = i.isWeighted ? i.qtyFraction : i.qty;
-                text += `• *${i.name}* - ${formatMoney(i.priceUSD * mult)}%0A`;
-            });
-            text += `━━━━━━━━━━━━━━━━━━%0A✅ *TOTAL: ${formatMoney(totalGeneralUSD)}*%0A`;
+        let text = `🛒 *PEDIDO - ${shopName.toUpperCase()}*%0A🔖 Orden: *${ordenId}*%0A👤 Cliente: *${cliente}*%0A📅 ${fechaStr}%0A%0A`;
 
-            customPaymentMethods.forEach(p => {
+        cart.forEach((i) => {
+            const isWeighted = Boolean(i.isWeighted);
+            const mult = Number(isWeighted ? (i.qtyFraction ?? i.qty ?? 0) : (i.qty ?? 0));
+            const subtotal = Number((Number(i.priceUSD ?? 0) * mult).toFixed(2));
+            const qtyText = isWeighted ? `${i.gramsTotal ?? mult * 1000 ?? 0}g` : i.qty;
+            text += `• *${i.name || 'Producto'}* - ${qtyText} x ${formatMoneySafe(i.priceUSD ?? 0)} = ${formatMoneySafe(subtotal)}%0A`;
+        });
+
+        text += `━━━━━━━━━━━━━━━━━━%0A✅ *TOTAL: ${formatMoneySafe(totalGeneralUSD)} USD*%0A`;
+
+        if (Array.isArray(customPaymentMethods)) {
+            customPaymentMethods.forEach((p) => {
                 const chk = document.getElementById(`chk_pay_${p.id}`);
                 if (chk && chk.checked) {
-                    text += `%0A📱 *${p.flag} ${p.name}:*%0A`;
-                    p.details.split('\n').forEach(l => { text += `${l}%0A`; });
+                    text += `%0A📱 *${p.flag || ''} ${p.name || 'Pago'}:*%0A`;
+                    const details = String(p.details || '');
+                    if (details.trim()) {
+                        details.split('\n').forEach((line) => {
+                            text += `${line}%0A`;
+                        });
+                    }
                 }
             });
+        }
 
-            window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
-            cart = [];
-            renderCart();
-            document.getElementById('clientNameInput').value = '';
-            showToast('¡Pedido enviado y guardado!');
-        };
+        const encodedText = encodeURIComponent(text);
+        window.open(`https://api.whatsapp.com/send?text=${encodedText}`, '_blank');
+
+        cart = [];
+        renderCart();
+
+        if (clientInput) clientInput.value = '';
+        showToast('¡Pedido enviado y guardado!');
+
+    } catch (error) {
+        console.error('Error en sendCartWhatsApp:', error);
+        alert('Ocurrió un error al procesar el pedido: ' + (error.message || error));
+    }
+};
 
         window.toggleSalesHistoryModal = function() {
             filterOnlyPending = false;
