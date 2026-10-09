@@ -27,7 +27,7 @@
             <div class="text-center mb-6">
                 <i class="fas fa-store text-4xl text-blue-600 dark:text-blue-400 mb-2"></i>
                 <h2 class="text-2xl font-bold dark:text-white">Gestor de Mi Tienda</h2>
-                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Acceso seguro con control de suscripción anual</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Acceso seguro con control de suscripción mensual</p>
             </div>
             <div class="space-y-4">
                 <div>
@@ -40,8 +40,50 @@
                 </div>
                 <div id="authError" class="text-red-500 text-xs text-center font-semibold"></div>
                 <button id="loginBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg font-bold text-sm shadow transition">Iniciar Sesión</button>
-                <button id="registerBtn" class="w-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 py-2.5 rounded-lg font-semibold text-sm transition">Crear Cuenta Nueva (Requiere Aprobación)</button>
+                <button id="registerBtn" class="w-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 py-2.5 rounded-lg font-semibold text-sm transition">Crear Cuenta Nueva</button>
             </div>
+        </div>
+    </div>
+
+    <!-- PANTALLA DE SUSCRIPCIÓN PENDIENTE -->
+    <div id="subscriptionScreen" class="min-h-screen flex items-center justify-center p-4 hidden">
+        <div class="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-xl max-w-md w-full text-center border dark:border-gray-700">
+            <i class="fas fa-lock text-4xl text-amber-500 mb-3"></i>
+            <h2 class="text-2xl font-bold dark:text-white mb-2">Activación de Suscripción</h2>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">
+                Tu cuenta (<span id="subUserEmail" class="font-semibold text-gray-700 dark:text-gray-300"></span>) tiene el Código de Cliente: <b id="subUserCode" class="text-blue-600 dark:text-blue-400 font-mono">...</b>. Realiza el pago de tu suscripción mensual para activar el acceso completo.
+            </p>
+            
+            <div class="bg-gray-50 dark:bg-gray-900 p-4 rounded-xl text-left text-xs mb-4 border dark:border-gray-700 space-y-2">
+                <p class="font-bold text-gray-700 dark:text-gray-300 mb-1">📱 Métodos de pago disponibles:</p>
+                
+                <!-- Binance Pay -->
+                <div class="border-b dark:border-gray-700 pb-1.5">
+                    <p class="font-semibold text-amber-600 dark:text-amber-400">🟡 Binance Pay:</p>
+                    <p><b>Pay ID: 190696956</b></p>
+                </div>
+
+                <!-- Pago Móvil -->
+                <div class="border-b dark:border-gray-700 pb-1.5 pt-1">
+                    <p class="font-semibold text-blue-600 dark:text-blue-400">🇻🇪 Pago Móvil:</p>
+                    <p id="adminPmBanco">Banco: Banco de Venezuela</p>
+                    <p id="adminPmTelefono">Teléfono: 0412-0000000</p>
+                    <p id="adminPmCedula">Cédula: V-00000000</p>
+                </div>
+
+                <!-- Zinli -->
+                <div class="pt-1">
+                    <p class="font-semibold text-indigo-600 dark:text-indigo-400">💳 Zinli:</p>
+                    <p id="adminZinli">Correo: tucorreo@zinli.com</p>
+                </div>
+
+                <p class="text-emerald-600 font-bold pt-2 text-center">💰 Monto: Suscripción Mensual</p>
+            </div>
+
+            <button onclick="enviarComprobanteWhatsApp()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-lg font-bold text-sm shadow transition flex items-center justify-center gap-2 mb-3">
+                <i class="fab fa-whatsapp text-lg"></i> Enviar Comprobante por WhatsApp
+            </button>
+            <button onclick="logoutUser()" class="text-xs text-red-500 hover:underline">Cerrar sesión</button>
         </div>
     </div>
 
@@ -169,23 +211,23 @@
                 <input type="hidden" id="editDocId" value="">
                 <div>
                     <label for="name" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Nombre del Producto</label>
-                    <input type="text" id="name" required class="w-full border dark:border-gray-700 dark:bg-gray-900 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <input type="text" id="name" required placeholder="Ej: Queso Paisa / Harina PAN" class="w-full border dark:border-gray-700 dark:bg-gray-900 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
                 </div>
                 <div>
                     <label for="barcode" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Código de Barras / SKU</label>
-                    <input type="text" id="barcode" placeholder="Opcional" class="w-full border dark:border-gray-700 dark:bg-gray-900 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <input type="text" id="barcode" placeholder="Ej: 7591012345678 (Opcional)" class="w-full border dark:border-gray-700 dark:bg-gray-900 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
                 </div>
                 <div>
-                    <label for="stock" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Inventario (Cantidad / Kilos / Litros)</label>
-                    <input type="number" id="stock" step="0.01" min="0" value="0" required class="w-full border dark:border-gray-700 dark:bg-gray-900 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <label for="stock" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Inventario Inicial</label>
+                    <input type="number" id="stock" step="0.01" min="0" value="0" required placeholder="Ej: 15 (Unidades, Kg o Litros)" class="w-full border dark:border-gray-700 dark:bg-gray-900 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
                 </div>
                 <div>
                     <label for="costUSD" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Costo Base ($)</label>
-                    <input type="number" id="costUSD" step="0.01" min="0" placeholder="Precio de compra" class="w-full border dark:border-gray-700 dark:bg-gray-900 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <input type="number" id="costUSD" step="0.01" min="0" placeholder="Ej: 1.50 (Precio de compra)" class="w-full border dark:border-gray-700 dark:bg-gray-900 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
                 </div>
                 <div>
                     <label for="priceUSD" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Precio de Venta ($ <span id="priceUnitLabel">unidad</span>)</label>
-                    <input type="number" id="priceUSD" step="0.01" min="0" required class="w-full border dark:border-gray-700 dark:bg-gray-900 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <input type="number" id="priceUSD" step="0.01" min="0" required placeholder="Ej: 2.20 (Precio al público)" class="w-full border dark:border-gray-700 dark:bg-gray-900 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Porcentaje de Ganancia</label>
@@ -194,46 +236,55 @@
                     </div>
                 </div>
 
-                <!-- SELECTOR INDEPENDIENTE DE KILOS O LITROS -->
+                <!-- SELECTOR INDEPENDIENTE DE TIPO DE VENTA: KILOS O LITROS -->
                 <div class="md:col-span-2 lg:col-span-3 bg-blue-50 dark:bg-gray-900 p-4 rounded-lg border border-blue-200 dark:border-gray-700">
-                    <label class="block text-sm font-bold text-gray-800 dark:text-gray-200 mb-2">⚖️ ¿Cómo se vende este producto fraccionado?</label>
-                    <div class="flex flex-wrap gap-6">
-                        <label class="flex items-center space-x-2 cursor-pointer">
+                    <label class="block text-sm font-bold text-gray-800 dark:text-gray-200 mb-2">⚖️ Tipo de venta (Selecciona una casilla independiente):</label>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <label class="flex items-center space-x-2 bg-white dark:bg-gray-800 p-3 rounded-lg border dark:border-gray-700 cursor-pointer">
                             <input type="radio" id="unitNone" name="fractionUnit" value="none" checked class="text-blue-600 focus:ring-blue-500 w-4 h-4">
-                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Unidad Normal (Por piezas)</span>
+                            <div>
+                                <span class="text-xs font-bold block text-gray-700 dark:text-gray-300">Unidad Normal</span>
+                                <span class="text-[10px] text-gray-400 block">Ej: Refrescos, Harina, Snacks</span>
+                            </div>
                         </label>
-                        <label class="flex items-center space-x-2 cursor-pointer">
+                        <label class="flex items-center space-x-2 bg-white dark:bg-gray-800 p-3 rounded-lg border dark:border-gray-700 cursor-pointer">
                             <input type="radio" id="unitKg" name="fractionUnit" value="kg" class="text-blue-600 focus:ring-blue-500 w-4 h-4">
-                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Por Kilos (ej. Queso, Carne)</span>
+                            <div>
+                                <span class="text-xs font-bold block text-amber-600">Casilla Kilos (kg)</span>
+                                <span class="text-[10px] text-gray-400 block">Ej: Queso, Carne, Jamón</span>
+                            </div>
                         </label>
-                        <label class="flex items-center space-x-2 cursor-pointer">
+                        <label class="flex items-center space-x-2 bg-white dark:bg-gray-800 p-3 rounded-lg border dark:border-gray-700 cursor-pointer">
                             <input type="radio" id="unitLt" name="fractionUnit" value="lt" class="text-blue-600 focus:ring-blue-500 w-4 h-4">
-                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Por Litros (ej. Cloro, Aceite)</span>
+                            <div>
+                                <span class="text-xs font-bold block text-cyan-600">Casilla Litros (lt)</span>
+                                <span class="text-[10px] text-gray-400 block">Ej: Cloro, Aceite a granel</span>
+                            </div>
                         </label>
                     </div>
                 </div>
 
                 <div class="md:col-span-2">
-                    <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Imagen del Producto (Galería o Cámara)</label>
+                    <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Imagen del Producto (Opcional)</label>
                     <div class="flex items-center gap-3">
-                        <label for="imageFile" class="cursor-pointer bg-blue-50 dark:bg-gray-700 hover:bg-blue-100 text-blue-600 dark:text-blue-300 border border-blue-200 dark:border-gray-600 px-4 py-2 rounded-lg flex items-center gap-2">
-                            <i class="fas fa-camera"></i> Seleccionar o Tomar Foto
+                        <label for="imageFile" class="cursor-pointer bg-blue-50 dark:bg-gray-700 hover:bg-blue-100 text-blue-600 dark:text-blue-300 border border-blue-200 dark:border-gray-600 px-4 py-2 rounded-lg flex items-center gap-2 text-sm">
+                            <i class="fas fa-camera"></i> Seleccionar Imagen
                         </label>
                         <input type="file" id="imageFile" accept="image/*" class="hidden">
-                        <span id="fileName" class="text-sm text-gray-400 truncate">Ninguna imagen seleccionada</span>
+                        <span id="fileName" class="text-xs text-gray-400 truncate">Ninguna imagen seleccionada (Opcional)</span>
                     </div>
                 </div>
                 <div class="flex items-center justify-center">
                     <div id="imagePreviewContainer" class="w-28 h-28 border dark:border-gray-700 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-900 flex items-center justify-center">
-                        <span class="text-xs text-gray-400">Sin vista previa</span>
+                        <span class="text-xs text-gray-400">Sin foto</span>
                     </div>
                 </div>
                 <div class="md:col-span-2 lg:col-span-3">
-                    <label for="description" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Descripción</label>
-                    <textarea id="description" rows="2" required class="w-full border dark:border-gray-700 dark:bg-gray-900 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                    <label for="description" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Descripción (Opcional)</label>
+                    <textarea id="description" rows="2" placeholder="Ej: Presentación de 1kg, producto fresco..." class="w-full border dark:border-gray-700 dark:bg-gray-900 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"></textarea>
                 </div>
                 <div class="md:col-span-2 lg:col-span-3 text-right">
-                    <button type="submit" id="saveBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition font-semibold">Guardar Producto</button>
+                    <button type="submit" id="saveBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition font-semibold text-sm">Guardar Producto</button>
                 </div>
             </form>
         </section>
@@ -277,6 +328,18 @@
                         <span class="font-bold text-indigo-700 dark:text-indigo-400 uppercase text-[10px]">📊 % Ganancia:</span>
                         <h4 id="cierrePorcentajeGanancia" class="text-xs font-bold text-indigo-600">0.00%</h4>
                     </div>
+                </div>
+            </div>
+
+            <!-- FILTRO DE HISTORIAL POR FECHA 📅 -->
+            <div class="bg-gray-100 dark:bg-gray-900 p-2.5 rounded-lg mb-3 flex flex-wrap items-center justify-between gap-2 text-xs border dark:border-gray-700">
+                <div class="flex items-center gap-2">
+                    <span class="font-bold text-gray-700 dark:text-gray-300"><i class="fas fa-calendar-alt text-blue-500 mr-1"></i> Buscar por Fecha:</span>
+                    <input type="date" id="filterDateInput" class="border dark:border-gray-700 dark:bg-gray-800 rounded px-2 py-1 text-xs focus:outline-none">
+                </div>
+                <div class="flex gap-1.5">
+                    <button onclick="applyDateFilter()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded font-bold transition">Filtrar</button>
+                    <button onclick="clearDateFilter()" class="bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 text-gray-700 dark:text-gray-200 px-2.5 py-1 rounded">Ver todo</button>
                 </div>
             </div>
 
@@ -325,6 +388,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, collection, addDoc, getDocs, doc, setDoc, getDoc, updateDoc, deleteDoc, query, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAryObeeWoCFkuJ1Vb91YN8G8WAKcxaFto",
@@ -339,6 +403,14 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
+        const storage = getStorage(app);
+
+        const adminPaymentData = {
+            pagoMovil: { banco: 'Banco de Venezuela', telefono: '0412-0000000', cedula: 'V-00000000' },
+            zinli: 'tucorreo@zinli.com',
+            binancePayId: '190696956',
+            whatsappAdmin: '584120000000'
+        };
 
         let currentUser = null;
         let products = [];
@@ -347,40 +419,50 @@
         let globalExchangeRate = 36.50;
         let storeName = 'Mi Tienda';
         let pagoMovilData = { banco: 'Banco de Venezuela', telefono: '0412-0000000', cedula: 'V-00000000' };
-        let currentImageBase64 = '';
+        let imageFileToUpload = null;
         let isDarkMode = localStorage.getItem('isDarkMode') === 'true';
         let filterOnlyPending = false;
+        let selectedFilterDate = '';
 
         applyTheme();
+        cargarDatosPagoAdmin();
 
-        // CONTROL DE SESIÓN Y VERIFICACIÓN DE APROBACIÓN
+        function cargarDatosPagoAdmin() {
+            document.getElementById('adminPmBanco').textContent = `Banco: ${adminPaymentData.pagoMovil.banco}`;
+            document.getElementById('adminPmTelefono').textContent = `Teléfono: ${adminPaymentData.pagoMovil.telefono}`;
+            document.getElementById('adminPmCedula').textContent = `Cédula: ${adminPaymentData.pagoMovil.cedula}`;
+            document.getElementById('adminZinli').textContent = `Correo: ${adminPaymentData.zinli}`;
+        }
+
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 try {
+                    currentUser = user;
                     const userDocRef = doc(db, "users", user.uid);
                     const userSnap = await getDoc(userDocRef);
 
-                    let isApproved = false;
+                    let isSubscribed = false;
                     if (userSnap.exists()) {
                         const userData = userSnap.data();
-                        if (userData.status === 'approved') {
-                            isApproved = true;
+                        if (userData.subscriptionActive === true) {
+                            isSubscribed = true;
                         }
                     } else {
-                        await setDoc(userDocRef, { email: user.email, status: 'approved', createdAt: new Date() });
-                        isApproved = true;
+                        await setDoc(userDocRef, { email: user.email, subscriptionActive: false, createdAt: new Date() });
+                        isSubscribed = false;
                     }
 
-                    if (!isApproved) {
-                        await signOut(auth);
-                        alert('⏳ Tu cuenta está registrada pero pendiente de aprobación por el administrador (Suscripción anual). Serás notificado cuando se active.');
-                        document.getElementById('authScreen').classList.remove('hidden');
+                    document.getElementById('authScreen').classList.add('hidden');
+
+                    if (!isSubscribed) {
                         document.getElementById('mainAppContainer').classList.add('hidden');
+                        document.getElementById('subscriptionScreen').classList.remove('hidden');
+                        document.getElementById('subUserEmail').textContent = user.email;
+                        document.getElementById('subUserCode').textContent = user.uid.substring(0, 6).toUpperCase();
                         return;
                     }
 
-                    currentUser = user;
-                    document.getElementById('authScreen').classList.add('hidden');
+                    document.getElementById('subscriptionScreen').classList.add('hidden');
                     document.getElementById('mainAppContainer').classList.remove('hidden');
                     document.getElementById('userEmailDisplay').textContent = user.email;
                     
@@ -397,12 +479,12 @@
                     await loadUserDataFromFirebase();
                 } catch (err) {
                     console.error("Error verificando estatus:", err);
-                    signOut(auth);
                 }
             } else {
                 currentUser = null;
                 document.getElementById('authScreen').classList.remove('hidden');
                 document.getElementById('mainAppContainer').classList.add('hidden');
+                document.getElementById('subscriptionScreen').classList.add('hidden');
             }
         });
 
@@ -418,7 +500,6 @@
             }
         });
 
-        // REGISTRO CON ESTADO PENDIENTE
         document.getElementById('registerBtn').addEventListener('click', async () => {
             const email = document.getElementById('authEmail').value.trim();
             const pass = document.getElementById('authPassword').value.trim();
@@ -429,16 +510,22 @@
                 
                 await setDoc(doc(db, "users", cred.user.uid), {
                     email: email,
-                    status: 'pending',
+                    subscriptionActive: false,
                     createdAt: new Date()
                 });
-
-                await signOut(auth);
-                alert('🎉 ¡Cuenta creada con éxito! Tu acceso está pendiente de aprobación por suscripción anual. Por favor comunícate con el administrador.');
             } catch (e) {
                 errEl.textContent = 'Error al registrarse: ' + e.message;
             }
         });
+
+        window.enviarComprobanteWhatsApp = function() {
+            if (!currentUser) return;
+            const emailUser = currentUser.email;
+            const codigoUnico = currentUser.uid.substring(0, 6).toUpperCase();
+            
+            const texto = `Hola! Acabo de realizar el pago de mi suscripción mensual (Binance Pay ID: 190696956).%0A%0A📧 Correo: *${emailUser}*%0A🔑 Código de Cliente: *${codigoUnico}*%0A%0AAdjunto mi comprobante para la activación.`;
+            window.open(`https://api.whatsapp.com/send?phone=${adminPaymentData.whatsappAdmin}&text=${texto}`, '_blank');
+        };
 
         window.logoutUser = () => { signOut(auth); };
 
@@ -579,11 +666,11 @@
         imageFile.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) {
+                imageFileToUpload = file;
                 fileName.textContent = file.name;
                 const reader = new FileReader();
                 reader.onload = (uploadEvent) => {
-                    currentImageBase64 = uploadEvent.target.result;
-                    imagePreviewContainer.innerHTML = `<img src="${currentImageBase64}" class="w-full h-full object-cover">`;
+                    imagePreviewContainer.innerHTML = `<img src="${uploadEvent.target.result}" class="w-full h-full object-cover">`;
                 };
                 reader.readAsDataURL(file);
             }
@@ -593,10 +680,15 @@
             e.preventDefault();
             const docId = document.getElementById('editDocId').value;
             
-            let finalImage = currentImageBase64;
-            if (!finalImage && docId) {
+            let finalImageURL = '';
+            if (imageFileToUpload) {
+                showToast('Subiendo imagen a Storage...');
+                const storageRef = ref(storage, `productos/${currentUser.uid}/${Date.now()}_${imageFileToUpload.name}`);
+                const snapshot = await uploadBytes(storageRef, imageFileToUpload);
+                finalImageURL = await getDownloadURL(snapshot.ref);
+            } else if (docId) {
                 const existing = products.find(p => p.id === docId);
-                if (existing) finalImage = existing.image;
+                if (existing) finalImageURL = existing.image;
             }
 
             const selectedUnit = document.querySelector('input[name="fractionUnit"]:checked').value;
@@ -610,7 +702,7 @@
                 priceUSD: parseFloat(document.getElementById('priceUSD').value) || 0,
                 fractionUnit: selectedUnit,
                 description: document.getElementById('description').value.trim(),
-                image: finalImage || ''
+                image: finalImageURL || ''
             };
 
             try {
@@ -626,12 +718,12 @@
                     products.push({ id: docRef.id, ...productData });
                 }
 
-            productForm.reset();
+                productForm.reset();
                 document.getElementById('unitNone').checked = true;
                 document.getElementById('priceUnitLabel').textContent = 'unidad';
-                currentImageBase64 = '';
-                fileName.textContent = 'Ninguna imagen seleccionada';
-                imagePreviewContainer.innerHTML = '<span class="text-xs text-gray-400">Sin vista previa</span>';
+                imageFileToUpload = null;
+                fileName.textContent = 'Ninguna imagen seleccionada (Opcional)';
+                imagePreviewContainer.innerHTML = '<span class="text-xs text-gray-400">Sin foto</span>';
                 calculateProfitMargin();
                 renderProducts();
                 showToast('¡Producto guardado en la nube con éxito!');
@@ -663,20 +755,36 @@
                 card.className = 'bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden flex flex-col justify-between';
                 
                 let selectorHtml = '';
-                const isFrac = p.fractionUnit && p.fractionUnit !== 'none';
+                const isKg = p.fractionUnit === 'kg';
+                const isLt = p.fractionUnit === 'lt';
                 
-                if (isFrac) {
-                    const unitAbbr = p.fractionUnit === 'kg' ? 'g' : 'ml';
+                if (isKg) {
                     selectorHtml = `
                         <div class="mb-3 bg-amber-50 dark:bg-gray-900 p-2.5 rounded-lg border border-amber-200 dark:border-gray-700">
                             <div class="flex justify-between items-center mb-1">
-                                <span class="text-xs font-bold text-amber-700 dark:text-amber-400"><i class="fas fa-weight-scale mr-1"></i>Venta por ${p.fractionUnit.toUpperCase()}:</span>
-                                <span class="text-[10px] text-gray-500">Ej: 500 (${unitAbbr})</span>
+                                <span class="text-xs font-bold text-amber-700 dark:text-amber-400"><i class="fas fa-weight-scale mr-1"></i>Venta por Kilos (g):</span>
+                                <span class="text-[10px] text-gray-500">Ej: 500 (g)</span>
                             </div>
                             <div class="flex items-center gap-2">
                                 <input type="number" id="gramsVal_${p.id}" value="250" step="10" min="1" class="w-full text-xs font-bold px-2 py-1.5 border dark:border-gray-700 dark:bg-gray-800 rounded text-center focus:outline-none">
-                                <span class="text-xs font-semibold text-gray-600 dark:text-gray-400">${unitAbbr}</span>
+                                <span class="text-xs font-semibold text-gray-600 dark:text-gray-400">g</span>
                                 <button type="button" onclick="addWeightedToCart('${p.id}')" class="bg-amber-600 hover:bg-amber-700 text-white text-xs px-3 py-1.5 rounded font-bold shadow whitespace-nowrap">
+                                    <i class="fas fa-cart-plus"></i> Añadir
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                } else if (isLt) {
+                    selectorHtml = `
+                        <div class="mb-3 bg-cyan-50 dark:bg-gray-900 p-2.5 rounded-lg border border-cyan-200 dark:border-gray-700">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="text-xs font-bold text-cyan-700 dark:text-cyan-400"><i class="fas fa-wine-bottle mr-1"></i>Venta por Litros (ml):</span>
+                                <span class="text-[10px] text-gray-500">Ej: 500 (ml)</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <input type="number" id="gramsVal_${p.id}" value="250" step="10" min="1" class="w-full text-xs font-bold px-2 py-1.5 border dark:border-gray-700 dark:bg-gray-800 rounded text-center focus:outline-none">
+                                <span class="text-xs font-semibold text-gray-600 dark:text-gray-400">ml</span>
+                                <button type="button" onclick="addWeightedToCart('${p.id}')" class="bg-cyan-600 hover:bg-cyan-700 text-white text-xs px-3 py-1.5 rounded font-bold shadow whitespace-nowrap">
                                     <i class="fas fa-cart-plus"></i> Añadir
                                 </button>
                             </div>
@@ -697,7 +805,9 @@
                     `;
                 }
 
-                const badgeTag = isFrac ? `<span class="bg-amber-100 text-amber-800 text-[10px] px-2 py-0.5 rounded font-bold">${p.fractionUnit.toUpperCase()}</span>` : '';
+                let badgeTag = '';
+                if (isKg) badgeTag = `<span class="bg-amber-100 text-amber-800 text-[10px] px-2 py-0.5 rounded font-bold">KILOS</span>`;
+                if (isLt) badgeTag = `<span class="bg-cyan-100 text-cyan-800 text-[10px] px-2 py-0.5 rounded font-bold">LITROS</span>`;
 
                 card.innerHTML = `
                     <div>
@@ -708,17 +818,17 @@
                                 ${badgeTag}
                             </div>
                             ${p.barcode ? `<p class="text-xs text-gray-400 mb-1"><i class="fas fa-barcode"></i> SKU: ${p.barcode}</p>` : ''}
-                            <p class="text-gray-600 dark:text-gray-300 text-sm line-clamp-2 mb-2">📝 ${p.description || ''}</p>
+                            <p class="text-gray-600 dark:text-gray-300 text-sm line-clamp-2 mb-2">📝 ${p.description || 'Sin descripción'}</p>
                             
                             <div class="flex items-center justify-between bg-gray-50 dark:bg-gray-900 p-2 rounded-lg mb-3 border dark:border-gray-700">
-                                <span class="text-xs text-gray-500 dark:text-gray-400 font-medium">Inventario: <b>${p.stock} ${isFrac ? (p.fractionUnit === 'kg' ? 'Kg' : 'Litros') : 'unid.'}</b></span>
+                                <span class="text-xs text-gray-500 dark:text-gray-400 font-medium">Inventario: <b>${p.stock} ${isKg ? 'Kg' : (isLt ? 'Litros' : 'unid.')}</b></span>
                                 <div class="flex items-center gap-1">
-                                    <button type="button" onclick="updateStock('${p.id}', ${isFrac ? '-0.25' : '-1'})" class="bg-red-100 dark:bg-red-900 hover:bg-red-200 text-red-600 dark:text-red-300 w-6 h-6 rounded font-bold flex items-center justify-center text-xs">-</button>
-                                    <button type="button" onclick="updateStock('${p.id}', ${isFrac ? '0.25' : '1'})" class="bg-green-100 dark:bg-green-900 hover:bg-green-200 text-green-600 dark:text-green-300 w-6 h-6 rounded font-bold flex items-center justify-center text-xs">+</button>
+                                    <button type="button" onclick="updateStock('${p.id}', -1)" class="bg-red-100 dark:bg-red-900 hover:bg-red-200 text-red-600 dark:text-red-300 w-6 h-6 rounded font-bold flex items-center justify-center text-xs">-</button>
+                                    <button type="button" onclick="updateStock('${p.id}', 1)" class="bg-green-100 dark:bg-green-900 hover:bg-green-200 text-green-600 dark:text-green-300 w-6 h-6 rounded font-bold flex items-center justify-center text-xs">+</button>
                                 </div>
                             </div>
 
-                            <p class="text-green-600 dark:text-green-400 font-bold text-base mb-3">💰 Bs. ${totalBs} <span class="text-xs text-gray-400">($${p.priceUSD.toFixed(2)} ${isFrac ? '/' + p.fractionUnit : ''})</span></p>
+                            <p class="text-green-600 dark:text-green-400 font-bold text-base mb-3">💰 Bs. ${totalBs} <span class="text-xs text-gray-400">($${p.priceUSD.toFixed(2)} ${isKg ? '/kg' : (isLt ? '/lt' : '')})</span></p>
                             
                             ${selectorHtml}
                         </div>
@@ -794,7 +904,7 @@
 
             const unitLabelCart = p.fractionUnit === 'kg' ? 'g' : 'ml';
             const customName = `${p.name} (${grams}${unitLabelCart})`;
-            const existingIndex = cart.findIndex(item => item.productId === id && item.customName === customName);
+            const existingIndex = cart.findIndex(item => item.productId === id && item.name === customName);
             
             if (existingIndex > -1) {
                 cart[existingIndex].qtyFraction += fraction;
@@ -913,6 +1023,7 @@
 
             const now = new Date();
             const fechaActual = now.toLocaleDateString('es-VE');
+            const fechaIso = now.toISOString().split('T')[0]; // Formato YYYY-MM-DD para filtros
             const horaActual = now.toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit' });
             const numeroOrden = 'OM-' + Math.random().toString(36).substring(2, 7).toUpperCase();
 
@@ -948,7 +1059,7 @@
                     subtotalUSD: subtotalUSD.toFixed(2)
                 });
 
-            text += `• *${item.name}*%0A`;
+                text += `• *${item.name}*%0A`;
                 text += `  Subtotal: *${subtotalBs.toFixed(2)} Bs* ($${subtotalUSD.toFixed(2)})%0A`;
                 if (item.description) text += `  📝 ${item.description}%0A`;
                 text += `%0A`;
@@ -985,6 +1096,7 @@
                 total: totalGeneralBs.toFixed(2),
                 costUSD: totalCostUSD.toFixed(2),
                 date: `${fechaActual} a las ${horaActual}`,
+                dateIso: fechaIso,
                 timestamp: Date.now(),
                 items: itemsDetail,
                 pagado: false,
@@ -1015,9 +1127,12 @@
 
             products.forEach((p, idx) => {
                 const totalBs = (p.priceUSD * globalExchangeRate).toFixed(2);
-                const isFrac = p.fractionUnit && p.fractionUnit !== 'none';
-                text += `${idx + 1}. *${p.name}* ${isFrac ? '(' + p.fractionUnit.toUpperCase() + ')' : ''}%0A`;
-                text += `   💰 Precio: *${totalBs} Bs* ($${p.priceUSD.toFixed(2)}${isFrac ? '/' + p.fractionUnit : ''})%0A`;
+                let unitStr = '';
+                if (p.fractionUnit === 'kg') unitStr = '/kg';
+                if (p.fractionUnit === 'lt') unitStr = '/lt';
+
+                text += `${idx + 1}. *${p.name}* ${p.fractionUnit !== 'none' ? '(' + p.fractionUnit.toUpperCase() + ')' : ''}%0A`;
+                text += `   💰 Precio: *${totalBs} Bs* ($${p.priceUSD.toFixed(2)}${unitStr})%0A`;
                 if (p.description) text += `   📝 ${p.description}%0A`;
                 text += `%0A`;
             });
@@ -1035,6 +1150,8 @@
 
         window.toggleSalesHistoryModal = function() {
             filterOnlyPending = false;
+            selectedFilterDate = '';
+            document.getElementById('filterDateInput').value = '';
             const modal = document.getElementById('salesModal');
             modal.classList.toggle('hidden');
             if (!modal.classList.contains('hidden')) {
@@ -1053,6 +1170,24 @@
                 btn.innerHTML = `<i class="fas fa-filter mr-1"></i>Ver pendientes`;
             }
             renderSalesHistory();
+        };
+
+        window.applyDateFilter = function() {
+            const val = document.getElementById('filterDateInput').value;
+            if (!val) {
+                alert('Por favor selecciona una fecha');
+                return;
+            }
+            selectedFilterDate = val;
+            renderSalesHistory();
+            showToast(`Filtrando ventas del: ${val}`);
+        };
+
+        window.clearDateFilter = function() {
+            selectedFilterDate = '';
+            document.getElementById('filterDateInput').value = '';
+            renderSalesHistory();
+            showToast('Mostrando todo el historial');
         };
 
         function renderSalesHistory() {
@@ -1090,7 +1225,7 @@
                 }
             });
 
-        let porcentajeGananciaPromedio = totalIngresoGlobalUSD > 0 ? ((totalGananciaUSD / (totalIngresoGlobalUSD - totalGananciaUSD)) * 100) : 0;
+            let porcentajeGananciaPromedio = totalIngresoGlobalUSD > 0 ? ((totalGananciaUSD / (totalIngresoGlobalUSD - totalGananciaUSD)) * 100) : 0;
             if (isNaN(porcentajeGananciaPromedio) || !isFinite(porcentajeGananciaPromedio)) porcentajeGananciaPromedio = 0;
 
             document.getElementById('cierreCobrado').textContent = `Bs. ${cobradoBs.toFixed(2)} ($${cobradoUSD.toFixed(2)})`;
@@ -1098,10 +1233,18 @@
             document.getElementById('cierreGananciaNeta').textContent = `Bs. ${(totalGananciaUSD * globalExchangeRate).toFixed(2)} ($${totalGananciaUSD.toFixed(2)})`;
             document.getElementById('cierrePorcentajeGanancia').textContent = `${porcentajeGananciaPromedio.toFixed(2)}%`;
 
-            const listToRender = filterOnlyPending ? salesHistory.filter(s => !s.pagado && ((parseFloat(s.totalUSDOriginal || s.totalUSD || 0) - parseFloat(s.abonoUSD || 0)) > 0.01)) : salesHistory;
+            let listToRender = salesHistory;
+
+            if (filterOnlyPending) {
+                listToRender = listToRender.filter(s => !s.pagado && ((parseFloat(s.totalUSDOriginal || s.totalUSD || 0) - parseFloat(s.abonoUSD || 0)) > 0.01));
+            }
+
+            if (selectedFilterDate) {
+                listToRender = listToRender.filter(s => s.dateIso === selectedFilterDate);
+            }
 
             if (listToRender.length === 0) {
-                container.innerHTML = '<p class="text-gray-400 text-center py-6 text-xs">No hay ventas registradas con este filtro.</p>';
+                container.innerHTML = '<p class="text-gray-400 text-center py-6 text-xs">No hay ventas registradas con los filtros seleccionados.</p>';
                 return;
             }
 
@@ -1112,7 +1255,6 @@
                 const pagadoTotal = sale.pagado === true;
                 const abono = parseFloat(sale.abonoUSD || 0);
                 const originalUSD = parseFloat(sale.totalUSDOriginal || sale.totalUSD || 0);
-                const restanteUSD = originalUSD - abono;
 
                 let colorPunto = '#dc3545';
                 let textoEstado = 'Pendiente';
@@ -1427,13 +1569,13 @@
             document.getElementById('saveBtn').textContent = 'Actualizar Producto';
             
             calculateProfitMargin();
-            currentImageBase64 = ''; 
+            imageFileToUpload = null; 
             if (p.image) {
                 imagePreviewContainer.innerHTML = `<img src="${p.image}" class="w-full h-full object-cover">`;
                 fileName.textContent = 'Imagen actual cargada';
             } else {
-                imagePreviewContainer.innerHTML = '<span class="text-xs text-gray-400">Sin vista previa</span>';
-                fileName.textContent = 'Ninguna imagen seleccionada';
+                imagePreviewContainer.innerHTML = '<span class="text-xs text-gray-400">Sin foto</span>';
+                fileName.textContent = 'Ninguna imagen seleccionada (Opcional)';
             }
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
@@ -1457,3 +1599,4 @@
     </script>
 </body>
 </html>
+               
