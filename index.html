@@ -88,6 +88,7 @@
             <div class="mt-4 flex flex-wrap justify-center gap-3">
                 <button onclick="sendCatalogWhatsApp()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1 rounded-md text-sm font-semibold shadow"><i class="fab fa-whatsapp mr-1"></i> Enviar Catálogo</button>
                 <button onclick="toggleSalesHistoryModal()" class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded-md text-sm"><i class="fas fa-chart-line mr-2"></i>Historial de Ventas / Cierre</button>
+                <button onclick="togglePendingCartsModal()" class="bg-amber-600 hover:bg-amber-700 text-white px-3 py-1 rounded-md text-sm"><i class="fas fa-clock mr-2"></i>Carritos Pendientes (<span id="pendingCartsCountBadge">0</span>)</button>
             </div>
         </header>
 
@@ -107,23 +108,23 @@
             <div class="flex flex-col md:flex-row justify-between items-center gap-4 border-b border-blue-400 pb-3 mb-3">
                 <div>
                     <h3 class="text-lg font-bold flex items-center gap-2"><i class="fas fa-shopping-cart"></i> Carrito de Compras Actual</h3>
-                    <p class="text-xs text-blue-100">Productos seleccionados para el pedido</p>
+                    <p class="text-xs text-blue-100">Productos seleccionados por el cliente para un pedido consolidado</p>
                 </div>
                 <div class="flex items-center gap-3">
-                    <span id="cartTotalBadge" class="bg-white text-blue-700 px-4 py-1.5 rounded-full font-bold text-sm shadow">Total: 0.00</span>
+                    <span id="cartTotalBadge" class="bg-white text-blue-700 px-4 py-1.5 rounded-full font-bold text-sm shadow">Total: $0.00</span>
                     <button onclick="clearCart()" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold"><i class="fas fa-trash mr-1"></i> Vaciar Carrito</button>
                 </div>
             </div>
             <div id="cartItemsContainer" class="space-y-2 mb-4 max-h-48 overflow-y-auto pr-2"></div>
-            <div class="flex flex-col md:flex-row items-center justify-between gap-3 pt-2 border-t border-blue-400">
-                <div class="flex flex-wrap items-center gap-3 text-xs w-full md:w-auto" id="cartPaymentCheckboxesContainer"></div>
-                <div class="flex flex-wrap items-center gap-2 w-full md:w-auto justify-end">
-                    <input type="text" id="clientNameInput" placeholder="Nombre del cliente..." class="text-gray-800 text-xs px-3 py-2 rounded-lg border-0 focus:outline-none focus:ring-2 focus:ring-blue-300 w-full sm:w-44">
-                    <button onclick="guardarCarritoEnHistorialManual()" class="bg-amber-500 hover:bg-amber-600 text-white px-3 py-2.5 rounded-xl font-bold text-xs flex items-center gap-1.5 shadow transition whitespace-nowrap" title="Guarda en caja sin abrir WhatsApp">
-                        <i class="fas fa-save"></i> Guardar en Historial
+            <div class="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-blue-400">
+                <div class="flex flex-wrap items-center gap-3 text-xs" id="cartPaymentCheckboxesContainer"></div>
+                <div class="flex flex-wrap items-center gap-2 w-full md:w-auto mt-2 md:mt-0">
+                    <input type="text" id="clientNameInput" placeholder="Nombre del cliente..." class="text-gray-800 text-xs px-3 py-2 rounded-lg border-0 focus:outline-none focus:ring-2 focus:ring-blue-300 w-full md:w-44">
+                    <button onclick="saveCartForLater()" class="bg-amber-500 hover:bg-amber-600 text-white px-3 py-2.5 rounded-xl font-bold text-xs flex items-center gap-1.5 shadow transition whitespace-nowrap" title="Guardar carrito para más tarde">
+                        <i class="fas fa-save"></i> Guardar Carrito
                     </button>
                     <button onclick="sendCartWhatsApp()" class="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2.5 rounded-xl font-bold text-xs flex items-center gap-1.5 shadow-lg transition whitespace-nowrap">
-                        <i class="fab fa-whatsapp text-base"></i> Enviar por WhatsApp
+                        <i class="fab fa-whatsapp text-base"></i> Enviar Pedido
                     </button>
                 </div>
             </div>
@@ -140,76 +141,42 @@
             </div>
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 border-l-4 border-emerald-500 flex items-center justify-between">
                 <div>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 uppercase font-semibold">Ingresos Totales</p>
-                    <h3 id="statTotalIngresos" class="text-xl font-bold text-emerald-600 dark:text-emerald-400">0.00</h3>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 uppercase font-semibold">Ingresos Totales (USD)</p>
+                    <h3 id="statTotalIngresos" class="text-xl font-bold text-emerald-600 dark:text-emerald-400">$0.00</h3>
                 </div>
                 <i class="fas fa-money-bill-wave text-emerald-200 dark:text-emerald-900 text-3xl"></i>
             </div>
         </div>
 
-        <!-- CONFIGURACIÓN DE MONEDA Y PREFERENCIAS -->
+        <!-- CONFIGURACIÓN DE TASAS Y MONEDAS -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <section class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 border-l-4 border-indigo-500 flex flex-col justify-between">
                 <div>
                     <label for="storeNameInput" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"><i class="fas fa-store text-indigo-500 mr-1"></i> Nombre de la Tienda</label>
+                    <span class="text-xs text-gray-400 block mb-2">Ej: Mi Tienda Virtual</span>
                 </div>
                 <input type="text" id="storeNameInput" placeholder="Nombre de tu tienda..." class="w-full border-2 border-indigo-100 dark:border-gray-700 dark:bg-gray-900 rounded-lg px-3 py-1.5 font-bold text-indigo-600 dark:text-indigo-400 text-sm focus:outline-none">
             </section>
 
-            <!-- SELECCIÓN DE MONEDA BASE MUNDIAL Y TASA -->
-            <section class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 border-l-4 border-blue-500 md:col-span-2">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                    <div>
-                        <label class="block text-sm font-bold text-gray-700 dark:text-gray-300">💱 Moneda Base de la Tienda (Mundial)</label>
-                        <span class="text-xs text-gray-400">Elige o busca la moneda oficial de tu país</span>
-                    </div>
-                    <div class="flex items-center gap-2 w-full sm:w-auto">
-                        <select id="baseCurrencySelect" class="border-2 border-blue-200 dark:border-gray-700 dark:bg-gray-900 rounded-lg px-3 py-1.5 font-bold text-blue-600 dark:text-blue-400 text-sm focus:outline-none w-full sm:w-60">
-                            <option value="USD">🇺🇸 Dólar ($ USD)</option>
-                            <option value="BS">🇻🇪 Bolívares (Bs)</option>
-                            <option value="EUR">🇪🇸 Euro (€ EUR - España)</option>
-                            <option value="ARS">🇦🇷 Peso Argentino (ARS)</option>
-                            <option value="BOB">🇧🇴 Boliviano (BOB)</option>
-                            <option value="UYU">🇺🇾 Peso Uruguayo (UYU)</option>
-                            <option value="COP">🇨🇴 Peso Colombiano (COP)</option>
-                            <option value="CLP">🇨🇱 Peso Chileno (CLP)</option>
-                            <option value="PEN">🇵🇪 Sol Peruano (PEN)</option>
-                            <option value="BRL">🇧🇷 Real Brasileño (BRL)</option>
-                            <option value="MXN">🇲🇽 Peso Mexicano (MXN)</option>
-                            <option value="DOP">🇩🇴 Peso Dominicano (DOP)</option>
-                            <option value="PAB">🇵🇦 Balboa Panameño (PAB)</option>
-                            <option value="CRC">🇨🇷 Colón Costarricense (CRC)</option>
-                            <option value="GTQ">🇬🇹 Quetzal Guatemalteco (GTQ)</option>
-                            <option value="HNL">🇭🇳 Lempira Hondureño (HNL)</option>
-                            <option value="NIO">🇳🇮 Córdoba Nicaragüense (NIO)</option>
-                            <option value="PYG">🇵🇾 Guaraní Paraguayo (PYG)</option>
-                            <option value="CUP">🇨🇺 Peso Cubano (CUP)</option>
-                            <option value="OTHER">🌐 Otra moneda personalizada...</option>
-                        </select>
-                    </div>
+            <section class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 flex items-center justify-between gap-4 border-l-4 border-blue-500">
+                <div>
+                    <label for="globalExchangeRate" class="block text-sm font-medium text-gray-700 dark:text-gray-300">🇻🇪 Tasa Bolívar (Bs. por $1)</label>
+                    <span class="text-xs text-gray-400">Conversión a bolívares</span>
                 </div>
-
-                <div id="customCurrencyBox" class="mt-3 pt-3 border-t dark:border-gray-700 hidden flex items-center gap-2">
-                    <span class="text-xs font-semibold">Código o Símbolo Personalizado:</span>
-                    <input type="text" id="customCurrencyInput" placeholder="Ej: VES, GBP, CAD..." class="w-32 border dark:border-gray-700 dark:bg-gray-900 rounded px-2 py-1 text-xs font-bold uppercase text-center">
-                    <button type="button" onclick="saveCustomCurrency()" class="bg-blue-600 text-white px-3 py-1 rounded text-xs font-bold">Aplicar</button>
-                </div>
-
-                <div class="mt-3 pt-3 border-t dark:border-gray-700 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                    <label class="flex items-center gap-2 cursor-pointer text-xs font-semibold">
-                        <input type="checkbox" id="useUsdReferenceCheckbox" class="rounded text-blue-600 w-4 h-4"> Usar Dólar ($ USD) como referencia paralela
-                    </label>
-                    <div id="exchangeRateBox" class="flex items-center gap-2 hidden">
-                        <span class="text-xs font-medium text-gray-500">Tasa de cambio local:</span>
-                        <input type="number" id="localExchangeRate" step="0.01" min="0" value="36.50" class="w-24 border dark:border-gray-700 dark:bg-gray-900 rounded px-2 py-1 text-xs font-bold text-center">
-                    </div>
-                </div>
+                <input type="number" id="globalExchangeRate" step="0.01" min="0" value="36.50" class="w-28 border-2 border-blue-200 dark:border-gray-700 dark:bg-gray-900 rounded-lg px-2 py-2 font-bold text-blue-600 dark:text-blue-400 text-base text-center focus:outline-none">
             </section>
 
-            <!-- GESTOR DE MÉTODOS DE PAGO -->
+            <section class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 flex items-center justify-between gap-4 border-l-4 border-amber-500">
+                <div>
+                    <label for="copExchangeRate" class="block text-sm font-medium text-gray-700 dark:text-gray-300">🇨🇴 Tasa Pesos COP (por $1 USD)</label>
+                    <span class="text-xs text-gray-400">Ej: 4100 COP = $1 USD</span>
+                </div>
+                <input type="number" id="copExchangeRate" step="1" min="0" value="4100" class="w-28 border-2 border-amber-200 dark:border-gray-700 dark:bg-gray-900 rounded-lg px-2 py-2 font-bold text-amber-600 dark:text-amber-400 text-base text-center focus:outline-none">
+            </section>
+
             <section class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 border-l-4 border-emerald-500 md:col-span-3">
                 <div class="flex justify-between items-center mb-3">
-                    <span class="text-sm font-bold text-gray-800 dark:text-gray-200"><i class="fas fa-globe-americas text-emerald-500 mr-1"></i> Métodos de Pago (Cualquier país y bandera)</span>
+                    <span class="text-sm font-bold text-gray-800 dark:text-gray-200"><i class="fas fa-globe-americas text-emerald-500 mr-1"></i> Métodos de Pago Internacionales</span>
                     <button type="button" onclick="openAddPaymentModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs px-3 py-1.5 rounded-lg font-semibold shadow flex items-center gap-1">
                         <i class="fas fa-plus"></i> Agregar Método de Pago
                     </button>
@@ -230,28 +197,31 @@
                 <input type="hidden" id="editDocId" value="">
                 <div>
                     <label for="name" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Nombre del Producto</label>
-                    <input type="text" id="name" required placeholder="Ej: Queso Paisa / Harina PAN" class="w-full border dark:border-gray-700 dark:bg-gray-900 rounded-lg px-3 py-2 focus:outline-none text-sm">
+                    <input type="text" id="name" required placeholder="Ej: Queso Paisa / Harina PAN" class="w-full border dark:border-gray-700 dark:bg-gray-900 rounded-lg px-3 py-2 text-sm focus:outline-none">
                 </div>
                 <div>
                     <label for="barcode" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Código de Barras / SKU</label>
-                    <input type="text" id="barcode" placeholder="Ej: 7591012345678 (Opcional)" class="w-full border dark:border-gray-700 dark:bg-gray-900 rounded-lg px-3 py-2 focus:outline-none text-sm">
+                    <input type="text" id="barcode" placeholder="Ej: 7591012345678 (Opcional)" class="w-full border dark:border-gray-700 dark:bg-gray-900 rounded-lg px-3 py-2 text-sm focus:outline-none">
                 </div>
                 <div>
                     <label for="stock" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Inventario Inicial</label>
-                    <input type="number" id="stock" step="0.01" min="0" value="0" required placeholder="Ej: 15" class="w-full border dark:border-gray-700 dark:bg-gray-900 rounded-lg px-3 py-2 focus:outline-none text-sm">
+                    <input type="number" id="stock" step="0.01" min="0" value="0" required placeholder="Ej: 15" class="w-full border dark:border-gray-700 dark:bg-gray-900 rounded-lg px-3 py-2 text-sm focus:outline-none">
                 </div>
                 <div>
-                    <label for="costBase" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Costo Base (<span id="labelCurrencyCost">USD</span>)</label>
-                    <input type="number" id="costBase" step="0.01" min="0" placeholder="Ej: 1.50" class="w-full border dark:border-gray-700 dark:bg-gray-900 rounded-lg px-3 py-2 focus:outline-none text-sm">
+                    <label for="costUSD" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Costo Base ($ USD)</label>
+                    <input type="number" id="costUSD" step="0.01" min="0" placeholder="Ej: 1.50" class="w-full border dark:border-gray-700 dark:bg-gray-900 rounded-lg px-3 py-2 text-sm focus:outline-none">
                 </div>
                 <div>
-                    <label for="priceBase" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Precio de Venta (<span id="labelCurrencyPrice">USD</span>)</label>
-                    <input type="number" id="priceBadge" class="w-full bg-gray-100 dark:bg-gray-900 border dark:border-gray-700 rounded-lg px-3 py-2 font-bold text-emerald-600 flex items-center text-sm">
+                    <label for="priceUSD" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Precio de Venta ($ USD <span id="priceUnitLabel">unidad</span>)</label>
+                    <input type="number" id="priceUSD" step="0.01" min="0" required placeholder="Ej: 2.20" class="w-full border dark:border-gray-700 dark:bg-gray-900 rounded-lg px-3 py-2 text-sm focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Porcentaje de Ganancia</label>
+                    <div id="profitPercentageBadge" class="w-full bg-gray-100 dark:bg-gray-900 border dark:border-gray-700 rounded-lg px-3 py-2 font-bold text-emerald-600 flex items-center text-sm">
                         0.00%
                     </div>
                 </div>
 
-                <!-- TIPO DE VENTA -->
                 <div class="md:col-span-2 lg:col-span-3 bg-blue-50 dark:bg-gray-900 p-4 rounded-lg border border-blue-200 dark:border-gray-700">
                     <label class="block text-sm font-bold text-gray-800 dark:text-gray-200 mb-2">⚖️ Tipo de venta:</label>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -287,7 +257,7 @@
                 </div>
                 <div class="md:col-span-2 lg:col-span-3">
                     <label for="description" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Descripción (Opcional)</label>
-                    <textarea id="description" rows="2" placeholder="Ej: Producto fresco..." class="w-full border dark:border-gray-700 dark:bg-gray-900 rounded-lg px-3 py-2 focus:outline-none text-sm"></textarea>
+                    <textarea id="description" rows="2" placeholder="Ej: Producto fresco..." class="w-full border dark:border-gray-700 dark:bg-gray-900 rounded-lg px-3 py-2 text-sm focus:outline-none"></textarea>
                 </div>
                 <div class="md:col-span-2 lg:col-span-3 text-right">
                     <button type="submit" id="saveBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition font-semibold text-sm">Guardar Producto</button>
@@ -319,6 +289,20 @@
         </div>
     </div>
 
+    <!-- MODAL CARRITOS PENDIENTES (PARA MÁS TARDE) -->
+    <div id="pendingCartsModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-gray-800 dark:text-gray-100 rounded-xl shadow-xl max-w-xl w-full p-5 max-h-[85vh] flex flex-col">
+            <div class="flex justify-between items-center mb-2 border-b dark:border-gray-700 pb-2">
+                <h3 class="text-base font-bold"><i class="fas fa-clock mr-2 text-amber-500"></i>Carritos Guardados (Para más tarde)</h3>
+                <button onclick="togglePendingCartsModal()" class="text-gray-400 text-lg">&times;</button>
+            </div>
+            <div id="pendingCartsListContainer" class="overflow-y-auto flex-1 space-y-3 pr-1 py-2"></div>
+            <div class="mt-3 pt-2 border-t dark:border-gray-700 text-right">
+                <button onclick="togglePendingCartsModal()" class="bg-gray-200 dark:bg-gray-700 px-3 py-1 rounded text-xs font-semibold">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
     <!-- MODAL HISTORIAL Y CIERRE DE CAJA -->
     <div id="salesModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
         <div id="salesModalContentCard" class="bg-white dark:bg-gray-800 dark:text-gray-100 rounded-xl shadow-xl max-w-2xl w-full p-5 max-h-[85vh] flex flex-col">
@@ -328,16 +312,10 @@
             </div>
             
             <div class="bg-purple-50 dark:bg-gray-900 border dark:border-gray-700 rounded-lg p-3 mb-3 grid grid-cols-2 gap-2 text-xs">
-                <div><span class="font-bold text-purple-700 uppercase block">✔️ Cobrado:</span><h4 id="cierreCobrado" class="text-sm font-bold text-emerald-600">0.00</h4></div>
-                <div><span class="font-bold text-red-700 uppercase block">❌ Por Cobrar:</span><h4 id="cierrePendiente" class="text-sm font-bold text-red-600">0.00</h4></div>
-            </div>
-
-            <!-- FILTRO RÁPIDO PARA VER DEUDORES -->
-            <div class="flex items-center justify-between mb-3 bg-gray-100 dark:bg-gray-900 px-3 py-2 rounded-lg text-xs">
-                <span class="font-semibold text-gray-600 dark:text-gray-300">Filtrar lista:</span>
-                <div class="flex gap-2">
-                    <button type="button" onclick="setSalesFilter('all')" id="filterBtnAll" class="bg-blue-600 text-white px-2.5 py-1 rounded font-bold transition">Todos</button>
-                    <button type="button" onclick="setSalesFilter('pending')" id="filterBtnPending" class="bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 px-2.5 py-1 rounded font-bold transition">🔴 Solo Deudores</button>
+                <div><span class="font-bold text-purple-700 uppercase block">✔️ Cobrado:</span><h4 id="cierreCobrado" class="text-sm font-bold text-emerald-600">$0.00</h4></div>
+                <div>
+                    <div class="flex justify-between items-center"><span class="font-bold text-red-700 uppercase block">❌ Por Cobrar:</span><button onclick="filterPendingSalesToggle()" id="btnFilterPending" class="bg-red-600 text-white px-2 py-0.5 rounded text-[10px] font-bold">Ver pendientes</button></div>
+                    <h4 id="cierrePendiente" class="text-sm font-bold text-red-600">$0.00</h4>
                 </div>
             </div>
 
@@ -350,7 +328,7 @@
         </div>
     </div>
 
-    <!-- MODAL DETALLE DE VENTA Y ESTADO DE CUENTA -->
+    <!-- MODAL DETALLE DE VENTA Y ABONOS -->
     <div id="saleDetailModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
         <div id="saleDetailCard" class="bg-white dark:bg-gray-800 dark:text-gray-100 rounded-xl shadow-xl max-w-md w-full p-6 flex flex-col max-h-[90vh]">
             <div class="flex justify-between items-center mb-4 border-b dark:border-gray-700 pb-2">
@@ -388,16 +366,17 @@
         let products = [];
         let salesHistory = [];
         let cart = [];
+        let pendingCarts = [];
+        let globalExchangeRate = 36.50;
+        let copExchangeRate = 4100;
         let storeName = 'Mi Tienda';
-        let baseCurrency = 'USD';
-        let useUsdReference = false;
-        let localExchangeRate = 36.50;
         let customPaymentMethods = [
-            { id: 'pm1', name: 'Pago Móvil', flag: '🇻🇪', details: 'Banco: Venezuela\nTelf: 0412-0000000\nCédula: V-00000000' }
+            { id: 'pm1', name: 'Pago Móvil', flag: '🇻🇪', details: 'Banco: Venezuela\nTelf: 0412-0000000\nCédula: V-00000000' },
+            { id: 'nequi1', name: 'Nequi', flag: '🇨🇴', details: 'Celular: 3000000000\nTitular: Tienda' }
         ];
-        let base64ImageToSave = '';
+        let imageFileToUpload = null;
         let isDarkMode = localStorage.getItem('isDarkMode') === 'true';
-        let currentSalesFilter = 'all';
+        let filterOnlyPending = false;
 
         applyTheme();
 
@@ -421,37 +400,23 @@
                     document.getElementById('mainAppContainer').classList.remove('hidden');
                     document.getElementById('userEmailDisplay').textContent = currentUser.email;
                     
-                    baseCurrency = localStorage.getItem(`baseCurrency_${currentUser.id}`) || 'USD';
-                    useUsdReference = localStorage.getItem(`useUsdRef_${currentUser.id}`) === 'true';
-                    localExchangeRate = parseFloat(localStorage.getItem(`localExRate_${currentUser.id}`)) || 36.50;
+                    globalExchangeRate = parseFloat(localStorage.getItem(`exchangeRate_${currentUser.id}`)) || 36.50;
+                    copExchangeRate = parseFloat(localStorage.getItem(`copExchangeRate_${currentUser.id}`)) || 4100;
                     storeName = localStorage.getItem(`storeName_${currentUser.id}`) || 'Mi Tienda';
                     
                     const paySaved = localStorage.getItem(`customPayments_${currentUser.id}`);
                     if (paySaved) customPaymentMethods = JSON.parse(paySaved);
 
-                    const selectEl = document.getElementById('baseCurrencySelect');
-                    let exists = Array.from(selectEl.options).some(o => o.value === baseCurrency);
-                    if (!exists && baseCurrency !== 'OTHER') {
-                        const opt = document.createElement('option');
-                        opt.value = baseCurrency;
-                        opt.textContent = baseCurrency;
-                        selectEl.appendChild(opt);
-                    }
-                    selectEl.value = exists ? baseCurrency : 'OTHER';
-                    if (!exists && baseCurrency !== 'OTHER') {
-                        document.getElementById('customCurrencyBox').classList.remove('hidden');
-                        document.getElementById('customCurrencyInput').value = baseCurrency;
-                    }
+                    const pcSaved = localStorage.getItem(`pendingCarts_${currentUser.id}`);
+                    if (pcSaved) pendingCarts = JSON.parse(pcSaved);
 
-                    document.getElementById('useUsdReferenceCheckbox').checked = useUsdReference;
-                    document.getElementById('localExchangeRate').value = localExchangeRate;
+                    document.getElementById('globalExchangeRate').value = globalExchangeRate;
+                    document.getElementById('copExchangeRate').value = copExchangeRate;
                     document.getElementById('storeNameInput').value = storeName;
                     
-                    toggleExchangeRateVisibility();
-                    updateCurrencyUI();
                     updateStoreNameUI();
                     renderCustomPaymentMethodsUI();
-
+                    updatePendingCartsBadge();
                     await loadUserDataFromSupabase();
                 } catch (err) { console.error(err); }
             } else {
@@ -515,60 +480,22 @@
             else htmlRoot.classList.remove('dark');
         }
 
-        const baseCurrencySelect = document.getElementById('baseCurrencySelect');
-        const customCurrencyBox = document.getElementById('customCurrencyBox');
+        const globalExchangeRateInput = document.getElementById('globalExchangeRate');
+        const copExchangeRateInput = document.getElementById('copExchangeRate');
 
-        baseCurrencySelect.addEventListener('change', (e) => {
-            const val = e.target.value;
-            if (val === 'OTHER') {
-                customCurrencyBox.classList.remove('hidden');
-                return;
-            }
-            customCurrencyBox.classList.add('hidden');
-            baseCurrency = val;
-            localStorage.setItem(`baseCurrency_${currentUser.id}`, baseCurrency);
-            updateCurrencyUI();
+        globalExchangeRateInput.addEventListener('input', (e) => {
+            globalExchangeRate = parseFloat(e.target.value) || 0;
+            localStorage.setItem(`exchangeRate_${currentUser.id}`, globalExchangeRate);
             renderProducts();
             renderCart();
         });
 
-        window.saveCustomCurrency = function() {
-            const customVal = document.getElementById('customCurrencyInput').value.trim().toUpperCase();
-            if (!customVal) return alert('Escribe un código de moneda válido');
-            baseCurrency = customVal;
-            localStorage.setItem(`baseCurrency_${currentUser.id}`, baseCurrency);
-            updateCurrencyUI();
-            renderProducts();
-            renderCart();
-            showToast(`Moneda guardada: ${baseCurrency}`);
-        };
-
-        document.getElementById('useUsdReferenceCheckbox').addEventListener('change', (e) => {
-            useUsdReference = e.target.checked;
-            localStorage.setItem(`useUsdRef_${currentUser.id}`, useUsdReference);
-            toggleExchangeRateVisibility();
+        copExchangeRateInput.addEventListener('input', (e) => {
+            copExchangeRate = parseFloat(e.target.value) || 0;
+            localStorage.setItem(`copExchangeRate_${currentUser.id}`, copExchangeRate);
             renderProducts();
             renderCart();
         });
-
-        document.getElementById('localExchangeRate').addEventListener('input', (e) => {
-            localExchangeRate = parseFloat(e.target.value) || 1;
-            localStorage.setItem(`localExRate_${currentUser.id}`, localExchangeRate);
-            renderProducts();
-            renderCart();
-        });
-
-        function toggleExchangeRateVisibility() {
-            const box = document.getElementById('exchangeRateBox');
-            if (useUsdReference && baseCurrency !== 'USD') box.classList.remove('hidden');
-            else box.classList.add('hidden');
-        }
-
-        function updateCurrencyUI() {
-            document.getElementById('labelCurrencyCost').textContent = baseCurrency;
-            document.getElementById('labelCurrencyPrice').textContent = baseCurrency;
-            toggleExchangeRateVisibility();
-        }
 
         document.getElementById('storeNameInput').addEventListener('input', (e) => {
             storeName = e.target.value.trim() || 'Mi Tienda';
@@ -582,18 +509,18 @@
         }
 
         function calculateProfitMargin() {
-            const cost = parseFloat(document.getElementById('costBase').value) || 0;
-            const price = parseFloat(document.getElementById('priceBase').value) || 0;
+            const cost = parseFloat(document.getElementById('costUSD').value) || 0;
+            const price = parseFloat(document.getElementById('priceUSD').value) || 0;
             const badge = document.getElementById('profitPercentageBadge');
             if (cost > 0 && price > cost) {
                 const profit = ((price - cost) / cost) * 100;
-                badge.textContent = `${profit.toFixed(2)}% (Ganancia: ${baseCurrency} ${(price - cost).toFixed(2)})`;
+                badge.textContent = `${profit.toFixed(2)}% (Ganancia: $${(price - cost).toFixed(2)})`;
             } else {
                 badge.textContent = `0.00%`;
             }
         }
-        document.getElementById('costBase').addEventListener('input', calculateProfitMargin);
-        document.getElementById('priceBase').addEventListener('input', calculateProfitMargin);
+        document.getElementById('costUSD').addEventListener('input', calculateProfitMargin);
+        document.getElementById('priceUSD').addEventListener('input', calculateProfitMargin);
 
         window.openAddPaymentModal = function() {
             document.getElementById('editPaymentId').value = '';
@@ -623,24 +550,6 @@
             showToast('Método guardado');
         };
 
-        window.editCustomPayment = function(id) {
-            const item = customPaymentMethods.find(p => p.id === id);
-            if (!item) return;
-            document.getElementById('editPaymentId').value = item.id;
-            document.getElementById('payName').value = item.name;
-            document.getElementById('payFlag').value = item.flag;
-            document.getElementById('payDetails').value = item.details;
-            document.getElementById('paymentModal').classList.remove('hidden');
-        };
-
-        window.deleteCustomPayment = function(id) {
-            if (confirm('¿Eliminar?')) {
-                customPaymentMethods = customPaymentMethods.filter(p => p.id !== id);
-                localStorage.setItem(`customPayments_${currentUser.id}`, JSON.stringify(customPaymentMethods));
-                renderCustomPaymentMethodsUI();
-            }
-        };
-
         function renderCustomPaymentMethodsUI() {
             const container = document.getElementById('customPaymentMethodsList');
             const chkContainer = document.getElementById('cartPaymentCheckboxesContainer');
@@ -649,7 +558,7 @@
             customPaymentMethods.forEach(p => {
                 const card = document.createElement('div');
                 card.className = 'bg-gray-50 dark:bg-gray-900 border dark:border-gray-700 p-3 rounded-lg flex flex-col justify-between text-xs';
-                card.innerHTML = `<div><div class="flex justify-between font-bold mb-1"><span>${p.flag} ${p.name}</span><div class="flex gap-2"><button onclick="editCustomPayment('${p.id}')" class="text-blue-500"><i class="fas fa-edit"></i></button><button onclick="deleteCustomPayment('${p.id}')" class="text-red-500"><i class="fas fa-trash"></i></button></div></div><p class="text-gray-400 whitespace-pre-line text-[11px]">${p.details}</p></div>`;
+                card.innerHTML = `<div><div class="flex justify-between font-bold mb-1"><span>${p.flag} ${p.name}</span></div><p class="text-gray-400 whitespace-pre-line text-[11px]">${p.details}</p></div>`;
                 container.appendChild(card);
 
                 const label = document.createElement('label');
@@ -671,11 +580,11 @@
         imageFile.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) {
+                imageFileToUpload = file;
                 fileName.textContent = file.name;
                 const reader = new FileReader();
                 reader.onload = (ev) => {
-                    base64ImageToSave = ev.target.result;
-                    imagePreviewContainer.innerHTML = `<img src="${base64ImageToSave}" class="w-full h-full object-cover">`;
+                    imagePreviewContainer.innerHTML = `<img src="${ev.target.result}" class="w-full h-full object-cover">`;
                 };
                 reader.readAsDataURL(file);
             }
@@ -684,45 +593,47 @@
         productForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const docId = document.getElementById('editDocId').value;
-            let finalImageURL = base64ImageToSave;
+            let finalImageURL = '';
 
-            if (!finalImageURL && docId) {
+            if (imageFileToUpload) {
+                const reader = new FileReader();
+                reader.readAsDataURL(imageFileToUpload);
+                await new Promise(resolve => reader.onload = resolve);
+                finalImageURL = reader.result;
+            } else if (docId) {
                 const ext = products.find(p => p.id === docId);
                 if (ext) finalImageURL = ext.image || '';
             }
 
-            const selectedFraction = document.querySelector('input[name="fractionUnit"]:checked');
+            const selectedUnit = document.querySelector('input[name="fractionUnit"]:checked').value;
 
             const productData = {
                 userId: currentUser.id,
                 name: document.getElementById('name').value.trim(),
                 barcode: document.getElementById('barcode').value.trim(),
                 stock: parseFloat(document.getElementById('stock').value) || 0,
-                costBase: parseFloat(document.getElementById('costBase').value) || 0,
-                priceBase: parseFloat(document.getElementById('priceBase').value) || 0,
-                currency: baseCurrency,
-                fractionUnit: selectedFraction ? selectedFraction.value : 'none',
+                costUSD: parseFloat(document.getElementById('costUSD').value) || 0,
+                priceUSD: parseFloat(document.getElementById('priceUSD').value) || 0,
+                fractionUnit: selectedUnit,
                 description: document.getElementById('description').value.trim(),
                 image: finalImageURL
             };
 
             if (docId) {
                 const { error } = await supabase.from('products').update(productData).eq('id', docId);
-                if (error) { alert('Error al actualizar: ' + error.message); return; }
+                if (error) { alert('Error: ' + error.message); return; }
                 document.getElementById('editDocId').value = '';
                 document.getElementById('formTitle').textContent = 'Agregar Nuevo Producto';
                 document.getElementById('saveBtn').textContent = 'Guardar Producto';
             } else {
                 const { error } = await supabase.from('products').insert([productData]);
-                if (error) { alert('Error al guardar en Supabase: ' + error.message); return; }
+                if (error) { alert('Error: ' + error.message); return; }
             }
 
             productForm.reset();
-            base64ImageToSave = '';
+            imageFileToUpload = null;
             fileName.textContent = 'Ninguna imagen seleccionada';
             imagePreviewContainer.innerHTML = '<span class="text-xs text-gray-400">Sin foto</span>';
-            
-            // Recargar inventario directamente desde Supabase para reflejar el cambio al instante
             await loadUserDataFromSupabase();
             showToast('¡Producto guardado exitosamente!');
         });
@@ -738,18 +649,53 @@
             }
 
             filtered.forEach(p => {
+                const totalBs = (p.priceUSD * globalExchangeRate).toFixed(2);
+                const totalCop = (p.priceUSD * copExchangeRate).toLocaleString('es-CO', { maximumFractionDigits: 0 });
                 const card = document.createElement('div');
                 card.className = 'bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden flex flex-col justify-between';
-                
-                let secondaryPriceHtml = '';
-                if (useUsdReference && p.currency !== 'USD') {
-                    let equivUSD = p.priceBase / localExchangeRate;
-                    secondaryPriceHtml = `<span class="text-xs text-gray-400 block">(Ref: $${equivUSD.toFixed(2)} USD)</span>`;
-                }
 
-                let unitLabelText = 'unidad';
-                if (p.fractionUnit === 'kg') unitLabelText = 'kg';
-                if (p.fractionUnit === 'lt') unitLabelText = 'lt';
+                let selectorHtml = '';
+                const isKg = p.fractionUnit === 'kg';
+                const isLt = p.fractionUnit === 'lt';
+
+                if (isKg) {
+                    selectorHtml = `
+                        <div class="mb-3 bg-amber-50 dark:bg-gray-900 p-2.5 rounded-lg border border-amber-200 dark:border-gray-700">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="text-xs font-bold text-amber-700 dark:text-amber-400">Venta por Kilos (g):</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <input type="number" id="gramsVal_${p.id}" value="250" step="10" min="1" class="w-full text-xs font-bold px-2 py-1.5 border dark:border-gray-700 dark:bg-gray-800 rounded text-center">
+                                <span class="text-xs font-semibold">g</span>
+                                <button type="button" onclick="addWeightedToCart('${p.id}')" class="bg-amber-600 hover:bg-amber-700 text-white text-xs px-3 py-1.5 rounded font-bold whitespace-nowrap">Añadir</button>
+                            </div>
+                        </div>
+                    `;
+                } else if (isLt) {
+                    selectorHtml = `
+                        <div class="mb-3 bg-cyan-50 dark:bg-gray-900 p-2.5 rounded-lg border border-cyan-200 dark:border-gray-700">
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="text-xs font-bold text-cyan-700 dark:text-cyan-400">Venta por Litros (ml):</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <input type="number" id="gramsVal_${p.id}" value="250" step="10" min="1" class="w-full text-xs font-bold px-2 py-1.5 border dark:border-gray-700 dark:bg-gray-800 rounded text-center">
+                                <span class="text-xs font-semibold">ml</span>
+                                <button type="button" onclick="addWeightedToCart('${p.id}')" class="bg-cyan-600 hover:bg-cyan-700 text-white text-xs px-3 py-1.5 rounded font-bold whitespace-nowrap">Añadir</button>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    selectorHtml = `
+                        <div class="mb-3 bg-blue-50 dark:bg-gray-900 p-2.5 rounded-lg border border-blue-100 dark:border-gray-700 flex items-center justify-between">
+                            <div class="flex items-center gap-1">
+                                <button type="button" onclick="changeQty('${p.id}', -1)" class="bg-blue-200 dark:bg-blue-900 w-7 h-7 rounded font-bold">-</button>
+                                <span id="qtyVal_${p.id}" class="font-bold text-sm w-7 text-center">1</span>
+                                <button type="button" onclick="changeQty('${p.id}', 1)" class="bg-blue-200 dark:bg-blue-900 w-7 h-7 rounded font-bold">+</button>
+                            </div>
+                            <button type="button" onclick="addToCart('${p.id}')" class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-2 rounded-lg font-bold">Añadir</button>
+                        </div>
+                    `;
+                }
 
                 card.innerHTML = `
                     <div>
@@ -758,11 +704,12 @@
                             <h3 class="font-bold text-lg dark:text-white mb-1">${p.name}</h3>
                             <p class="text-gray-500 text-sm mb-2">📝 ${p.description || 'Sin descripción'}</p>
                             <div class="mb-3 text-xs bg-gray-50 dark:bg-gray-900 p-2 rounded">
-                                <span class="font-bold text-green-600 text-base">💰 ${p.currency} ${p.priceBase.toFixed(2)} <span class="text-xs font-normal text-gray-500">/${unitLabelText}</span></span>
-                                ${secondaryPriceHtml}
+                                <span class="font-bold text-green-600 text-base">💰 $${p.priceUSD.toFixed(2)} USD</span>
+                                <span class="text-blue-600 block">🇻🇪 Bs. ${totalBs}</span>
+                                <span class="text-amber-600 block">🇨🇴 COP $${totalCop}</span>
                                 <span class="text-gray-500 block mt-1">Stock: ${p.stock}</span>
                             </div>
-                            <button onclick="addToCart('${p.id}')" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-xs py-2 rounded font-bold"><i class="fas fa-cart-plus mr-1"></i> Añadir al Carrito</button>
+                            ${selectorHtml}
                         </div>
                     </div>
                     <div class="p-3 bg-gray-50 dark:bg-gray-900 border-t dark:border-gray-700 flex justify-end gap-3 text-sm">
@@ -774,14 +721,47 @@
             });
         };
 
+        window.changeQty = function(id, delta) {
+            const span = document.getElementById(`qtyVal_${id}`);
+            if (span) {
+                let current = parseInt(span.textContent) || 1;
+                current += delta;
+                if (current < 1) current = 1;
+                span.textContent = current;
+            }
+        };
+
+        window.addWeightedToCart = function(id) {
+            const gramsInput = document.getElementById(`gramsVal_${id}`);
+            const grams = parseFloat(gramsInput ? gramsInput.value : 250) || 250;
+            const p = products.find(item => item.id === id);
+            if (!p) return;
+            const fraction = grams / 1000;
+            const unitLabelCart = p.fractionUnit === 'kg' ? 'g' : 'ml';
+            const customName = `${p.name} (${grams}${unitLabelCart})`;
+
+            const existing = cart.find(i => i.productId === id && i.name === customName);
+            if (existing) {
+                existing.qtyFraction += fraction;
+                existing.gramsTotal += grams;
+            } else {
+                cart.push({ productId: p.id, name: customName, priceUSD: p.priceUSD, costUSD: p.costUSD || 0, qtyFraction: fraction, gramsTotal: grams, isWeighted: true, fractionUnit: p.fractionUnit });
+            }
+            renderCart();
+            showToast(`Añadido: ${customName}`);
+        };
+
         window.addToCart = function(id) {
             const p = products.find(item => item.id === id);
             if (!p) return;
-            const existing = cart.find(i => i.productId === id);
+            const qtySpan = document.getElementById(`qtyVal_${id}`);
+            const cantidad = parseInt(qtySpan ? qtySpan.textContent : 1) || 1;
+
+            const existing = cart.find(i => i.productId === id && !i.isWeighted);
             if (existing) {
-                existing.qty += (p.fractionUnit !== 'none' ? 0.5 : 1);
+                existing.qty += cantidad;
             } else {
-                cart.push({ productId: p.id, name: p.name, price: p.priceBase, currency: p.currency, cost: p.costBase || 0, qty: 1, fractionUnit: p.fractionUnit });
+                cart.push({ productId: p.id, name: p.name, priceUSD: p.priceUSD, costUSD: p.costUSD || 0, qty: cantidad, isWeighted: false });
             }
             renderCart();
             showToast(`Añadido: ${p.name}`);
@@ -794,101 +774,145 @@
 
             panel.classList.remove('hidden');
             container.innerHTML = '';
-            let total = 0;
+            let totalUSD = 0;
 
             cart.forEach((item, idx) => {
-                let subtotal = item.price * item.qty;
-                total += subtotal;
+                let mult = item.isWeighted ? item.qtyFraction : item.qty;
+                let subtotal = item.priceUSD * mult;
+                totalUSD += subtotal;
+                let badge = item.isWeighted ? `${item.gramsTotal}${item.fractionUnit === 'kg' ? 'g' : 'ml'}` : `x${item.qty}`;
+
                 const row = document.createElement('div');
                 row.className = 'bg-blue-800 bg-opacity-40 p-2 rounded flex justify-between items-center text-xs';
                 row.innerHTML = `
                     <div class="flex items-center gap-2">
-                        <span class="bg-blue-900 px-2 py-0.5 rounded font-bold">x${item.qty}</span>
+                        <span class="bg-blue-900 px-2 py-0.5 rounded font-bold">${badge}</span>
                         <span><b>${item.name}</b></span>
                     </div>
                     <div class="flex items-center gap-2">
-                        <span>${item.currency} ${subtotal.toFixed(2)}</span>
+                        <span>$${subtotal.toFixed(2)} USD</span>
                         <button onclick="cart.splice(${idx},1);renderCart()" class="text-red-300"><i class="fas fa-trash"></i></button>
                     </div>`;
                 container.appendChild(row);
             });
-            document.getElementById('cartTotalBadge').textContent = `Total: ${baseCurrency} ${total.toFixed(2)}`;
+            const totalBsGen = totalUSD * globalExchangeRate;
+            const totalCopGen = totalUSD * copExchangeRate;
+            document.getElementById('cartTotalBadge').textContent = `Total: $${totalUSD.toFixed(2)} USD (Bs. ${totalBsGen.toFixed(2)} | COP $${totalCopGen.toLocaleString('es-CO', {maximumFractionDigits: 0})})`;
         }
 
         window.clearCart = function() { cart = []; renderCart(); };
 
-        async function procesarGuardadoVenta(esWhatsApp = false) {
-            if (cart.length === 0) return null;
+        window.saveCartForLater = function() {
+            if (cart.length === 0) { alert('El carrito está vacío'); return; }
+            const clientName = document.getElementById('clientNameInput').value.trim() || 'Cliente General';
+            pendingCarts.push({ id: 'pc_' + Date.now(), client: clientName, items: [...cart], date: new Date().toLocaleString('es-VE') });
+            localStorage.setItem(`pendingCarts_${currentUser.id}`, JSON.stringify(pendingCarts));
+            updatePendingCartsBadge();
+            cart = [];
+            renderCart();
+            document.getElementById('clientNameInput').value = '';
+            showToast('¡Carrito guardado para más tarde!');
+        };
 
+        window.togglePendingCartsModal = function() {
+            const modal = document.getElementById('pendingCartsModal');
+            modal.classList.toggle('hidden');
+            if (!modal.classList.contains('hidden')) renderPendingCartsList();
+        };
+
+        function updatePendingCartsBadge() {
+            document.getElementById('pendingCartsCountBadge').textContent = pendingCarts.length;
+        }
+
+        function renderPendingCartsList() {
+            const container = document.getElementById('pendingCartsListContainer');
+            container.innerHTML = '';
+            if (pendingCarts.length === 0) {
+                container.innerHTML = '<p class="text-gray-400 text-center py-6 text-xs">No hay carritos guardados.</p>';
+                return;
+            }
+            pendingCarts.forEach((pc, idx) => {
+                let totalPC = pc.items.reduce((acc, i) => acc + (i.priceUSD * (i.isWeighted ? i.qtyFraction : i.qty)), 0);
+                const div = document.createElement('div');
+                div.className = 'bg-gray-50 dark:bg-gray-900 border dark:border-gray-700 p-3 rounded-lg text-xs flex justify-between items-center';
+                div.innerHTML = `
+                    <div>
+                        <p class="font-bold text-gray-800 dark:text-gray-200">👤 ${pc.client} <span class="text-gray-400">(${pc.date})</span></p>
+                        <p class="text-emerald-600 font-semibold">${pc.items.length} productos - Total: $${totalPC.toFixed(2)} USD</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="restorePendingCart(${idx})" class="bg-blue-600 hover:bg-blue-700 text-white px-2.5 py-1 rounded font-bold">Cargar</button>
+                        <button onclick="deletePendingCart(${idx})" class="bg-red-500 hover:bg-red-600 text-white px-2.5 py-1 rounded font-bold"><i class="fas fa-trash"></i></button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        window.restorePendingCart = function(idx) {
+            const pc = pendingCarts[idx];
+            cart = [...pc.items];
+            document.getElementById('clientNameInput').value = pc.client;
+            pendingCarts.splice(idx, 1);
+            localStorage.setItem(`pendingCarts_${currentUser.id}`, JSON.stringify(pendingCarts));
+            updatePendingCartsBadge();
+            renderCart();
+            togglePendingCartsModal();
+            showToast('Carrito restaurado con éxito');
+        };
+
+        window.deletePendingCart = function(idx) {
+            if (confirm('¿Eliminar este carrito guardado?')) {
+                pendingCarts.splice(idx, 1);
+                localStorage.setItem(`pendingCarts_${currentUser.id}`, JSON.stringify(pendingCarts));
+                updatePendingCartsBadge();
+                renderPendingCartsList();
+            }
+        };
+
+        window.sendCartWhatsApp = async function() {
+            if (cart.length === 0) return;
             const cliente = document.getElementById('clientNameInput').value.trim() || 'Cliente General';
-            let totalGeneral = cart.reduce((acc, i) => acc + (i.price * i.qty), 0);
-            let totalCost = cart.reduce((acc, i) => acc + (i.cost * i.qty), 0);
+            let totalGeneralUSD = 0;
+            let totalCostUSD = 0;
             
+            let itemsDetail = cart.map(i => {
+                let mult = i.isWeighted ? i.qtyFraction : i.qty;
+                let sub = i.priceUSD * mult;
+                totalGeneralUSD += sub;
+                totalCostUSD += (i.costUSD || 0) * mult;
+                return { name: i.name, qty: i.isWeighted ? i.gramsTotal + 'g' : i.qty, priceUSD: i.priceUSD, subtotalUSD: sub.toFixed(2) };
+            });
+
             const now = new Date();
             const fechaStr = now.toLocaleDateString('es-VE') + ' a las ' + now.toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit' });
-            const fechaIso = now.toISOString().split('T')[0];
             const ordenId = 'OM-' + Math.random().toString(36).substring(2, 7).toUpperCase();
-
-            let itemsDetail = cart.map(i => ({
-                name: i.name,
-                qty: i.qty,
-                priceUSD: i.price,
-                subtotalUSD: (i.price * i.qty).toFixed(2)
-            }));
 
             const nuevaVenta = {
                 userId: currentUser.id,
                 idOrden: ordenId,
                 name: `Pedido (${cart.length} productos)`,
                 cliente: cliente,
-                total: totalGeneral.toFixed(2),
-                totalUSD: totalGeneral.toFixed(2),
-                costUSD: totalCost.toFixed(2),
-                currency: baseCurrency,
+                totalUSDOriginal: totalGeneralUSD.toFixed(2),
+                totalUSD: totalGeneralUSD.toFixed(2),
+                total: (totalGeneralUSD * globalExchangeRate).toFixed(2),
+                costUSD: totalCostUSD.toFixed(2),
                 date: fechaStr,
-                dateIso: fechaIso,
                 timestamp: Date.now(),
                 items: itemsDetail,
                 pagado: false,
                 abonoUSD: 0
             };
 
-            try {
-                const { error } = await supabase.from('sales').insert([nuevaVenta]);
-                if (error) throw error;
-                await loadUserDataFromSupabase();
-            } catch (err) {
-                console.error("Error guardando venta:", err);
-            }
+            await supabase.from('sales').insert([nuevaVenta]);
+            await loadUserDataFromSupabase();
 
-            return { ordenId, cliente, totalGeneral, itemsDetail };
-        }
-
-        window.guardarCarritoEnHistorialManual = async function() {
-            if (cart.length === 0) { alert('El carrito está vacío'); return; }
-            await procesarGuardadoVenta(false);
-            showToast('¡Carrito guardado en el historial de ventas exitosamente!');
-            cart = [];
-            renderCart();
-            if (document.getElementById('clientNameInput')) document.getElementById('clientNameInput').value = '';
-        };
-
-        window.sendCartWhatsApp = async function() {
-            if (cart.length === 0) return;
-            const res = await procesarGuardadoVenta(true);
-            if (!res) return;
-
-            let text = `🛒 *PEDIDO - ${storeName.toUpperCase()}*%0A`;
-            text += `🔖 Orden: *${res.ordenId}*%0A`;
-            text += `👤 Cliente: *${res.cliente}*%0A%0A📦 *Detalle:*%0A`;
-            
+            let text = `🛒 *PEDIDO - ${storeName.toUpperCase()}*%0A🔖 Orden: *${ordenId}*%0A👤 Cliente: *${cliente}*%0A%0A`;
             cart.forEach(i => {
-                text += `• (x${i.qty}) *${i.name}* - ${i.currency} ${(i.price * i.qty).toFixed(2)}%0A`;
+                let mult = i.isWeighted ? i.qtyFraction : i.qty;
+                text += `• *${i.name}* - $${(i.priceUSD * mult).toFixed(2)} USD%0A`;
             });
-
-            text += `━━━━━━━━━━━━━━━━━━%0A`;
-            text += `✅ *TOTAL: ${baseCurrency} ${res.totalGeneral.toFixed(2)}*%0A`;
-            text += `━━━━━━━━━━━━━━━━━━%0A`;
+            text += `━━━━━━━━━━━━━━━━━━%0A✅ *TOTAL: $${totalGeneralUSD.toFixed(2)} USD*%0A`;
 
             customPaymentMethods.forEach(p => {
                 const chk = document.getElementById(`chk_pay_${p.id}`);
@@ -901,42 +925,26 @@
             window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
             cart = [];
             renderCart();
-            if (document.getElementById('clientNameInput')) document.getElementById('clientNameInput').value = '';
-            showToast('¡Pedido enviado por WhatsApp y guardado en el historial!');
+            document.getElementById('clientNameInput').value = '';
+            showToast('¡Pedido enviado y guardado!');
         };
 
         window.toggleSalesHistoryModal = function() {
+            filterOnlyPending = false;
             const modal = document.getElementById('salesModal');
             modal.classList.toggle('hidden');
-            if (!modal.classList.contains('hidden')) {
-                currentSalesFilter = 'all';
-                updateFilterButtonsUI();
-                renderSalesHistory();
-            }
+            if (!modal.classList.contains('hidden')) renderSalesHistory();
         };
 
-        window.setSalesFilter = function(filter) {
-            currentSalesFilter = filter;
-            updateFilterButtonsUI();
+        window.filterPendingSalesToggle = function() {
+            filterOnlyPending = !filterOnlyPending;
             renderSalesHistory();
         };
 
-        function updateFilterButtonsUI() {
-            const btnAll = document.getElementById('filterBtnAll');
-            const btnPending = document.getElementById('filterBtnPending');
-            if (currentSalesFilter === 'all') {
-                btnAll.className = 'bg-blue-600 text-white px-2.5 py-1 rounded font-bold transition';
-                btnPending.className = 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 px-2.5 py-1 rounded font-bold transition';
-            } else {
-                btnAll.className = 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 px-2.5 py-1 rounded font-bold transition';
-                btnPending.className = 'bg-red-600 text-white px-2.5 py-1 rounded font-bold transition';
-            }
-        }
-
         function updateSalesStats() {
             document.getElementById('statTotalVentas').textContent = salesHistory.length;
-            const totalIngresos = salesHistory.reduce((acc, item) => acc + parseFloat(item.total || 0), 0);
-            document.getElementById('statTotalIngresos').innerHTML = `${baseCurrency} ${totalIngresos.toFixed(2)}`;
+            const totalIngresos = salesHistory.reduce((acc, item) => acc + parseFloat(item.totalUSD || 0), 0);
+            document.getElementById('statTotalIngresos').innerHTML = `$${totalIngresos.toFixed(2)} USD`;
         }
 
         function renderSalesHistory() {
@@ -944,38 +952,34 @@
             let cobrado = 0, pendiente = 0;
 
             salesHistory.forEach(sale => {
-                let sTotal = parseFloat(sale.total || 0);
+                let sTotal = parseFloat(sale.totalUSDOriginal || sale.totalUSD || 0);
                 let abono = parseFloat(sale.abonoUSD || 0);
-                let saldoPendiente = sTotal - abono;
-                if (saldoPendiente < 0) saldoPendiente = 0;
+                let saldo = sTotal - abono;
+                if (saldo < 0) saldo = 0;
 
-                if (sale.pagado) {
-                    cobrado += sTotal;
-                } else {
-                    cobrado += abono;
-                    pendiente += saldoPendiente;
-                }
+                if (sale.pagado) cobrado += sTotal;
+                else { cobrado += abono; pendiente += saldo; }
             });
 
-            document.getElementById('cierreCobrado').textContent = `${baseCurrency} ${cobrado.toFixed(2)}`;
-            document.getElementById('cierrePendiente').textContent = `${baseCurrency} ${pendiente.toFixed(2)}`;
+            document.getElementById('cierreCobrado').textContent = `$${cobrado.toFixed(2)} USD`;
+            document.getElementById('cierrePendiente').textContent = `$${pendiente.toFixed(2)} USD`;
 
-            const listToShow = salesHistory.filter(sale => {
-                if (currentSalesFilter === 'pending') return !sale.pagado;
-                return true;
-            });
+            let listToShow = salesHistory;
+            if (filterOnlyPending) {
+                listToShow = listToShow.filter(s => !s.pagado);
+            }
 
             if (listToShow.length === 0) {
-                container.innerHTML = '<p class="text-gray-400 text-center py-6 text-xs">No hay registros que coincidan con el filtro.</p>';
+                container.innerHTML = '<p class="text-gray-400 text-center py-6 text-xs">No hay registros.</p>';
                 return;
             }
 
-            container.innerHTML = '';
+        container.innerHTML = '';
             listToShow.forEach(sale => {
                 const ordenCorta = sale.idOrden || 'OM-XXXX';
                 const cliente = sale.cliente || 'Cliente General';
                 const pagadoTotal = sale.pagado === true;
-                const totalVenta = parseFloat(sale.total || 0);
+                const totalVenta = parseFloat(sale.totalUSDOriginal || sale.totalUSD || 0);
 
                 let colorPunto = pagadoTotal ? '#28a745' : '#dc3545';
                 let textoEstado = pagadoTotal ? 'Pagada' : 'Pendiente (Deuda)';
@@ -992,7 +996,7 @@
                         </div>
                     </div>
                     <div class="text-right whitespace-nowrap ml-2">
-                        <span class="font-bold text-emerald-600 block">${baseCurrency} ${totalVenta.toFixed(2)}</span>
+                        <span class="font-bold text-emerald-600 block">$${totalVenta.toFixed(2)} USD</span>
                     </div>
                 `;
                 container.appendChild(item);
@@ -1003,20 +1007,24 @@
             const sale = salesHistory.find(s => s.id === saleId);
             if (!sale) return;
             const content = document.getElementById('saleDetailContent');
-            
+            const originalUSD = parseFloat(sale.totalUSDOriginal || sale.totalUSD || 0);
+            const abonoActualUSD = parseFloat(sale.abonoUSD || 0);
+            const restanteUSD = originalUSD - abonoActualUSD;
+            const pagadoTotal = sale.pagado === true;
+
             let html = `
                 <div>
                     <p class="text-xs text-gray-400">Fecha: ${sale.date}</p>
                     <p class="font-bold text-base text-blue-600 mt-1">${sale.name}</p>
-                    <p class="text-xs mt-1"><strong>Cliente (Deudor/Comprador):</strong> <span class="text-indigo-600 font-bold">${sale.cliente || 'General'}</span></p>
-                    <p class="text-xs mt-1"><strong>Nro. Orden:</strong> <span class="font-mono font-bold text-blue-600">${sale.idOrden || 'OM-XXXX'}</span></p>
+                    <p class="text-xs mt-1"><strong>Cliente:</strong> <span class="text-indigo-600 font-bold">${sale.cliente || 'General'}</span></p>
+                    <p class="text-xs mt-1"><strong>Orden:</strong> <span class="font-mono font-bold text-blue-600">${sale.idOrden || 'OM-XXXX'}</span></p>
                 </div>
             `;
 
             if (sale.items && sale.items.length > 0) {
                 html += `<div class="border-t dark:border-gray-700 pt-2"><strong class="text-xs block mb-1">Productos:</strong><div class="space-y-1">`;
                 sale.items.forEach(i => {
-                    html += `<div class="bg-gray-50 dark:bg-gray-900 p-2 rounded flex justify-between text-xs"><span><b>(x${i.qty})</b> ${i.name}</span><span class="font-semibold text-emerald-600">${baseCurrency} ${i.subtotalUSD}</span></div>`;
+                    html += `<div class="bg-gray-50 dark:bg-gray-900 p-2 rounded flex justify-between text-xs"><span><b>(${i.qty})</b> ${i.name}</span><span class="font-semibold text-emerald-600">$${i.subtotalUSD} USD</span></div>`;
                 });
                 html += `</div></div>`;
             }
@@ -1024,11 +1032,19 @@
             html += `
                 <div class="border-t dark:border-gray-700 pt-2 flex justify-between items-center">
                     <span class="font-bold">Total:</span>
-                    <span class="font-bold text-emerald-600">${baseCurrency} ${parseFloat(sale.total || 0).toFixed(2)}</span>
+                    <span class="font-bold text-emerald-600">$${originalUSD.toFixed(2)} USD</span>
                 </div>
-                <div class="border-t dark:border-gray-700 pt-2 mt-2">
-                    <button onclick="alternarEstadoPago('${sale.id}')" class="w-full py-2.5 px-4 rounded-lg font-bold text-white text-xs shadow transition" style="background-color: ${sale.pagado ? '#28a745' : '#dc3545'}">
-                        ${sale.pagado ? '✔️ Pedido Pagado (Clic para reabrir deuda)' : '❌ Marcar como Pagado / Saldar Deuda'}
+                <div class="border-t dark:border-gray-700 pt-3 mt-2 bg-gray-50 dark:bg-gray-900 p-3 rounded-lg">
+                    <p class="text-xs font-bold mb-1">💳 Control de Deuda y Abonos ($ USD):</p>
+                    <p class="text-[11px] text-gray-500 mb-2">Restante por pagar: <b class="text-red-500">$${restanteUSD.toFixed(2)} USD</b></p>
+                    
+                    <div class="flex items-center gap-2 mb-2">
+                        <input type="number" id="inputAbonoUSD_${sale.id}" placeholder="Monto abonar en $" step="0.01" min="0" class="w-full text-xs border dark:border-gray-700 dark:bg-gray-800 rounded px-2 py-1.5 focus:outline-none">
+                        <button onclick="registrarAbono('${sale.id}')" class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1.5 rounded font-bold whitespace-nowrap">Abonar $</button>
+                    </div>
+
+                    <button onclick="alternarEstadoPago('${sale.id}')" class="w-full py-2 px-4 rounded-lg font-bold text-white text-xs shadow transition mt-1" style="background-color: ${pagadoTotal ? '#28a745' : '#dc3545'};">
+                        ${pagadoTotal ? '✔️ Pedido Pagado por Completo' : '❌ Marcar como Pagado Total'}
                     </button>
                 </div>
             `;
@@ -1037,21 +1053,44 @@
             document.getElementById('saleDetailModal').classList.remove('hidden');
         };
 
+        window.registrarAbono = async function(saleId) {
+            const sale = salesHistory.find(s => s.id === saleId);
+            if (!sale) return;
+            const input = document.getElementById(`inputAbonoUSD_${saleId}`);
+            const montoAbonado = parseFloat(input.value) || 0;
+            if (montoAbonado <= 0) return alert('Ingrese un monto válido');
+
+            const originalUSD = parseFloat(sale.totalUSDOriginal || sale.totalUSD || 0);
+            let actualAbono = parseFloat(sale.abonoUSD || 0) + montoAbonado;
+            if (actualAbono >= originalUSD) {
+                actualAbono = originalUSD;
+                sale.pagado = true;
+            }
+            sale.abonoUSD = actualAbono;
+
+            await supabase.from('sales').update({ abonoUSD: sale.abonoUSD, pagado: sale.pagado }).eq('id', saleId);
+            showToast('¡Abono registrado!');
+            showSaleDetail(saleId);
+            renderSalesHistory();
+            updateSalesStats();
+        };
+
         window.alternarEstadoPago = async function(saleId) {
             const sale = salesHistory.find(s => s.id === saleId);
             if (!sale) return;
             sale.pagado = !sale.pagado;
-            await supabase.from('sales').update({ pagado: sale.pagado }).eq('id', saleId);
+            sale.abonoUSD = sale.pagado ? parseFloat(sale.totalUSDOriginal || sale.totalUSD || 0) : 0;
+            await supabase.from('sales').update({ pagado: sale.pagado, abonoUSD: sale.abonoUSD }).eq('id', saleId);
             showSaleDetail(saleId);
             renderSalesHistory();
             updateSalesStats();
-            showToast('Estado de cuenta actualizado');
+            showToast('Estado actualizado');
         };
 
         window.closeSaleDetailModal = function() { document.getElementById('saleDetailModal').classList.add('hidden'); };
         
         window.clearSalesHistory = async function() {
-            if (confirm('¿Limpiar todo el historial?')) {
+            if (confirm('¿Limpiar historial?')) {
                 for (const s of salesHistory) { await supabase.from('sales').delete().eq('id', s.id); }
                 salesHistory = [];
                 renderSalesHistory();
@@ -1066,18 +1105,12 @@
             document.getElementById('name').value = p.name;
             document.getElementById('barcode').value = p.barcode || '';
             document.getElementById('stock').value = p.stock;
-            document.getElementById('costBase').value = p.costBase || '';
-            document.getElementById('priceBase').value = p.priceBase;
+            document.getElementById('costUSD').value = p.costUSD || '';
+            document.getElementById('priceUSD').value = p.priceUSD;
             document.getElementById('description').value = p.description || '';
             
-            base64ImageToSave = p.image || '';
-            if (base64ImageToSave) {
-                imagePreviewContainer.innerHTML = `<img src="${base64ImageToSave}" class="w-full h-full object-cover">`;
-            }
-
-            if (p.fractionUnit) {
-                const radio = document.querySelector(`input[name="fractionUnit"][value="${p.fractionUnit}"]`);
-                if (radio) radio.checked = true;
+            if (p.image) {
+                imagePreviewContainer.innerHTML = `<img src="${p.image}" class="w-full h-full object-cover">`;
             }
 
             document.getElementById('formTitle').textContent = 'Editar Producto';
@@ -1091,6 +1124,43 @@
                 products = products.filter(p => p.id !== id);
                 renderProducts();
             }
+        };
+
+        window.openScannerModal = function() {
+            document.getElementById('scannerModal').classList.remove('hidden');
+            setTimeout(() => {
+                Quagga.init({
+                    inputStream: { name: "Live", type: "LiveStream", target: document.querySelector('#scanner-container'), constraints: { facingMode: "environment" } },
+                    decoder: { readers: ["ean_reader", "code_128_reader"] },
+                }, function(err) {
+                    if (err) { stopScanner(); return; }
+                    Quagga.start();
+                });
+            }, 300);
+            Quagga.onDetected(onBarcodeDetected);
+        };
+
+        function onBarcodeDetected(result) {
+            const code = result.codeResult.code;
+            if (code) {
+                document.getElementById('barcode').value = code;
+                stopScanner();
+                showToast(`Código escaneado: ${code}`);
+            }
+        }
+
+        window.stopScanner = function() {
+            try { Quagga.stop(); } catch(e) {}
+            document.getElementById('scannerModal').classList.add('hidden');
+        };
+
+        window.sendCatalogWhatsApp = function() {
+            if (products.length === 0) return alert('No hay productos');
+            let text = `📋 *CATÁLOGO DE PRECIOS - ${storeName.toUpperCase()}*%0A%0A`;
+            products.forEach((p, idx) => {
+                text += `${idx + 1}. *${p.name}* - $${p.priceUSD.toFixed(2)} USD%0A`;
+            });
+            window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
         };
 
         function showToast(msg) {
