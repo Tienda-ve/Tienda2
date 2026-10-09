@@ -1023,7 +1023,7 @@
             showToast('Carrito vaciado');
         };
 
-        window.sendCartWhatsApp = async function() {
+                window.sendCartWhatsApp = async function() {
             if (cart.length === 0) return;
 
             const clientNameInput = document.getElementById('clientNameInput');
@@ -1054,6 +1054,78 @@
                 totalGeneralUSD += subtotalUSD;
                 totalCostUSD += (item.costUSD || 0) * multiplier;
 
+                const unitAbbr = item.fractionUnit === 'kg' ? 'g' : 'ml';
+                itemsDetail.push({
+                    name: item.name,
+                    baseName: item.baseName,
+                    qty: item.isWeighted ? `${item.gramsTotal}${unitAbbr}` : item.qty,
+                    isWeighted: item.isWeighted || false,
+                    fractionUnit: item.fractionUnit || 'none',
+                    costUSD: item.costUSD || 0,
+                    priceUSD: item.priceUSD,
+                    subtotalBs: subtotalBs.toFixed(2),
+                    subtotalUSD: subtotalUSD.toFixed(2)
+                });
+
+                text += `• *${item.name}*%0A`;
+                text += `  Subtotal: *${subtotalBs.toFixed(2)} Bs* ($${subtotalUSD.toFixed(2)})%0A`;
+                if (item.description) text += `  📝 ${item.description}%0A`;
+                text += `%0A`;
+
+                const pObj = products.find(p => p.id === item.productId);
+                if (pObj) {
+                    pObj.stock -= multiplier;
+                    if (pObj.stock < 0) pObj.stock = 0;
+                    await supabase.from('products').update({ stock: pObj.stock }).eq('id', pObj.id);
+                }
+            }
+
+            text += `━━━━━━━━━━━━━━━━━━%0A`;
+            text += `✅ *TOTAL A PAGAR: ${totalGeneralBs.toFixed(2)} Bs. ($${totalGeneralUSD.toFixed(2)})*%0A`;
+            text += `━━━━━━━━━━━━━━━━━━%0A`;
+
+            if (document.getElementById('cartIncludePM').checked) {
+                text += `%0A📱 *Datos de Pago Móvil:*%0A`;
+                text += `🏦 Banco: ${pagoMovilData.banco}%0A`;
+                text += `📞 Teléfono: ${pagoMovilData.telefono}%0A`;
+                text += `🆔 Cédula/RIF: ${pagoMovilData.cedula}%0A`;
+            }
+
+            text += `%0A📲 ¡Esperamos su confirmación para procesar el pedido!`;
+
+            const newSale = {
+                userId: currentUser.id,
+                idOrden: numeroOrden,
+                name: `Pedido Múltiple (${cart.length} productos)`,
+                cliente: clienteFinal,
+                qty: cart.reduce((acc, i) => acc + (i.isWeighted ? 1 : i.qty), 0),
+                totalUSDOriginal: totalGeneralUSD.toFixed(2),
+                totalUSD: totalGeneralUSD.toFixed(2),
+                total: totalGeneralBs.toFixed(2),
+                costUSD: totalCostUSD.toFixed(2),
+                date: `${fechaActual} a las ${horaActual}`,
+                dateIso: fechaIso,
+                timestamp: Date.now(),
+                items: itemsDetail,
+                pagado: false,
+                abonoUSD: 0
+            };
+
+            const { data, error } = await supabase.from('sales').insert([newSale]).select();
+            if (!error && data && data[0]) {
+                salesHistory.unshift(data[0]);
+            }
+
+            window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
+            
+            cart = [];
+            if (clientNameInput) clientNameInput.value = '';
+            renderCart();
+            renderProducts();
+            updateSalesStats();
+            showToast('¡Pedido enviado y stock actualizado en la nube!');
+        };
+        
                 const unitAbbr = item.fractionUnit === 'kg' ? 'g' : 'ml';
                 itemsDetail.push({
                     name: item.name,
