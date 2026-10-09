@@ -246,11 +246,7 @@
                 </div>
                 <div>
                     <label for="priceBase" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Precio de Venta (<span id="labelCurrencyPrice">USD</span>)</label>
-                    <input type="number" id="priceBase" step="0.01" min="0" required placeholder="Ej: 2.20" class="w-full border dark:border-gray-700 dark:bg-gray-900 rounded-lg px-3 py-2 focus:outline-none text-sm">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Porcentaje de Ganancia</label>
-                    <div id="profitPercentageBadge" class="w-full bg-gray-100 dark:bg-gray-900 border dark:border-gray-700 rounded-lg px-3 py-2 font-bold text-emerald-600 flex items-center text-sm">
+                    <input type="number" id="priceBadge" class="w-full bg-gray-100 dark:bg-gray-900 border dark:border-gray-700 rounded-lg px-3 py-2 font-bold text-emerald-600 flex items-center text-sm">
                         0.00%
                     </div>
                 </div>
@@ -323,7 +319,7 @@
         </div>
     </div>
 
-    <!-- MODAL HISTORIAL Y CIERRE DE CAJA (CON FILTRO DE DEUDORES) -->
+    <!-- MODAL HISTORIAL Y CIERRE DE CAJA -->
     <div id="salesModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
         <div id="salesModalContentCard" class="bg-white dark:bg-gray-800 dark:text-gray-100 rounded-xl shadow-xl max-w-2xl w-full p-5 max-h-[85vh] flex flex-col">
             <div class="flex justify-between items-center mb-2 border-b dark:border-gray-700 pb-2">
@@ -399,9 +395,9 @@
         let customPaymentMethods = [
             { id: 'pm1', name: 'Pago Móvil', flag: '🇻🇪', details: 'Banco: Venezuela\nTelf: 0412-0000000\nCédula: V-00000000' }
         ];
-        let imageFileToUpload = null;
+        let base64ImageToSave = '';
         let isDarkMode = localStorage.getItem('isDarkMode') === 'true';
-        let currentSalesFilter = 'all'; // 'all' o 'pending'
+        let currentSalesFilter = 'all';
 
         applyTheme();
 
@@ -496,15 +492,15 @@
 
         async function loadUserDataFromSupabase() {
             try {
-                const { data: prodData } = await supabase.from('products').select('*').eq('userId', currentUser.id);
-                if (prodData) products = prodData;
+                const { data: prodData, error: prodErr } = await supabase.from('products').select('*').eq('userId', currentUser.id);
+                if (!prodErr && prodData) products = prodData;
                 
-                const { data: salesData } = await supabase.from('sales').select('*').eq('userId', currentUser.id).order('timestamp', { ascending: false });
-                if (salesData) salesHistory = salesData;
+                const { data: salesData, error: salesErr } = await supabase.from('sales').select('*').eq('userId', currentUser.id).order('timestamp', { ascending: false });
+                if (!salesErr && salesData) salesHistory = salesData;
 
                 renderProducts();
                 updateSalesStats();
-            } catch (e) { showToast('Error al cargar datos'); }
+            } catch (e) { console.error(e); }
         }
 
         window.toggleTheme = function() {
@@ -675,10 +671,12 @@
         imageFile.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) {
-                imageFileToUpload = file;
                 fileName.textContent = file.name;
                 const reader = new FileReader();
-                reader.onload = (ev) => { imagePreviewContainer.innerHTML = `<img src="${ev.target.result}" class="w-full h-full object-cover">`; };
+                reader.onload = (ev) => {
+                    base64ImageToSave = ev.target.result;
+                    imagePreviewContainer.innerHTML = `<img src="${base64ImageToSave}" class="w-full h-full object-cover">`;
+                };
                 reader.readAsDataURL(file);
             }
         });
@@ -686,23 +684,11 @@
         productForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const docId = document.getElementById('editDocId').value;
-            let finalImageURL = '';
+            let finalImageURL = base64ImageToSave;
 
-            if (imageFileToUpload) {
-                const filePath = `productos/${currentUser.id}/${Date.now()}_${imageFileToUpload.name}`;
-                const { error: upErr } = await supabase.storage.from('store-images').upload(filePath, imageFileToUpload);
-                if (upErr) {
-                    const reader = new FileReader();
-                    reader.readAsDataURL(imageFileToUpload);
-                    await new Promise(r => reader.onload = r);
-                    finalImageURL = reader.result;
-                } else {
-                    const { data } = supabase.storage.from('store-images').getPublicUrl(filePath);
-                    finalImageURL = data.publicUrl;
-                }
-            } else if (docId) {
+            if (!finalImageURL && docId) {
                 const ext = products.find(p => p.id === docId);
-                if (ext) finalImageURL = ext.image;
+                if (ext) finalImageURL = ext.image || '';
             }
 
             const selectedFraction = document.querySelector('input[name="fractionUnit"]:checked');
@@ -717,27 +703,28 @@
                 currency: baseCurrency,
                 fractionUnit: selectedFraction ? selectedFraction.value : 'none',
                 description: document.getElementById('description').value.trim(),
-                image: finalImageURL || ''
+                image: finalImageURL
             };
 
             if (docId) {
-                await supabase.from('products').update(productData).eq('id', docId);
-                const idx = products.findIndex(p => p.id === docId);
-                if (idx > -1) products[idx] = { id: docId, ...productData };
+                const { error } = await supabase.from('products').update(productData).eq('id', docId);
+                if (error) { alert('Error al actualizar: ' + error.message); return; }
                 document.getElementById('editDocId').value = '';
                 document.getElementById('formTitle').textContent = 'Agregar Nuevo Producto';
                 document.getElementById('saveBtn').textContent = 'Guardar Producto';
             } else {
-                const { data } = await supabase.from('products').insert([productData]).select();
-                if (data && data[0]) products.push(data[0]);
+                const { error } = await supabase.from('products').insert([productData]);
+                if (error) { alert('Error al guardar en Supabase: ' + error.message); return; }
             }
 
             productForm.reset();
-            imageFileToUpload = null;
+            base64ImageToSave = '';
             fileName.textContent = 'Ninguna imagen seleccionada';
             imagePreviewContainer.innerHTML = '<span class="text-xs text-gray-400">Sin foto</span>';
-            renderProducts();
-            showToast('¡Producto guardado!');
+            
+            // Recargar inventario directamente desde Supabase para reflejar el cambio al instante
+            await loadUserDataFromSupabase();
+            showToast('¡Producto guardado exitosamente!');
         });
 
         window.renderProducts = function() {
@@ -867,15 +854,11 @@
             };
 
             try {
-                const { data, error } = await supabase.from('sales').insert([nuevaVenta]).select();
+                const { error } = await supabase.from('sales').insert([nuevaVenta]);
                 if (error) throw error;
-                if (data && data[0]) {
-                    salesHistory.unshift(data[0]);
-                }
-                updateSalesStats();
+                await loadUserDataFromSupabase();
             } catch (err) {
                 console.error("Error guardando venta:", err);
-                showToast("Error al guardar en el historial de la nube");
             }
 
             return { ordenId, cliente, totalGeneral, itemsDetail };
@@ -1087,6 +1070,11 @@
             document.getElementById('priceBase').value = p.priceBase;
             document.getElementById('description').value = p.description || '';
             
+            base64ImageToSave = p.image || '';
+            if (base64ImageToSave) {
+                imagePreviewContainer.innerHTML = `<img src="${base64ImageToSave}" class="w-full h-full object-cover">`;
+            }
+
             if (p.fractionUnit) {
                 const radio = document.querySelector(`input[name="fractionUnit"][value="${p.fractionUnit}"]`);
                 if (radio) radio.checked = true;
