@@ -725,7 +725,7 @@
             });
         };
 
-        function renderQuickShortcuts() {
+                function renderQuickShortcuts() {
             const container = document.getElementById('quickProductShortcuts');
             if (!container) return;
             container.innerHTML = '';
@@ -735,12 +735,28 @@
                 btn.className = 'bg-white dark:bg-gray-800 border text-xs px-2.5 py-1 rounded-md shadow-sm truncate max-w-[150px]';
                 btn.innerHTML = `<i class="fas fa-plus text-blue-500 mr-1"></i>${p.name}`;
                 btn.onclick = () => {
-                    if (p.fractionUnit !== 'none') addWeightedCustomCart(p.id, 250);
-                    else addToCart(p.id);
+                    if (p.fractionUnit && p.fractionUnit !== 'none') {
+                        const grams = 250;
+                        const fraction = grams / 1000;
+                        const unitLabel = p.fractionUnit === 'kg' ? 'g' : 'ml';
+                        const customName = `${p.name} (${grams}${unitLabel})`;
+
+                        const existing = cart.find(i => i.productId === p.id && i.name === customName);
+                        if (existing) {
+                            existing.qtyFraction += fraction;
+                            existing.gramsTotal += grams;
+                        } else {
+                            cart.push({ productId: p.id, name: customName, priceUSD: p.priceUSD, costUSD: p.costUSD || 0, qtyFraction: fraction, gramsTotal: grams, isWeighted: true, fractionUnit: p.fractionUnit });
+                        }
+                        renderCart();
+                        showToast(`Añadido: ${customName}`);
+                    } else {
+                        addToCart(p.id);
+                    }
                 };
                 container.appendChild(btn);
             });
-        }
+                }
 
         window.changeQty = function(id, delta) {
             const span = document.getElementById(`qtyVal_${id}`);
