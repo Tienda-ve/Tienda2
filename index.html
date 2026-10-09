@@ -390,7 +390,7 @@
         import { getFirestore, collection, addDoc, getDocs, doc, setDoc, getDoc, updateDoc, deleteDoc, query, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
-                const firebaseConfig = {
+        const firebaseConfig = {
             apiKey: "AIzaSyBwQRFLTlyc4eHCBisMu8VvqbIPjLUd5ZE",
             authDomain: "tiendave1-ae842.firebaseapp.com",
             projectId: "tiendave1-ae842",
@@ -804,7 +804,7 @@
                     `;
                 }
 
-                let badgeTag = '';
+                                     let badgeTag = '';
                 if (isKg) badgeTag = `<span class="bg-amber-100 text-amber-800 text-[10px] px-2 py-0.5 rounded font-bold">KILOS</span>`;
                 if (isLt) badgeTag = `<span class="bg-cyan-100 text-cyan-800 text-[10px] px-2 py-0.5 rounded font-bold">LITROS</span>`;
 
@@ -1022,7 +1022,7 @@
 
             const now = new Date();
             const fechaActual = now.toLocaleDateString('es-VE');
-            const fechaIso = now.toISOString().split('T')[0]; // Formato YYYY-MM-DD para filtros
+            const fechaIso = now.toISOString().split('T')[0];
             const horaActual = now.toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit' });
             const numeroOrden = 'OM-' + Math.random().toString(36).substring(2, 7).toUpperCase();
 
@@ -1598,4 +1598,3 @@
     </script>
 </body>
 </html>
-               
