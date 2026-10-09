@@ -107,22 +107,25 @@
             <div class="flex flex-col md:flex-row justify-between items-center gap-4 border-b border-blue-400 pb-3 mb-3">
                 <div>
                     <h3 class="text-lg font-bold flex items-center gap-2"><i class="fas fa-shopping-cart"></i> Carrito de Compras Actual</h3>
-                    <p class="text-xs text-blue-100">Productos seleccionados por el cliente para un pedido consolidado</p>
+                    <p class="text-xs text-blue-100">Productos seleccionados para el pedido</p>
                 </div>
                 <div class="flex items-center gap-3">
-                    <span id="cartTotalBadge" class="bg-white text-blue-700 px-4 py-1.5 rounded-full font-bold text-sm shadow">Total: $0.00</span>
+                    <span id="cartTotalBadge" class="bg-white text-blue-700 px-4 py-1.5 rounded-full font-bold text-sm shadow">Total: 0.00</span>
                     <button onclick="clearCart()" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold"><i class="fas fa-trash mr-1"></i> Vaciar Carrito</button>
                 </div>
             </div>
             <div id="cartItemsContainer" class="space-y-2 mb-4 max-h-48 overflow-y-auto pr-2"></div>
-            <div class="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-blue-400">
-                <div class="flex flex-wrap items-center gap-3 text-xs" id="cartPaymentCheckboxesContainer">
-                    <!-- Checkboxes dinámicos de métodos de pago -->
+            <div class="flex flex-col md:flex-row items-center justify-between gap-3 pt-2 border-t border-blue-400">
+                <div class="flex flex-wrap items-center gap-3 text-xs w-full md:w-auto" id="cartPaymentCheckboxesContainer">
+                    <!-- Checkboxes de métodos de pago -->
                 </div>
-                <div class="flex items-center gap-2 w-full md:w-auto mt-2 md:mt-0">
-                    <input type="text" id="clientNameInput" placeholder="Nombre del cliente..." class="text-gray-800 text-xs px-3 py-2 rounded-lg border-0 focus:outline-none focus:ring-2 focus:ring-blue-300 w-full md:w-48">
-                    <button onclick="sendCartWhatsApp()" class="bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 shadow-lg transition transform hover:scale-105 whitespace-nowrap">
-                        <i class="fab fa-whatsapp text-lg"></i> Enviar Pedido
+                <div class="flex flex-wrap items-center gap-2 w-full md:w-auto justify-end">
+                    <input type="text" id="clientNameInput" placeholder="Nombre del cliente..." class="text-gray-800 text-xs px-3 py-2 rounded-lg border-0 focus:outline-none focus:ring-2 focus:ring-blue-300 w-full sm:w-44">
+                    <button onclick="guardarCarritoEnHistorialManual()" class="bg-amber-500 hover:bg-amber-600 text-white px-3 py-2.5 rounded-xl font-bold text-xs flex items-center gap-1.5 shadow transition whitespace-nowrap" title="Guarda en caja sin abrir WhatsApp">
+                        <i class="fas fa-save"></i> Guardar en Historial
+                    </button>
+                    <button onclick="sendCartWhatsApp()" class="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2.5 rounded-xl font-bold text-xs flex items-center gap-1.5 shadow-lg transition whitespace-nowrap">
+                        <i class="fab fa-whatsapp text-base"></i> Enviar por WhatsApp
                     </button>
                 </div>
             </div>
@@ -139,42 +142,51 @@
             </div>
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 border-l-4 border-emerald-500 flex items-center justify-between">
                 <div>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 uppercase font-semibold">Ingresos Totales (USD)</p>
-                    <h3 id="statTotalIngresos" class="text-xl font-bold text-emerald-600 dark:text-emerald-400">$0.00</h3>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 uppercase font-semibold">Ingresos Totales</p>
+                    <h3 id="statTotalIngresos" class="text-xl font-bold text-emerald-600 dark:text-emerald-400">0.00</h3>
                 </div>
                 <i class="fas fa-money-bill-wave text-emerald-200 dark:text-emerald-900 text-3xl"></i>
             </div>
         </div>
 
-        <!-- CONFIGURACIÓN DE TASAS Y MONEDAS -->
+        <!-- CONFIGURACIÓN DE MONEDA Y PREFERENCIAS -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <section class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 border-l-4 border-indigo-500 flex flex-col justify-between">
                 <div>
                     <label for="storeNameInput" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"><i class="fas fa-store text-indigo-500 mr-1"></i> Nombre de la Tienda</label>
-                    <span class="text-xs text-gray-400 block mb-2">Ej: Mi Tienda Virtual</span>
                 </div>
-                <input type="text" id="storeNameInput" placeholder="Nombre de tu tienda..." class="w-full border-2 border-indigo-100 dark:border-gray-700 dark:bg-gray-900 rounded-lg px-3 py-1.5 font-bold text-indigo-600 dark:text-indigo-400 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <input type="text" id="storeNameInput" placeholder="Nombre de tu tienda..." class="w-full border-2 border-indigo-100 dark:border-gray-700 dark:bg-gray-900 rounded-lg px-3 py-1.5 font-bold text-indigo-600 dark:text-indigo-400 text-sm focus:outline-none">
             </section>
 
-            <!-- TASA BS (VENEZUELA 🇻🇪) -->
-            <section class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 flex items-center justify-between gap-4 border-l-4 border-blue-500">
-                <div>
-                    <label for="globalExchangeRate" class="block text-sm font-medium text-gray-700 dark:text-gray-300">🇻🇪 Tasa Bolívar (Bs. por $1)</label>
-                    <span class="text-xs text-gray-400">Conversión a bolívares</span>
+            <!-- SELECCIÓN DE MONEDA BASE Y TASA -->
+            <section class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 border-l-4 border-blue-500 md:col-span-2">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 dark:text-gray-300">💱 Moneda Base de la Tienda</label>
+                        <span class="text-xs text-gray-400">Elige en qué moneda fijas tus precios de venta</span>
+                    </div>
+                    <div class="flex items-center gap-3 w-full sm:w-auto">
+                        <select id="baseCurrencySelect" class="border-2 border-blue-200 dark:border-gray-700 dark:bg-gray-900 rounded-lg px-3 py-1.5 font-bold text-blue-600 dark:text-blue-400 text-sm focus:outline-none">
+                            <option value="USD">Dólar ($ USD)</option>
+                            <option value="BS">Bolívares (Bs 🇻🇪)</option>
+                            <option value="COP">Pesos Colombianos (COP 🇨🇴)</option>
+                            <option value="DOP">Pesos Dominicanos (DOP 🇩🇴)</option>
+                            <option value="PEN">Soles (PEN 🇵🇪)</option>
+                        </select>
+                    </div>
                 </div>
-                <input type="number" id="globalExchangeRate" step="0.01" min="0" value="36.50" class="w-28 border-2 border-blue-200 dark:border-gray-700 dark:bg-gray-900 rounded-lg px-2 py-2 font-bold text-blue-600 dark:text-blue-400 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 text-center">
+                <div class="mt-3 pt-3 border-t dark:border-gray-700 flex items-center justify-between gap-3">
+                    <label class="flex items-center gap-2 cursor-pointer text-xs font-semibold">
+                        <input type="checkbox" id="useUsdReferenceCheckbox" class="rounded text-blue-600 w-4 h-4"> Usar Dólar ($ USD) como referencia paralela
+                    </label>
+                    <div id="exchangeRateBox" class="flex items-center gap-2 hidden">
+                        <span class="text-xs font-medium text-gray-500">Tasa de cambio local:</span>
+                        <input type="number" id="localExchangeRate" step="0.01" min="0" value="36.50" class="w-24 border dark:border-gray-700 dark:bg-gray-900 rounded px-2 py-1 text-xs font-bold text-center">
+                    </div>
+                </div>
             </section>
 
-            <!-- TASA COP (COLOMBIA 🇨🇴 u otro país) -->
-            <section class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 flex items-center justify-between gap-4 border-l-4 border-amber-500">
-                <div>
-                    <label for="copExchangeRate" class="block text-sm font-medium text-gray-700 dark:text-gray-300">🇨🇴 Tasa Pesos COP (por $1 USD)</label>
-                    <span class="text-xs text-gray-400">Ej: 4100 COP = $1 USD</span>
-                </div>
-                <input type="number" id="copExchangeRate" step="1" min="0" value="4100" class="w-28 border-2 border-amber-200 dark:border-gray-700 dark:bg-gray-900 rounded-lg px-2 py-2 font-bold text-amber-600 dark:text-amber-400 text-base focus:outline-none focus:ring-2 focus:ring-amber-500 text-center">
-            </section>
-
-            <!-- GESTOR DE MÉTODOS DE PAGO INTERNACIONALES -->
+            <!-- GESTOR DE MÉTODOS DE PAGO -->
             <section class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 border-l-4 border-emerald-500 md:col-span-3">
                 <div class="flex justify-between items-center mb-3">
                     <span class="text-sm font-bold text-gray-800 dark:text-gray-200"><i class="fas fa-globe-americas text-emerald-500 mr-1"></i> Métodos de Pago (Cualquier país y bandera)</span>
@@ -182,9 +194,7 @@
                         <i class="fas fa-plus"></i> Agregar Método de Pago
                     </button>
                 </div>
-                <div id="customPaymentMethodsList" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                    <!-- Se listan dinámicamente -->
-                </div>
+                <div id="customPaymentMethodsList" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3"></div>
             </section>
         </div>
 
@@ -200,23 +210,23 @@
                 <input type="hidden" id="editDocId" value="">
                 <div>
                     <label for="name" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Nombre del Producto</label>
-                    <input type="text" id="name" required placeholder="Ej: Queso Paisa / Harina PAN" class="w-full border dark:border-gray-700 dark:bg-gray-900 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                    <input type="text" id="name" required placeholder="Ej: Queso Paisa / Harina PAN" class="w-full border dark:border-gray-700 dark:bg-gray-900 rounded-lg px-3 py-2 focus:outline-none text-sm">
                 </div>
                 <div>
                     <label for="barcode" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Código de Barras / SKU</label>
-                    <input type="text" id="barcode" placeholder="Ej: 7591012345678 (Opcional)" class="w-full border dark:border-gray-700 dark:bg-gray-900 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                    <input type="text" id="barcode" placeholder="Ej: 7591012345678 (Opcional)" class="w-full border dark:border-gray-700 dark:bg-gray-900 rounded-lg px-3 py-2 focus:outline-none text-sm">
                 </div>
                 <div>
                     <label for="stock" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Inventario Inicial</label>
-                    <input type="number" id="stock" step="0.01" min="0" value="0" required placeholder="Ej: 15 (Unidades, Kg o Litros)" class="w-full border dark:border-gray-700 dark:bg-gray-900 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                    <input type="number" id="stock" step="0.01" min="0" value="0" required placeholder="Ej: 15" class="w-full border dark:border-gray-700 dark:bg-gray-900 rounded-lg px-3 py-2 focus:outline-none text-sm">
                 </div>
                 <div>
-                    <label for="costUSD" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Costo Base ($ USD)</label>
-                    <input type="number" id="costUSD" step="0.01" min="0" placeholder="Ej: 1.50 (Precio de compra)" class="w-full border dark:border-gray-700 dark:bg-gray-900 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                    <label for="costBase" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Costo Base (<span id="labelCurrencyCost">USD</span>)</label>
+                    <input type="number" id="costBase" step="0.01" min="0" placeholder="Ej: 1.50" class="w-full border dark:border-gray-700 dark:bg-gray-900 rounded-lg px-3 py-2 focus:outline-none text-sm">
                 </div>
                 <div>
-                    <label for="priceUSD" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Precio de Venta ($ USD <span id="priceUnitLabel">unidad</span>)</label>
-                    <input type="number" id="priceUSD" step="0.01" min="0" required placeholder="Ej: 2.20 (Precio al público en USD)" class="w-full border dark:border-gray-700 dark:bg-gray-900 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                    <label for="priceBase" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Precio de Venta (<span id="labelCurrencyPrice">USD</span>)</label>
+                    <input type="number" id="priceBase" step="0.01" min="0" required placeholder="Ej: 2.20" class="w-full border dark:border-gray-700 dark:bg-gray-900 rounded-lg px-3 py-2 focus:outline-none text-sm">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Porcentaje de Ganancia</label>
@@ -224,35 +234,6 @@
                         0.00%
                     </div>
                 </div>
-
-                <!-- SELECTOR DE TIPO DE VENTA: UNIDAD, KILOS O LITROS -->
-                <div class="md:col-span-2 lg:col-span-3 bg-blue-50 dark:bg-gray-900 p-4 rounded-lg border border-blue-200 dark:border-gray-700">
-                    <label class="block text-sm font-bold text-gray-800 dark:text-gray-200 mb-2">⚖️ Tipo de venta (Selecciona una casilla independiente):</label>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                        <label class="flex items-center space-x-2 bg-white dark:bg-gray-800 p-3 rounded-lg border dark:border-gray-700 cursor-pointer">
-                            <input type="radio" id="unitNone" name="fractionUnit" value="none" checked class="text-blue-600 focus:ring-blue-500 w-4 h-4">
-                            <div>
-                                <span class="text-xs font-bold block text-gray-700 dark:text-gray-300">Unidad Normal</span>
-                                <span class="text-[10px] text-gray-400 block">Ej: Refrescos, Harina, Snacks</span>
-                            </div>
-                        </label>
-                        <label class="flex items-center space-x-2 bg-white dark:bg-gray-800 p-3 rounded-lg border dark:border-gray-700 cursor-pointer">
-                            <input type="radio" id="unitKg" name="fractionUnit" value="kg" class="text-blue-600 focus:ring-blue-500 w-4 h-4">
-                            <div>
-                                <span class="text-xs font-bold block text-amber-600">Casilla Kilos (kg)</span>
-                                <span class="text-[10px] text-gray-400 block">Ej: Queso, Carne, Jamón</span>
-                            </div>
-                        </label>
-                        <label class="flex items-center space-x-2 bg-white dark:bg-gray-800 p-3 rounded-lg border dark:border-gray-700 cursor-pointer">
-                            <input type="radio" id="unitLt" name="fractionUnit" value="lt" class="text-blue-600 focus:ring-blue-500 w-4 h-4">
-                            <div>
-                                <span class="text-xs font-bold block text-cyan-600">Casilla Litros (lt)</span>
-                                <span class="text-[10px] text-gray-400 block">Ej: Cloro, Aceite a granel</span>
-                            </div>
-                        </label>
-                    </div>
-                </div>
-
                 <div class="md:col-span-2">
                     <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Imagen del Producto (Opcional)</label>
                     <div class="flex items-center gap-3">
@@ -260,7 +241,22 @@
                             <i class="fas fa-camera"></i> Seleccionar Imagen
                         </label>
                         <input type="file" id="imageFile" accept="image/*" class="hidden">
-                        <span id="fileName" class="text-xs text-gray-400 truncate">Ninguna imagen seleccionada (Opcional)</span>
+                        <span id="fileName" class="text-xs text-gray-400 truncate">Ninguna imagen seleccionada</span>
+                    </div>
+                </div>
+                <div class="flex items-center justify-center">
+                    <div id="imagePreviewContainer" class="w-28 h-28 border dark:border-gray-700 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-900 flex items-center justify-center">
+                        <span class="text-xs text-gray-400">Sin foto</span>
+                    </div>
+                </div>
+                                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Imagen del Producto (Opcional)</label>
+                    <div class="flex items-center gap-3">
+                        <label for="imageFile" class="cursor-pointer bg-blue-50 dark:bg-gray-700 hover:bg-blue-100 text-blue-600 dark:text-blue-300 border border-blue-200 dark:border-gray-600 px-4 py-2 rounded-lg flex items-center gap-2 text-sm">
+                            <i class="fas fa-camera"></i> Seleccionar Imagen
+                        </label>
+                        <input type="file" id="imageFile" accept="image/*" class="hidden">
+                        <span id="fileName" class="text-xs text-gray-400 truncate">Ninguna imagen seleccionada</span>
                     </div>
                 </div>
                 <div class="flex items-center justify-center">
@@ -270,7 +266,7 @@
                 </div>
                 <div class="md:col-span-2 lg:col-span-3">
                     <label for="description" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Descripción (Opcional)</label>
-                    <textarea id="description" rows="2" placeholder="Ej: Presentación de 1kg, producto fresco..." class="w-full border dark:border-gray-700 dark:bg-gray-900 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"></textarea>
+                    <textarea id="description" rows="2" placeholder="Ej: Producto fresco..." class="w-full border dark:border-gray-700 dark:bg-gray-900 rounded-lg px-3 py-2 focus:outline-none text-sm"></textarea>
                 </div>
                 <div class="md:col-span-2 lg:col-span-3 text-right">
                     <button type="submit" id="saveBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition font-semibold text-sm">Guardar Producto</button>
@@ -285,174 +281,100 @@
         </section>
     </div>
 
-    <!-- MODAL PARA AGREGAR / EDITAR MÉTODO DE PAGO INTERNACIONAL -->
+    <!-- MODAL MÉTODO DE PAGO -->
     <div id="paymentModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
         <div class="bg-white dark:bg-gray-800 dark:text-gray-100 rounded-xl shadow-xl max-w-md w-full p-6">
             <h3 id="paymentModalTitle" class="text-lg font-bold mb-4">Agregar Método de Pago</h3>
             <div class="space-y-3">
                 <input type="hidden" id="editPaymentId" value="">
-                <div>
-                    <label class="block text-xs font-semibold mb-1">Nombre del Método / Banco / App</label>
-                    <input type="text" id="payName" placeholder="Ej: Zelle, Nequi, Pix, Yape, Banesco Panamá" class="w-full border dark:border-gray-700 dark:bg-gray-900 rounded px-3 py-2 text-xs focus:outline-none">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold mb-1">Bandera / País (Emoji)</label>
-                    <input type="text" id="payFlag" placeholder="Ej: 🇻🇪, 🇨🇴, 🇺🇸, 🇧🇷, 🇵🇪, 🇨🇱" class="w-full border dark:border-gray-700 dark:bg-gray-900 rounded px-3 py-2 text-xs focus:outline-none">
-                </div>
-                <div>
-                    <label class="block text-xs font-semibold mb-1">Detalles de la Cuenta (Teléfono, Correo, CBU, Número)</label>
-                    <textarea id="payDetails" rows="3" placeholder="Ej: Celular: 3000000000 - Titular: Juan" class="w-full border dark:border-gray-700 dark:bg-gray-900 rounded px-3 py-2 text-xs focus:outline-none"></textarea>
-                </div>
+                <div><label class="block text-xs font-semibold mb-1">Nombre</label><input type="text" id="payName" class="w-full border dark:border-gray-700 dark:bg-gray-900 rounded px-3 py-2 text-xs"></div>
+                <div><label class="block text-xs font-semibold mb-1">Bandera (Emoji)</label><input type="text" id="payFlag" class="w-full border dark:border-gray-700 dark:bg-gray-900 rounded px-3 py-2 text-xs"></div>
+                <div><label class="block text-xs font-semibold mb-1">Detalles</label><textarea id="payDetails" rows="3" class="w-full border dark:border-gray-700 dark:bg-gray-900 rounded px-3 py-2 text-xs"></textarea></div>
                 <div class="flex justify-end gap-2 pt-2">
-                    <button type="button" onclick="closePaymentModal()" class="bg-gray-300 dark:bg-gray-700 text-gray-700 dark:text-gray-200 px-4 py-2 rounded text-xs font-semibold">Cancelar</button>
-                    <button type="button" onclick="saveCustomPaymentMethod()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded text-xs font-semibold">Guardar</button>
+                    <button type="button" onclick="closePaymentModal()" class="bg-gray-300 dark:bg-gray-700 px-4 py-2 rounded text-xs font-semibold">Cancelar</button>
+                    <button type="button" onclick="saveCustomPaymentMethod()" class="bg-emerald-600 text-white px-4 py-2 rounded text-xs font-semibold">Guardar</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- MODAL DE HISTORIAL DE VENTAS Y CIERRE DE CAJA -->
+    <!-- MODAL HISTORIAL -->
     <div id="salesModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
         <div id="salesModalContentCard" class="bg-white dark:bg-gray-800 dark:text-gray-100 rounded-xl shadow-xl max-w-2xl w-full p-5 max-h-[85vh] flex flex-col">
             <div class="flex justify-between items-center mb-2 border-b dark:border-gray-700 pb-2">
-                <h3 class="text-base font-bold text-gray-800 dark:text-gray-100"><i class="fas fa-chart-pie mr-2 text-purple-600"></i>Cierre de Caja e Historial</h3>
-                <div class="flex items-center gap-2">
-                    <button onclick="downloadElementAsImage('salesModalContentCard', 'Cierre_de_Caja.png')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-2 py-0.5 rounded text-xs font-semibold flex items-center gap-1" title="Descargar comprobante"><i class="fas fa-download"></i> Captura</button>
-                    <button onclick="toggleSalesHistoryModal()" class="text-gray-400 hover:text-gray-600 text-lg">&times;</button>
-                </div>
+                <h3 class="text-base font-bold"><i class="fas fa-chart-pie mr-2 text-purple-600"></i>Cierre de Caja e Historial</h3>
+                <button onclick="toggleSalesHistoryModal()" class="text-gray-400 text-lg">&times;</button>
             </div>
-            
-            <div class="bg-purple-50 dark:bg-gray-900 border border-purple-200 dark:border-gray-700 rounded-lg p-3 mb-3 grid grid-cols-2 gap-2 text-xs">
-                <div>
-                    <span class="font-bold text-purple-700 dark:text-purple-400 uppercase block">✔️ Cobrado:</span>
-                    <h4 id="cierreCobrado" class="text-sm font-bold text-emerald-600">$0.00</h4>
-                </div>
-                <div>
-                    <div class="flex justify-between items-center">
-                        <span class="font-bold text-red-700 dark:text-red-400 uppercase block">❌ Por Cobrar:</span>
-                        <button onclick="filterPendingSalesToggle()" id="btnFilterPending" class="bg-red-600 hover:bg-red-700 text-white px-2 py-0.5 rounded text-[10px] font-bold shadow transition"><i class="fas fa-filter mr-1"></i>Ver pendientes</button>
-                    </div>
-                    <h4 id="cierrePendiente" class="text-sm font-bold text-red-600">$0.00</h4>
-                </div>
-                <div class="col-span-2 border-t dark:border-gray-700 pt-1.5 flex justify-between items-center">
-                    <div>
-                        <span class="font-bold text-blue-700 dark:text-blue-400 uppercase text-[10px]">💰 Ganancia Neta:</span>
-                        <h4 id="cierreGananciaNeta" class="text-xs font-bold text-blue-600">$0.00</h4>
-                    </div>
-                    <div class="text-right">
-                        <span class="font-bold text-indigo-700 dark:text-indigo-400 uppercase text-[10px]">📊 % Ganancia:</span>
-                        <h4 id="cierrePorcentajeGanancia" class="text-xs font-bold text-indigo-600">0.00%</h4>
-                    </div>
-                </div>
+            <div class="bg-purple-50 dark:bg-gray-900 border dark:border-gray-700 rounded-lg p-3 mb-3 grid grid-cols-2 gap-2 text-xs">
+                <div><span class="font-bold text-purple-700 uppercase block">✔️ Cobrado:</span><h4 id="cierreCobrado" class="text-sm font-bold text-emerald-600">0.00</h4></div>
+                <div><span class="font-bold text-red-700 uppercase block">❌ Por Cobrar:</span><h4 id="cierrePendiente" class="text-sm font-bold text-red-600">0.00</h4></div>
             </div>
-
-            <div class="bg-gray-100 dark:bg-gray-900 p-2.5 rounded-lg mb-3 flex flex-wrap items-center justify-between gap-2 text-xs border dark:border-gray-700">
-                <div class="flex items-center gap-2">
-                    <span class="font-bold text-gray-700 dark:text-gray-300"><i class="fas fa-calendar-alt text-blue-500 mr-1"></i> Buscar por Fecha:</span>
-                    <input type="date" id="filterDateInput" class="border dark:border-gray-700 dark:bg-gray-800 rounded px-2 py-1 text-xs focus:outline-none">
-                </div>
-                <div class="flex gap-1.5">
-                    <button onclick="applyDateFilter()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded font-bold transition">Filtrar</button>
-                    <button onclick="clearDateFilter()" class="bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 text-gray-700 dark:text-gray-200 px-2.5 py-1 rounded">Ver todo</button>
-                </div>
-            </div>
-
             <div id="salesHistoryList" class="overflow-y-auto flex-1 space-y-2 pr-1"></div>
-            
             <div class="mt-3 pt-2 border-t dark:border-gray-700 flex justify-between items-center">
-                <button onclick="clearSalesHistory()" class="bg-red-100 hover:bg-red-200 text-red-600 px-2.5 py-1 rounded text-xs font-semibold">Borrar Historial</button>
-                <button onclick="toggleSalesHistoryModal()" class="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 text-gray-700 dark:text-gray-200 px-3 py-1 rounded text-xs font-semibold">Cerrar</button>
+                <button onclick="clearSalesHistory()" class="bg-red-100 text-red-600 px-2.5 py-1 rounded text-xs font-semibold">Borrar Historial</button>
+                <button onclick="toggleSalesHistoryModal()" class="bg-gray-200 dark:bg-gray-700 px-3 py-1 rounded text-xs font-semibold">Cerrar</button>
             </div>
         </div>
     </div>
 
-    <!-- MODAL DE DETALLE DE VENTA -->
+    <!-- MODAL DETALLE DE VENTA -->
     <div id="saleDetailModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
         <div id="saleDetailCard" class="bg-white dark:bg-gray-800 dark:text-gray-100 rounded-xl shadow-xl max-w-md w-full p-6 flex flex-col max-h-[90vh]">
             <div class="flex justify-between items-center mb-4 border-b dark:border-gray-700 pb-2">
-                <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100"><i class="fas fa-receipt mr-2 text-blue-600"></i>Detalle de la Venta</h3>
-                <div class="flex items-center gap-2">
-                    <button onclick="downloadSaleDetailImage()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-2 py-1 rounded text-xs font-semibold flex items-center gap-1" title="Descargar captura"><i class="fas fa-download"></i> Captura</button>
-                    <button onclick="closeSaleDetailModal()" class="text-gray-400 hover:text-gray-600 text-xl font-bold px-1">&times;</button>
-                </div>
+                <h3 class="text-lg font-bold"><i class="fas fa-receipt mr-2 text-blue-600"></i>Detalle de la Venta</h3>
+                <button onclick="closeSaleDetailModal()" class="text-xl font-bold px-1">&times;</button>
             </div>
-            <div id="saleDetailContent" class="space-y-3 text-sm text-gray-700 dark:text-gray-300 overflow-y-auto mb-4 pr-1 flex-1"></div>
+            <div id="saleDetailContent" class="space-y-3 text-sm overflow-y-auto mb-4 pr-1 flex-1"></div>
             <div class="text-right pt-2 border-t dark:border-gray-700">
-                <button onclick="closeSaleDetailModal()" class="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 px-4 py-1.5 rounded text-sm font-semibold">Cerrar</button>
+                <button onclick="closeSaleDetailModal()" class="bg-gray-200 dark:bg-gray-700 px-4 py-1.5 rounded text-sm font-semibold">Cerrar</button>
             </div>
         </div>
     </div>
 
-    <!-- MODAL DE ESCÁNER -->
+    <!-- MODAL ESCÁNER -->
     <div id="scannerModal" class="fixed inset-0 bg-black bg-opacity-70 hidden z-50 flex items-center justify-center p-4">
         <div class="bg-white dark:bg-gray-800 dark:text-gray-100 rounded-xl shadow-xl max-w-md w-full p-6 text-center">
             <h3 class="text-lg font-bold mb-2">Escanear Código de Barras</h3>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">Apunta la cámara de tu celular al código de barras del producto</p>
             <div id="scanner-container" class="bg-black rounded-lg overflow-hidden mb-4 relative min-h-[300px]"></div>
-            <div class="flex justify-center gap-3">
-                <button onclick="stopScanner()" class="bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-lg text-sm font-semibold">Cancelar / Cerrar</button>
-            </div>
+            <button onclick="stopScanner()" class="bg-gray-300 dark:bg-gray-700 px-4 py-2 rounded-lg text-sm font-semibold">Cancelar</button>
         </div>
     </div>
 
     <div id="toastContainer"></div>
 
-    <!-- SCRIPT DE SUPABASE Y LÓGICA -->
     <script type="module">
         import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
         const SUPABASE_URL = 'https://jdnkohkkchyftdqsiuwy.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_qKmCxGdiP_FmewbqUHE2dA_1X8wyxFO';
-
         const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        const adminPaymentData = {
-            whatsappAdmin: '584120000000'
-        };
+        const adminPaymentData = { whatsappAdmin: '584120000000' };
 
         let currentUser = null;
         let products = [];
         let salesHistory = [];
         let cart = [];
-        let globalExchangeRate = 36.50;
-        let copExchangeRate = 4100;
         let storeName = 'Mi Tienda';
+        let baseCurrency = 'USD';
+        let useUsdReference = false;
+        let localExchangeRate = 36.50;
         let customPaymentMethods = [
-            { id: 'pm1', name: 'Pago Móvil', flag: '🇻🇪', details: 'Banco: Venezuela\nTelf: 0412-0000000\nCédula: V-00000000' },
-            { id: 'nequi1', name: 'Nequi', flag: '🇨🇴', details: 'Celular: 3000000000\nTitular: Tienda' },
-            { id: 'banco1', name: 'Bancolombia', flag: '🇨🇴', details: 'Ahorros: 000-000000-00\nTitular: Tienda' }
+            { id: 'pm1', name: 'Pago Móvil', flag: '🇻🇪', details: 'Banco: Venezuela\nTelf: 0412-0000000\nCédula: V-00000000' }
         ];
         let imageFileToUpload = null;
         let isDarkMode = localStorage.getItem('isDarkMode') === 'true';
-        let filterOnlyPending = false;
-        let selectedFilterDate = '';
 
         applyTheme();
 
-        // Gestión de sesión con Supabase Auth
         supabase.auth.onAuthStateChange(async (event, session) => {
             if (session && session.user) {
                 try {
                     currentUser = session.user;
-                    
-                    let { data: userRow, error: fetchErr } = await supabase
-                        .from('users')
-                        .select('*')
-                        .eq('id', currentUser.id)
-                        .single();
-
-                    let isSubscribed = false;
-                    if (userRow) {
-                        isSubscribed = userRow.subscriptionActive === true;
-                    } else {
-                        await supabase.from('users').insert([
-                            { id: currentUser.id, email: currentUser.email, subscriptionActive: false }
-                        ]);
-                        isSubscribed = false;
-                    }
+                    let { data: userRow } = await supabase.from('users').select('*').eq('id', currentUser.id).single();
+                    let isSubscribed = userRow ? userRow.subscriptionActive === true : false;
 
                     document.getElementById('authScreen').classList.add('hidden');
-
                     if (!isSubscribed) {
                         document.getElementById('mainAppContainer').classList.add('hidden');
                         document.getElementById('subscriptionScreen').classList.remove('hidden');
@@ -465,25 +387,26 @@
                     document.getElementById('mainAppContainer').classList.remove('hidden');
                     document.getElementById('userEmailDisplay').textContent = currentUser.email;
                     
-                    globalExchangeRate = parseFloat(localStorage.getItem(`exchangeRate_${currentUser.id}`)) || 36.50;
-                    copExchangeRate = parseFloat(localStorage.getItem(`copExchangeRate_${currentUser.id}`)) || 4100;
+                    baseCurrency = localStorage.getItem(`baseCurrency_${currentUser.id}`) || 'USD';
+                    useUsdReference = localStorage.getItem(`useUsdRef_${currentUser.id}`) === 'true';
+                    localExchangeRate = parseFloat(localStorage.getItem(`localExRate_${currentUser.id}`)) || 36.50;
                     storeName = localStorage.getItem(`storeName_${currentUser.id}`) || 'Mi Tienda';
                     
                     const paySaved = localStorage.getItem(`customPayments_${currentUser.id}`);
-                    if (paySaved) {
-                        customPaymentMethods = JSON.parse(paySaved);
-                    }
+                    if (paySaved) customPaymentMethods = JSON.parse(paySaved);
 
-                    document.getElementById('globalExchangeRate').value = globalExchangeRate;
-                    document.getElementById('copExchangeRate').value = copExchangeRate;
+                    document.getElementById('baseCurrencySelect').value = baseCurrency;
+                    document.getElementById('useUsdReferenceCheckbox').checked = useUsdReference;
+                    document.getElementById('localExchangeRate').value = localExchangeRate;
                     document.getElementById('storeNameInput').value = storeName;
+                    
+                    toggleExchangeRateVisibility();
+                    updateCurrencyUI();
                     updateStoreNameUI();
                     renderCustomPaymentMethodsUI();
 
                     await loadUserDataFromSupabase();
-                } catch (err) {
-                    console.error("Error verificando estatus:", err);
-                }
+                } catch (err) { console.error(err); }
             } else {
                 currentUser = null;
                 document.getElementById('authScreen').classList.remove('hidden');
@@ -495,71 +418,40 @@
         document.getElementById('loginBtn').addEventListener('click', async () => {
             const email = document.getElementById('authEmail').value.trim();
             const pass = document.getElementById('authPassword').value.trim();
-            const errEl = document.getElementById('authError');
             try {
-                errEl.textContent = '';
                 const { error } = await supabase.auth.signInWithPassword({ email, password: pass });
                 if (error) throw error;
-            } catch (e) {
-                errEl.textContent = 'Error al entrar: Verifique sus credenciales.';
-            }
+            } catch (e) { document.getElementById('authError').textContent = 'Error al entrar.'; }
         });
 
         document.getElementById('registerBtn').addEventListener('click', async () => {
             const email = document.getElementById('authEmail').value.trim();
             const pass = document.getElementById('authPassword').value.trim();
-            const errEl = document.getElementById('authError');
             try {
-                errEl.textContent = '';
                 const { data, error } = await supabase.auth.signUp({ email, password: pass });
                 if (error) throw error;
-                
-                if (data.user) {
-                    await supabase.from('users').insert([
-                        { id: data.user.id, email: email, subscriptionActive: false }
-                    ]);
-                }
-                showToast('¡Cuenta creada con éxito! Inicia sesión.');
-            } catch (e) {
-                errEl.textContent = 'Error al registrarse: ' + e.message;
-            }
+                if (data.user) await supabase.from('users').insert([{ id: data.user.id, email: email, subscriptionActive: false }]);
+                showToast('¡Cuenta creada!');
+            } catch (e) { document.getElementById('authError').textContent = 'Error: ' + e.message; }
         });
 
         window.enviarComprobanteWhatsApp = function() {
             if (!currentUser) return;
-            const emailUser = currentUser.email;
-            const codigoUnico = currentUser.id.substring(0, 6).toUpperCase();
-            
-            const texto = `Hola! Acabo de realizar el pago de mi suscripción mensual (Binance Pay ID: 190696956).%0A%0A📧 Correo: *${emailUser}*%0A🔑 Código de Cliente: *${codigoUnico}*%0A%0AAdjunto mi comprobante para la activación.`;
+            const texto = `Hola! Pago suscripción.%0A📧 Correo: *${currentUser.email}*%0A🔑 Código: *${currentUser.id.substring(0, 6).toUpperCase()}*`;
             window.open(`https://api.whatsapp.com/send?phone=${adminPaymentData.whatsappAdmin}&text=${texto}`, '_blank');
         };
 
         window.logoutUser = async () => { await supabase.auth.signOut(); };
 
         async function loadUserDataFromSupabase() {
-            showToast('Sincronizando datos...');
             try {
-                const { data: prodData, error: prodErr } = await supabase
-                    .from('products')
-                    .select('*')
-                    .eq('userId', currentUser.id);
-                if (prodErr) throw prodErr;
+                const { data: prodData } = await supabase.from('products').select('*').eq('userId', currentUser.id);
                 products = prodData || [];
-
-                const { data: salesData, error: salesErr } = await supabase
-                    .from('sales')
-                    .select('*')
-                    .eq('userId', currentUser.id)
-                    .order('timestamp', { ascending: false });
-                if (salesErr) throw salesErr;
+                const { data: salesData } = await supabase.from('sales').select('*').eq('userId', currentUser.id).order('timestamp', { ascending: false });
                 salesHistory = salesData || [];
-
                 renderProducts();
                 updateSalesStats();
-            } catch (e) {
-                console.error(e);
-                showToast('Error al cargar datos de la nube');
-            }
+            } catch (e) { showToast('Error al cargar datos'); }
         }
 
         window.toggleTheme = function() {
@@ -570,39 +462,46 @@
 
         function applyTheme() {
             const htmlRoot = document.getElementById('htmlRoot');
-            const themeIcon = document.getElementById('themeIcon');
-            const themeText = document.getElementById('themeText');
-            if (isDarkMode) {
-                htmlRoot.classList.add('dark');
-                if (themeIcon) themeIcon.className = 'fas fa-sun';
-                if (themeText) themeText.textContent = 'Modo Claro';
-            } else {
-                htmlRoot.classList.remove('dark');
-                if (themeIcon) themeIcon.className = 'fas fa-moon';
-                if (themeText) themeText.textContent = 'Modo Oscuro';
-            }
+            if (isDarkMode) htmlRoot.classList.add('dark');
+            else htmlRoot.classList.remove('dark');
         }
 
-        const globalExchangeRateInput = document.getElementById('globalExchangeRate');
-        const copExchangeRateInput = document.getElementById('copExchangeRate');
-        const storeNameInput = document.getElementById('storeNameInput');
-        const costUSDInput = document.getElementById('costUSD');
-        const priceUSDInput = document.getElementById('priceUSD');
-
-        document.querySelectorAll('input[name="fractionUnit"]').forEach(radio => {
-            radio.addEventListener('change', (e) => {
-                const val = e.target.value;
-                if (val === 'kg') {
-                    document.getElementById('priceUnitLabel').textContent = 'por Kilo (kg)';
-                } else if (val === 'lt') {
-                    document.getElementById('priceUnitLabel').textContent = 'por Litro (lt)';
-                } else {
-                    document.getElementById('priceUnitLabel').textContent = 'unidad';
-                }
-            });
+        document.getElementById('baseCurrencySelect').addEventListener('change', (e) => {
+            baseCurrency = e.target.value;
+            localStorage.setItem(`baseCurrency_${currentUser.id}`, baseCurrency);
+            updateCurrencyUI();
+            renderProducts();
+            renderCart();
         });
 
-        storeNameInput.addEventListener('input', (e) => {
+        document.getElementById('useUsdReferenceCheckbox').addEventListener('change', (e) => {
+            useUsdReference = e.target.checked;
+            localStorage.setItem(`useUsdRef_${currentUser.id}`, useUsdReference);
+            toggleExchangeRateVisibility();
+            renderProducts();
+            renderCart();
+        });
+
+        document.getElementById('localExchangeRate').addEventListener('input', (e) => {
+            localExchangeRate = parseFloat(e.target.value) || 1;
+            localStorage.setItem(`localExRate_${currentUser.id}`, localExchangeRate);
+            renderProducts();
+            renderCart();
+        });
+
+        function toggleExchangeRateVisibility() {
+            const box = document.getElementById('exchangeRateBox');
+            if (useUsdReference && baseCurrency !== 'USD') box.classList.remove('hidden');
+            else box.classList.add('hidden');
+        }
+
+        function updateCurrencyUI() {
+            document.getElementById('labelCurrencyCost').textContent = baseCurrency;
+            document.getElementById('labelCurrencyPrice').textContent = baseCurrency;
+            toggleExchangeRateVisibility();
+        }
+
+        document.getElementById('storeNameInput').addEventListener('input', (e) => {
             storeName = e.target.value.trim() || 'Mi Tienda';
             localStorage.setItem(`storeName_${currentUser.id}`, storeName);
             updateStoreNameUI();
@@ -614,66 +513,45 @@
         }
 
         function calculateProfitMargin() {
-            const cost = parseFloat(costUSDInput.value) || 0;
-            const price = parseFloat(priceUSDInput.value) || 0;
+            const cost = parseFloat(document.getElementById('costBase').value) || 0;
+            const price = parseFloat(document.getElementById('priceBase').value) || 0;
             const badge = document.getElementById('profitPercentageBadge');
             if (cost > 0 && price > cost) {
                 const profit = ((price - cost) / cost) * 100;
-                badge.textContent = `${profit.toFixed(2)}% (Ganancia: $${(price - cost).toFixed(2)})`;
-                badge.className = "w-full bg-gray-100 dark:bg-gray-900 border dark:border-gray-700 rounded-lg px-3 py-2 font-bold text-emerald-600 flex items-center text-sm";
-            } else if (cost > 0 && price <= cost) {
-                badge.textContent = `Pérdida o sin margen`;
-                badge.className = "w-full bg-gray-100 dark:bg-gray-900 border dark:border-gray-700 rounded-lg px-3 py-2 font-bold text-red-600 flex items-center text-sm";
+                badge.textContent = `${profit.toFixed(2)}% (Ganancia: ${baseCurrency} ${(price - cost).toFixed(2)})`;
             } else {
                 badge.textContent = `0.00%`;
-                badge.className = "w-full bg-gray-100 dark:bg-gray-900 border dark:border-gray-700 rounded-lg px-3 py-2 font-bold text-emerald-600 flex items-center text-sm";
             }
         }
+        document.getElementById('costBase').addEventListener('input', calculateProfitMargin);
+        document.getElementById('priceBase').addEventListener('input', calculateProfitMargin);
 
-        costUSDInput.addEventListener('input', calculateProfitMargin);
-        priceUSDInput.addEventListener('input', calculateProfitMargin);
-
-        // GESTOR DE MÉTODOS DE PAGO INTERNACIONALES (DINÁMICO)
         window.openAddPaymentModal = function() {
             document.getElementById('editPaymentId').value = '';
             document.getElementById('payName').value = '';
             document.getElementById('payFlag').value = '🇻🇪';
             document.getElementById('payDetails').value = '';
-            document.getElementById('paymentModalTitle').textContent = 'Agregar Método de Pago';
             document.getElementById('paymentModal').classList.remove('hidden');
         };
-
-        window.closePaymentModal = function() {
-            document.getElementById('paymentModal').classList.add('hidden');
-        };
+        window.closePaymentModal = function() { document.getElementById('paymentModal').classList.add('hidden'); };
 
         window.saveCustomPaymentMethod = function() {
             const idVal = document.getElementById('editPaymentId').value;
             const nameVal = document.getElementById('payName').value.trim();
             const flagVal = document.getElementById('payFlag').value.trim() || '🌐';
             const detailsVal = document.getElementById('payDetails').value.trim();
-
-            if (!nameVal || !detailsVal) {
-                alert('Por favor completa el nombre y los detalles del método de pago.');
-                return;
-            }
+            if (!nameVal || !detailsVal) return alert('Completa los campos');
 
             if (idVal) {
                 const item = customPaymentMethods.find(p => p.id === idVal);
-                if (item) {
-                    item.name = nameVal;
-                    item.flag = flagVal;
-                    item.details = detailsVal;
-                }
+                if (item) { item.name = nameVal; item.flag = flagVal; item.details = detailsVal; }
             } else {
-                const newId = 'pay_' + Date.now();
-                customPaymentMethods.push({ id: newId, name: nameVal, flag: flagVal, details: detailsVal });
+                customPaymentMethods.push({ id: 'pay_' + Date.now(), name: nameVal, flag: flagVal, details: detailsVal });
             }
-
             localStorage.setItem(`customPayments_${currentUser.id}`, JSON.stringify(customPaymentMethods));
             renderCustomPaymentMethodsUI();
             closePaymentModal();
-            showToast('Método de pago guardado');
+            showToast('Método guardado');
         };
 
         window.editCustomPayment = function(id) {
@@ -683,52 +561,32 @@
             document.getElementById('payName').value = item.name;
             document.getElementById('payFlag').value = item.flag;
             document.getElementById('payDetails').value = item.details;
-            document.getElementById('paymentModalTitle').textContent = 'Editar Método de Pago';
             document.getElementById('paymentModal').classList.remove('hidden');
         };
 
         window.deleteCustomPayment = function(id) {
-            if (confirm('¿Eliminar este método de pago?')) {
+            if (confirm('¿Eliminar?')) {
                 customPaymentMethods = customPaymentMethods.filter(p => p.id !== id);
                 localStorage.setItem(`customPayments_${currentUser.id}`, JSON.stringify(customPaymentMethods));
                 renderCustomPaymentMethodsUI();
-                showToast('Método de pago eliminado');
             }
         };
 
         function renderCustomPaymentMethodsUI() {
             const container = document.getElementById('customPaymentMethodsList');
-            const checkboxesContainer = document.getElementById('cartPaymentCheckboxesContainer');
-            
-            container.innerHTML = '';
-            checkboxesContainer.innerHTML = '';
-
-            if (customPaymentMethods.length === 0) {
-                container.innerHTML = '<p class="text-xs text-gray-400 col-span-full">No hay métodos de pago configurados.</p>';
-                return;
-            }
+            const chkContainer = document.getElementById('cartPaymentCheckboxesContainer');
+            container.innerHTML = ''; chkContainer.innerHTML = '';
 
             customPaymentMethods.forEach(p => {
                 const card = document.createElement('div');
                 card.className = 'bg-gray-50 dark:bg-gray-900 border dark:border-gray-700 p-3 rounded-lg flex flex-col justify-between text-xs';
-                card.innerHTML = `
-                    <div>
-                        <div class="flex justify-between items-center mb-1">
-                            <span class="font-bold text-gray-800 dark:text-gray-200">${p.flag} ${p.name}</span>
-                            <div class="flex gap-2">
-                                <button onclick="editCustomPayment('${p.id}')" class="text-blue-500 hover:text-blue-700"><i class="fas fa-edit"></i></button>
-                                <button onclick="deleteCustomPayment('${p.id}')" class="text-red-500 hover:text-red-700"><i class="fas fa-trash"></i></button>
-                            </div>
-                        </div>
-                        <p class="text-gray-500 dark:text-gray-400 whitespace-pre-line text-[11px]">${p.details}</p>
-                    </div>
-                `;
+                card.innerHTML = `<div><div class="flex justify-between font-bold mb-1"><span>${p.flag} ${p.name}</span><div class="flex gap-2"><button onclick="editCustomPayment('${p.id}')" class="text-blue-500"><i class="fas fa-edit"></i></button><button onclick="deleteCustomPayment('${p.id}')" class="text-red-500"><i class="fas fa-trash"></i></button></div></div><p class="text-gray-400 whitespace-pre-line text-[11px]">${p.details}</p></div>`;
                 container.appendChild(card);
 
                 const label = document.createElement('label');
                 label.className = 'flex items-center gap-1.5 cursor-pointer';
-                label.innerHTML = `<input type="checkbox" id="chk_pay_${p.id}" checked class="rounded text-blue-600 focus:ring-blue-500 w-4 h-4"> Incluir ${p.flag} ${p.name}`;
-                checkboxesContainer.appendChild(label);
+                label.innerHTML = `<input type="checkbox" id="chk_pay_${p.id}" checked class="rounded text-blue-600 w-4 h-4"> Incluir ${p.flag} ${p.name}`;
+                chkContainer.appendChild(label);
             });
         }
 
@@ -739,21 +597,7 @@
         const productList = document.getElementById('productList');
         const globalSearchInput = document.getElementById('globalSearchInput');
 
-        globalExchangeRateInput.addEventListener('input', (e) => {
-            globalExchangeRate = parseFloat(e.target.value) || 0;
-            localStorage.setItem(`exchangeRate_${currentUser.id}`, globalExchangeRate);
-            renderProducts();
-            renderCart();
-        });
-
-        copExchangeRateInput.addEventListener('input', (e) => {
-            copExchangeRate = parseFloat(e.target.value) || 0;
-            localStorage.setItem(`copExchangeRate_${currentUser.id}`, copExchangeRate);
-            renderProducts();
-            renderCart();
-        });
-
-        globalSearchInput.addEventListener('input', () => { renderProducts(); });
+        globalSearchInput.addEventListener('input', () => renderProducts());
 
         imageFile.addEventListener('change', (e) => {
             const file = e.target.files[0];
@@ -761,9 +605,7 @@
                 imageFileToUpload = file;
                 fileName.textContent = file.name;
                 const reader = new FileReader();
-                reader.onload = (uploadEvent) => {
-                    imagePreviewContainer.innerHTML = `<img src="${uploadEvent.target.result}" class="w-full h-full object-cover">`;
-                };
+                reader.onload = (ev) => { imagePreviewContainer.innerHTML = `<img src="${ev.target.result}" class="w-full h-full object-cover">`; };
                 reader.readAsDataURL(file);
             }
         });
@@ -771,450 +613,173 @@
         productForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const docId = document.getElementById('editDocId').value;
-            
             let finalImageURL = '';
+
             if (imageFileToUpload) {
-                showToast('Subiendo imagen a Supabase Storage...');
                 const filePath = `productos/${currentUser.id}/${Date.now()}_${imageFileToUpload.name}`;
-                const { data: uploadData, error: uploadErr } = await supabase.storage.from('store-images').upload(filePath, imageFileToUpload);
-                if (uploadErr) {
+                const { error: upErr } = await supabase.storage.from('store-images').upload(filePath, imageFileToUpload);
+                if (upErr) {
                     const reader = new FileReader();
                     reader.readAsDataURL(imageFileToUpload);
-                    await new Promise(resolve => reader.onload = resolve);
+                    await new Promise(r => reader.onload = r);
                     finalImageURL = reader.result;
                 } else {
-                    const { data: publicURLData } = supabase.storage.from('store-images').getPublicUrl(filePath);
-                    finalImageURL = publicURLData.publicUrl;
+                    const { data } = supabase.storage.from('store-images').getPublicUrl(filePath);
+                    finalImageURL = data.publicUrl;
                 }
             } else if (docId) {
-                const existing = products.find(p => p.id === docId);
-                if (existing) finalImageURL = existing.image;
+                const ext = products.find(p => p.id === docId);
+                if (ext) finalImageURL = ext.image;
             }
-
-            const selectedUnit = document.querySelector('input[name="fractionUnit"]:checked').value;
 
             const productData = {
                 userId: currentUser.id,
                 name: document.getElementById('name').value.trim(),
                 barcode: document.getElementById('barcode').value.trim(),
                 stock: parseFloat(document.getElementById('stock').value) || 0,
-                costUSD: parseFloat(document.getElementById('costUSD').value) || 0,
-                priceUSD: parseFloat(document.getElementById('priceUSD').value) || 0,
-                fractionUnit: selectedUnit,
+                costBase: parseFloat(document.getElementById('costBase').value) || 0,
+                priceBase: parseFloat(document.getElementById('priceBase').value) || 0,
+                currency: baseCurrency,
+                fractionUnit: 'none',
                 description: document.getElementById('description').value.trim(),
                 image: finalImageURL || ''
             };
 
-            try {
-                if (docId) {
-                    const { error } = await supabase.from('products').update(productData).eq('id', docId);
-                    if (error) throw error;
-                    const idx = products.findIndex(p => p.id === docId);
-                    if (idx > -1) products[idx] = { id: docId, ...productData };
-                    document.getElementById('editDocId').value = '';
-                    document.getElementById('formTitle').textContent = 'Agregar Nuevo Producto';
-                    document.getElementById('saveBtn').textContent = 'Guardar Producto';
-                } else {
-                    const { data, error } = await supabase.from('products').insert([productData]).select();
-                    if (error) throw error;
-                    if (data && data[0]) {
-                        products.push(data[0]);
-                    }
-                }
+            if (docId) {
+                await supabase.from('products').update(productData).eq('id', docId);
+                const idx = products.findIndex(p => p.id === docId);
+                if (idx > -1) products[idx] = { id: docId, ...productData };
+                document.getElementById('editDocId').value = '';
+                document.getElementById('formTitle').textContent = 'Agregar Nuevo Producto';
+                document.getElementById('saveBtn').textContent = 'Guardar Producto';
+            } else {
+                const { data } = await supabase.from('products').insert([productData]).select();
+                if (data && data[0]) products.push(data[0]);
+            }
 
             productForm.reset();
-                document.getElementById('unitNone').checked = true;
-                document.getElementById('priceUnitLabel').textContent = 'unidad';
-                imageFileToUpload = null;
-                fileName.textContent = 'Ninguna imagen seleccionada (Opcional)';
-                imagePreviewContainer.innerHTML = '<span class="text-xs text-gray-400">Sin foto</span>';
-                calculateProfitMargin();
-                renderProducts();
-                showToast('¡Producto guardado en la nube con éxito!');
-            } catch (err) {
-                console.error(err);
-                alert('Error al guardar el producto en Supabase.');
-            }
+            imageFileToUpload = null;
+            fileName.textContent = 'Ninguna imagen seleccionada';
+            imagePreviewContainer.innerHTML = '<span class="text-xs text-gray-400">Sin foto</span>';
+            renderProducts();
+            showToast('¡Producto guardado!');
         });
 
         window.renderProducts = function() {
             const searchTerm = globalSearchInput.value.toLowerCase().trim();
-            const filteredProducts = products.filter(p => 
-                (p.name && p.name.toLowerCase().includes(searchTerm)) || 
-                (p.barcode && p.barcode.toLowerCase().includes(searchTerm)) ||
-                (p.description && p.description.toLowerCase().includes(searchTerm))
-            );
+            const filtered = products.filter(p => (p.name && p.name.toLowerCase().includes(searchTerm)) || (p.barcode && p.barcode.toLowerCase().includes(searchTerm)));
 
-            renderQuickShortcuts();
-
-            if (filteredProducts.length === 0) {
-                productList.innerHTML = '<p class="text-gray-400 col-span-full text-center py-8">No se encontraron productos coincidentes.</p>';
+            productList.innerHTML = '';
+            if (filtered.length === 0) {
+                productList.innerHTML = '<p class="text-gray-400 col-span-full text-center py-8">No hay productos.</p>';
                 return;
             }
-            productList.innerHTML = '';
-            
-            filteredProducts.forEach((p) => {
-                const totalBs = (p.priceUSD * globalExchangeRate).toFixed(2);
-                const totalCop = (p.priceUSD * copExchangeRate).toLocaleString('es-CO', { maximumFractionDigits: 0 });
+
+            filtered.forEach(p => {
                 const card = document.createElement('div');
                 card.className = 'bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden flex flex-col justify-between';
                 
-                let selectorHtml = '';
-                const isKg = p.fractionUnit === 'kg';
-                const isLt = p.fractionUnit === 'lt';
-                
-                if (isKg) {
-                    selectorHtml = `
-                        <div class="mb-3 bg-amber-50 dark:bg-gray-900 p-2.5 rounded-lg border border-amber-200 dark:border-gray-700">
-                            <div class="flex justify-between items-center mb-1">
-                                <span class="text-xs font-bold text-amber-700 dark:text-amber-400"><i class="fas fa-weight-scale mr-1"></i>Venta por Kilos (g):</span>
-                                <span class="text-[10px] text-gray-500">Ej: 500 (g)</span>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <input type="number" id="gramsVal_${p.id}" value="250" step="10" min="1" class="w-full text-xs font-bold px-2 py-1.5 border dark:border-gray-700 dark:bg-gray-800 rounded text-center focus:outline-none">
-                                <span class="text-xs font-semibold text-gray-600 dark:text-gray-400">g</span>
-                                <button type="button" onclick="addWeightedToCart('${p.id}')" class="bg-amber-600 hover:bg-amber-700 text-white text-xs px-3 py-1.5 rounded font-bold shadow whitespace-nowrap">
-                                    <i class="fas fa-cart-plus"></i> Añadir
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                } else if (isLt) {
-                    selectorHtml = `
-                        <div class="mb-3 bg-cyan-50 dark:bg-gray-900 p-2.5 rounded-lg border border-cyan-200 dark:border-gray-700">
-                            <div class="flex justify-between items-center mb-1">
-                                <span class="text-xs font-bold text-cyan-700 dark:text-cyan-400"><i class="fas fa-wine-bottle mr-1"></i>Venta por Litros (ml):</span>
-                                <span class="text-[10px] text-gray-500">Ej: 500 (ml)</span>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <input type="number" id="gramsVal_${p.id}" value="250" step="10" min="1" class="w-full text-xs font-bold px-2 py-1.5 border dark:border-gray-700 dark:bg-gray-800 rounded text-center focus:outline-none">
-                                <span class="text-xs font-semibold text-gray-600 dark:text-gray-400">ml</span>
-                                <button type="button" onclick="addWeightedToCart('${p.id}')" class="bg-cyan-600 hover:bg-cyan-700 text-white text-xs px-3 py-1.5 rounded font-bold shadow whitespace-nowrap">
-                                    <i class="fas fa-cart-plus"></i> Añadir
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                } else {
-                    selectorHtml = `
-                        <div class="mb-3 bg-blue-50 dark:bg-gray-900 p-2.5 rounded-lg border border-blue-100 dark:border-gray-700 flex items-center justify-between">
-                            <div class="flex items-center gap-1">
-                                <button type="button" onclick="changeQty('${p.id}', -1)" class="bg-blue-200 dark:bg-blue-900 hover:bg-blue-300 text-blue-800 dark:text-blue-200 w-7 h-7 rounded font-bold flex items-center justify-center text-sm">-</button>
-                                <span id="qtyVal_${p.id}" class="font-bold text-sm w-7 text-center dark:text-white">1</span>
-                                <button type="button" onclick="changeQty('${p.id}', 1)" class="bg-blue-200 dark:bg-blue-900 hover:bg-blue-300 text-blue-800 dark:text-blue-200 w-7 h-7 rounded font-bold flex items-center justify-center text-sm">+</button>
-                            </div>
-                            <button type="button" onclick="addToCart('${p.id}')" class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-2 rounded-lg font-bold flex items-center gap-1.5 shadow">
-                                <i class="fas fa-cart-plus"></i> Añadir
-                            </button>
-                        </div>
-                    `;
+                let secondaryPriceHtml = '';
+                if (useUsdReference && p.currency !== 'USD') {
+                    let equivUSD = p.priceBase / localExchangeRate;
+                    secondaryPriceHtml = `<span class="text-xs text-gray-400 block">(Ref: $${equivUSD.toFixed(2)} USD)</span>`;
                 }
-
-                let badgeTag = '';
-                if (isKg) badgeTag = `<span class="bg-amber-100 text-amber-800 text-[10px] px-2 py-0.5 rounded font-bold">KILOS</span>`;
-                if (isLt) badgeTag = `<span class="bg-cyan-100 text-cyan-800 text-[10px] px-2 py-0.5 rounded font-bold">LITROS</span>`;
 
                 card.innerHTML = `
                     <div>
                         ${p.image ? `<img src="${p.image}" class="w-full h-48 object-cover">` : `<div class="w-full h-48 bg-gray-100 dark:bg-gray-900 flex items-center justify-center text-gray-400"><i class="fas fa-image fa-2x"></i></div>`}
                         <div class="p-4">
-                            <div class="flex justify-between items-start mb-1">
-                                <h3 class="font-bold text-lg dark:text-white">${p.name}</h3>
-                                ${badgeTag}
+                            <h3 class="font-bold text-lg dark:text-white mb-1">${p.name}</h3>
+                            <p class="text-gray-500 text-sm mb-2">📝 ${p.description || 'Sin descripción'}</p>
+                            <div class="mb-3 text-xs bg-gray-50 dark:bg-gray-900 p-2 rounded">
+                                <span class="font-bold text-green-600 text-base">💰 ${p.currency} ${p.priceBase.toFixed(2)}</span>
+                                ${secondaryPriceHtml}
+                                <span class="text-gray-500 block">Stock: ${p.stock}</span>
                             </div>
-                            ${p.barcode ? `<p class="text-xs text-gray-400 mb-1"><i class="fas fa-barcode"></i> SKU: ${p.barcode}</p>` : ''}
-                            <p class="text-gray-600 dark:text-gray-300 text-sm line-clamp-2 mb-2">📝 ${p.description || 'Sin descripción'}</p>
-                            
-                            <div class="flex items-center justify-between bg-gray-50 dark:bg-gray-900 p-2 rounded-lg mb-3 border dark:border-gray-700">
-                                <span class="text-xs text-gray-500 dark:text-gray-400 font-medium">Inventario: <b>${p.stock} ${isKg ? 'Kg' : (isLt ? 'Litros' : 'unid.')}</b></span>
-                                <div class="flex items-center gap-1">
-                                    <button type="button" onclick="updateStock('${p.id}', -1)" class="bg-red-100 dark:bg-red-900 hover:bg-red-200 text-red-600 dark:text-red-300 w-6 h-6 rounded font-bold flex items-center justify-center text-xs">-</button>
-                                    <button type="button" onclick="updateStock('${p.id}', 1)" class="bg-green-100 dark:bg-green-900 hover:bg-green-200 text-green-600 dark:text-green-300 w-6 h-6 rounded font-bold flex items-center justify-center text-xs">+</button>
-                                </div>
-                            </div>
-
-                            <div class="mb-3 text-xs">
-                                <p class="text-green-600 dark:text-green-400 font-bold text-base">💰 $${p.priceUSD.toFixed(2)} USD</p>
-                                <p class="text-blue-600 dark:text-blue-400 font-semibold">🇻🇪 Bs. ${totalBs}</p>
-                                <p class="text-amber-600 dark:text-amber-400 font-semibold">🇨🇴 COP $${totalCop}</p>
-                            </div>
-                            
-                            ${selectorHtml}
+                            <button onclick="addToCart('${p.id}')" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-xs py-2 rounded font-bold"><i class="fas fa-cart-plus mr-1"></i> Añadir al Carrito</button>
                         </div>
                     </div>
-                    <div class="p-3 bg-gray-50 dark:bg-gray-900 border-t dark:border-gray-700 flex justify-between items-center">
-                        <span class="text-xs text-gray-400">Opciones:</span>
-                        <div class="flex gap-3">
-                            <button type="button" onclick="editProduct('${p.id}')" class="text-blue-500 hover:text-blue-700 text-sm" title="Editar"><i class="fas fa-edit"></i></button>
-                            <button type="button" onclick="deleteProduct('${p.id}')" class="text-red-500 hover:text-red-700 text-sm" title="Eliminar"><i class="fas fa-trash"></i></button>
-                        </div>
+                    <div class="p-3 bg-gray-50 dark:bg-gray-900 border-t dark:border-gray-700 flex justify-end gap-3 text-sm">
+                        <button onclick="editProduct('${p.id}')" class="text-blue-500"><i class="fas fa-edit"></i></button>
+                        <button onclick="deleteProduct('${p.id}')" class="text-red-500"><i class="fas fa-trash"></i></button>
                     </div>
                 `;
                 productList.appendChild(card);
             });
         };
 
-        function renderQuickShortcuts() {
-            const container = document.getElementById('quickProductShortcuts');
-            if (!container) return;
-            container.innerHTML = '';
-            products.forEach((p) => {
-                const btn = document.createElement('button');
-                btn.type = 'button';
-                btn.className = 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:border-blue-500 text-xs px-2.5 py-1 rounded-md shadow-sm text-gray-700 dark:text-gray-200 truncate max-w-[150px] transition';
-                btn.title = `Añadir ${p.name}`;
-                btn.innerHTML = `<i class="fas fa-plus text-blue-500 mr-1 text-[10px]"></i>${p.name}`;
-                btn.onclick = () => {
-                    if (p.fractionUnit && p.fractionUnit !== 'none') {
-                        addWeightedCustomCart(p.id, 250);
-                    } else {
-                        addToCart(p.id);
-                    }
-                };
-                container.appendChild(btn);
-            });
-        }
-
-        window.updateStock = async function(id, amount) {
-            const p = products.find(item => item.id === id);
-            if (!p) return;
-            p.stock = parseFloat((p.stock + amount).toFixed(2));
-            if (p.stock < 0) p.stock = 0;
-            
-            await supabase.from('products').update({ stock: p.stock }).eq('id', id);
-            renderProducts();
-        };
-
-        window.changeQty = function(id, delta) {
-            const span = document.getElementById(`qtyVal_${id}`);
-            if (span) {
-                let current = parseInt(span.textContent) || 1;
-                current += delta;
-                if (current < 1) current = 1;
-                span.textContent = current;
-            }
-        };
-
-        window.addWeightedToCart = function(id) {
-            const gramsInput = document.getElementById(`gramsVal_${id}`);
-            const grams = parseFloat(gramsInput ? gramsInput.value : 250) || 250;
-            addWeightedCustomCart(id, grams);
-        };
-
-        function addWeightedCustomCart(id, grams) {
-            const p = products.find(item => item.id === id);
-            if (!p) return;
-            const fraction = grams / 1000;
-
-            if (p.stock < fraction) {
-                alert(`Inventario insuficiente. Solo quedan ${p.stock} disponibles.`);
-                return;
-            }
-
-            const unitLabelCart = p.fractionUnit === 'kg' ? 'g' : 'ml';
-            const customName = `${p.name} (${grams}${unitLabelCart})`;
-            const existingIndex = cart.findIndex(item => item.productId === id && item.name === customName);
-            
-            if (existingIndex > -1) {
-                cart[existingIndex].qtyFraction += fraction;
-                cart[existingIndex].gramsTotal += grams;
-            } else {
-                cart.push({
-                    productId: id,
-                    name: customName,
-                    baseName: p.name,
-                    costUSD: p.costUSD || 0,
-                    priceUSD: p.priceUSD,
-                    qtyFraction: fraction,
-                    gramsTotal: grams,
-                    isWeighted: true,
-                    fractionUnit: p.fractionUnit,
-                    description: p.description,
-                    image: p.image
-                });
-            }
-
-            renderCart();
-            showToast(`¡Agregado: ${p.name} (${grams}${unitLabelCart})!`);
-        }
-
         window.addToCart = function(id) {
             const p = products.find(item => item.id === id);
             if (!p) return;
-            const qtySpan = document.getElementById(`qtyVal_${id}`);
-            const cantidad = parseInt(qtySpan ? qtySpan.textContent : 1) || 1;
-
-            if (p.stock < cantidad) {
-                alert(`Inventario insuficiente. Solo quedan ${p.stock} unidades.`);
-                return;
-            }
-
-            const existingIndex = cart.findIndex(item => item.productId === id && (!item.isWeighted));
-            if (existingIndex > -1) {
-                cart[existingIndex].qty += cantidad;
+            const existing = cart.find(i => i.productId === id);
+            if (existing) {
+                existing.qty += 1;
             } else {
-                cart.push({
-                    productId: id,
-                    name: p.name,
-                    baseName: p.name,
-                    costUSD: p.costUSD || 0,
-                    priceUSD: p.priceUSD,
-                    qty: cantidad,
-                    isWeighted: false,
-                    fractionUnit: 'none',
-                    description: p.description,
-                    image: p.image
-                });
+                cart.push({ productId: p.id, name: p.name, price: p.priceBase, currency: p.currency, cost: p.costBase || 0, qty: 1 });
             }
-
             renderCart();
-            showToast(`¡Agregado: ${p.name} (x${cantidad})!`);
+            showToast(`Añadido: ${p.name}`);
         };
 
         function renderCart() {
             const panel = document.getElementById('cartPanel');
             const container = document.getElementById('cartItemsContainer');
-            
-            if (cart.length === 0) {
-                panel.classList.add('hidden');
-                return;
-            }
+            if (cart.length === 0) { panel.classList.add('hidden'); return; }
 
             panel.classList.remove('hidden');
             container.innerHTML = '';
-            let totalGeneralUSD = 0;
+            let total = 0;
 
-            cart.forEach((item, cartIdx) => {
-                const multiplier = item.isWeighted ? item.qtyFraction : item.qty;
-                const subtotalUSD = item.priceUSD * multiplier;
-                totalGeneralUSD += subtotalUSD;
-
-                const subtotalBs = subtotalUSD * globalExchangeRate;
-                const subtotalCop = subtotalUSD * copExchangeRate;
-
-                const unitAbbr = item.fractionUnit === 'kg' ? 'g' : 'ml';
-                const rowBadge = item.isWeighted ? `${item.gramsTotal}${unitAbbr}` : `x${item.qty}`;
-
+            cart.forEach((item, idx) => {
+                let subtotal = item.price * item.qty;
+                total += subtotal;
                 const row = document.createElement('div');
-                row.className = 'bg-blue-800 bg-opacity-40 p-2.5 rounded-lg flex items-center justify-between text-xs';
+                row.className = 'bg-blue-800 bg-opacity-40 p-2 rounded flex justify-between items-center text-xs';
                 row.innerHTML = `
-                    <div class="flex items-center gap-2 truncate">
-                        <span class="font-bold bg-blue-900 px-2 py-1 rounded">${rowBadge}</span>
-                        <span class="truncate"><b>${item.name}</b></span>
+                    <div class="flex items-center gap-2">
+                        <span class="bg-blue-900 px-2 py-0.5 rounded font-bold">x${item.qty}</span>
+                        <span><b>${item.name}</b></span>
                     </div>
-                    <div class="flex items-center gap-3">
-                        <span class="font-semibold text-emerald-300">$${subtotalUSD.toFixed(2)} USD (Bs. ${subtotalBs.toFixed(2)} | COP $${subtotalCop.toLocaleString('es-CO', {maximumFractionDigits: 0})})</span>
-                        <button onclick="removeFromCart(${cartIdx})" class="text-red-300 hover:text-red-100"><i class="fas fa-trash"></i></button>
-                    </div>
-                `;
+                    <div class="flex items-center gap-2">
+                        <span>${item.currency} ${subtotal.toFixed(2)}</span>
+                        <button onclick="cart.splice(${idx},1);renderCart()" class="text-red-300"><i class="fas fa-trash"></i></button>
+                    </div>`;
                 container.appendChild(row);
             });
-
-            const totalBsGen = totalGeneralUSD * globalExchangeRate;
-            const totalCopGen = totalGeneralUSD * copExchangeRate;
-            document.getElementById('cartTotalBadge').textContent = `Total: $${totalGeneralUSD.toFixed(2)} USD (Bs. ${totalBsGen.toFixed(2)} | COP $${totalCopGen.toLocaleString('es-CO', {maximumFractionDigits: 0})})`;
+            document.getElementById('cartTotalBadge').textContent = `Total: ${baseCurrency} ${total.toFixed(2)}`;
         }
 
-        window.removeFromCart = function(cartIdx) {
-            cart.splice(cartIdx, 1);
-            renderCart();
-        };
+        window.clearCart = function() { cart = []; renderCart(); };
 
-        window.clearCart = function() {
-            cart = [];
-            renderCart();
-            showToast('Carrito vaciado');
-        };
+        async function procesarGuardadoVenta(esWhatsApp = false) {
+            if (cart.length === 0) return null;
 
-        window.sendCartWhatsApp = async function() {
-            if (cart.length === 0) return;
-
-            const clientNameInput = document.getElementById('clientNameInput');
-            const clienteFinal = clientNameInput && clientNameInput.value.trim() !== '' ? clientNameInput.value.trim() : 'Cliente General';
-
+            const cliente = document.getElementById('clientNameInput').value.trim() || 'Cliente General';
+            let totalGeneral = cart.reduce((acc, i) => acc + (i.price * i.qty), 0);
+            let totalCost = cart.reduce((acc, i) => acc + (i.cost * i.qty), 0);
+            
             const now = new Date();
-            const fechaActual = now.toLocaleDateString('es-VE');
+            const fechaStr = now.toLocaleDateString('es-VE') + ' a las ' + now.toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit' });
             const fechaIso = now.toISOString().split('T')[0];
-            const horaActual = now.toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit' });
-            const numeroOrden = 'OM-' + Math.random().toString(36).substring(2, 7).toUpperCase();
+            const ordenId = 'OM-' + Math.random().toString(36).substring(2, 7).toUpperCase();
 
-            let totalGeneralUSD = 0;
-            let totalCostUSD = 0;
-            let text = `🛒 *PEDIDO - ${storeName.toUpperCase()}*%0A`;
-            text += `🔖 Orden: *${numeroOrden}*%0A`;
-            text += `👤 Cliente: *${clienteFinal}*%0A`;
-            text += `📅 Fecha: ${fechaActual} - ${horaActual}%0A%0A`;
-            text += `📦 *Detalle del Carrito:*%0A`;
+            let itemsDetail = cart.map(i => ({
+                name: i.name,
+                qty: i.qty,
+                priceUSD: i.price,
+                subtotalUSD: (i.price * i.qty).toFixed(2)
+            }));
 
-            let itemsDetail = [];
-
-            for (const item of cart) {
-                const multiplier = item.isWeighted ? item.qtyFraction : item.qty;
-                const subtotalUSD = item.priceUSD * multiplier;
-                totalGeneralUSD += subtotalUSD;
-                totalCostUSD += (item.costUSD || 0) * multiplier;
-
-                const subtotalBs = subtotalUSD * globalExchangeRate;
-                const subtotalCop = subtotalUSD * copExchangeRate;
-
-                const unitAbbr = item.fractionUnit === 'kg' ? 'g' : 'ml';
-                itemsDetail.push({
-                    name: item.name,
-                    baseName: item.baseName,
-                    qty: item.isWeighted ? `${item.gramsTotal}${unitAbbr}` : item.qty,
-                    isWeighted: item.isWeighted || false,
-                    fractionUnit: item.fractionUnit || 'none',
-                    costUSD: item.costUSD || 0,
-                    priceUSD: item.priceUSD,
-                    subtotalUSD: subtotalUSD.toFixed(2)
-                });
-
-                text += `• *${item.name}*%0A`;
-                text += `  Subtotal: *$${subtotalUSD.toFixed(2)} USD* (Bs. ${subtotalBs.toFixed(2)} | COP $${subtotalCop.toLocaleString('es-CO', {maximumFractionDigits: 0})})%0A`;
-                if (item.description) text += `  📝 ${item.description}%0A`;
-                text += `%0A`;
-
-                const pObj = products.find(p => p.id === item.productId);
-                if (pObj) {
-                    pObj.stock -= multiplier;
-                    if (pObj.stock < 0) pObj.stock = 0;
-                    await supabase.from('products').update({ stock: pObj.stock }).eq('id', pObj.id);
-                }
-            }
-
-            const totalBsGen = totalGeneralUSD * globalExchangeRate;
-            const totalCopGen = totalGeneralUSD * copExchangeRate;
-
-            text += `━━━━━━━━━━━━━━━━━━%0A`;
-            text += `✅ *TOTAL A PAGAR: $${totalGeneralUSD.toFixed(2)} USD*%0A`;
-            text += `🇻🇪 Equivalente Bs: *${totalBsGen.toFixed(2)} Bs*%0A`;
-            text += `🇨🇴 Equivalente COP: *$${totalCopGen.toLocaleString('es-CO', {maximumFractionDigits: 0})} COP*%0A`;
-            text += `━━━━━━━━━━━━━━━━━━%0A`;
-
-            customPaymentMethods.forEach(p => {
-                const chk = document.getElementById(`chk_pay_${p.id}`);
-                if (chk && chk.checked) {
-                    text += `%0A📱 *${p.flag} ${p.name}:*%0A`;
-                    const lines = p.details.split('\n');
-                    lines.forEach(l => {
-                        text += `${l}%0A`;
-                    });
-                }
-            });
-
-            text += `%0A📲 ¡Esperamos su confirmación para procesar el pedido!`;
-
-            const newSale = {
+            const nuevaVenta = {
                 userId: currentUser.id,
-                idOrden: numeroOrden,
-                name: `Pedido Múltiple (${cart.length} productos)`,
-                cliente: clienteFinal,
-                qty: cart.reduce((acc, i) => acc + (i.isWeighted ? 1 : i.qty), 0),
-                totalUSDOriginal: totalGeneralUSD.toFixed(2),
-                totalUSD: totalGeneralUSD.toFixed(2),
-                total: totalBsGen.toFixed(2),
-                costUSD: totalCostUSD.toFixed(2),
-                date: `${fechaActual} a las ${horaActual}`,
+                idOrden: ordenId,
+                name: `Pedido (${cart.length} productos)`,
+                cliente: cliente,
+                total: totalGeneral.toFixed(2),
+                totalUSD: totalGeneral.toFixed(2),
+                costUSD: totalCost.toFixed(2),
+                currency: baseCurrency,
+                date: fechaStr,
                 dateIso: fechaIso,
                 timestamp: Date.now(),
                 items: itemsDetail,
@@ -1222,179 +787,123 @@
                 abonoUSD: 0
             };
 
-            const { data, error } = await supabase.from('sales').insert([newSale]).select();
-            if (!error && data && data[0]) {
-                salesHistory.unshift(data[0]);
+            try {
+                const { data, error } = await supabase.from('sales').insert([nuevaVenta]).select();
+                if (error) throw error;
+                if (data && data[0]) {
+                    salesHistory.unshift(data[0]);
+                }
+                updateSalesStats();
+            } catch (err) {
+                console.error("Error guardando venta:", err);
+                showToast("Error al guardar en el historial de la nube");
             }
 
-            window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
-            
+            return { ordenId, cliente, totalGeneral, itemsDetail };
+        }
+
+        window.guardarCarritoEnHistorialManual = async function() {
+            if (cart.length === 0) { alert('El carrito está vacío'); return; }
+            await procesarGuardadoVenta(false);
+            showToast('¡Carrito guardado en el historial de ventas exitosamente!');
             cart = [];
-            if (clientNameInput) clientNameInput.value = '';
             renderCart();
-            renderProducts();
-            updateSalesStats();
-            showToast('¡Pedido enviado y stock actualizado en la nube!');
+            if (document.getElementById('clientNameInput')) document.getElementById('clientNameInput').value = '';
         };
 
-        window.sendCatalogWhatsApp = function() {
-            if (products.length === 0) {
-                alert('No hay productos en el inventario para generar el catálogo.');
-                return;
-            }
+        window.sendCartWhatsApp = async function() {
+            if (cart.length === 0) return;
+            const res = await procesarGuardadoVenta(true);
+            if (!res) return;
 
-            let text = `📋 *CATÁLOGO DE PRECIOS - ${storeName.toUpperCase()}*%0A`;
-            text += `💵 Tasas: 🇻🇪 ${globalExchangeRate} Bs/$ | 🇨🇴 ${copExchangeRate} COP/$%0A%0A`;
-
-            products.forEach((p, idx) => {
-                const totalBs = (p.priceUSD * globalExchangeRate).toFixed(2);
-                const totalCop = (p.priceUSD * copExchangeRate).toLocaleString('es-CO', {maximumFractionDigits: 0});
-                let unitStr = '';
-                if (p.fractionUnit === 'kg') unitStr = '/kg';
-                if (p.fractionUnit === 'lt') unitStr = '/lt';
-
-                text += `${idx + 1}. *${p.name}* ${p.fractionUnit !== 'none' ? '(' + p.fractionUnit.toUpperCase() + ')' : ''}%0A`;
-                text += `   💰 Precio: *$${p.priceUSD.toFixed(2)} USD* (${totalBs} Bs | $${totalCop} COP)%0A`;
-                if (p.description) text += `   📝 ${p.description}%0A`;
-                text += `%0A`;
+            let text = `🛒 *PEDIDO - ${storeName.toUpperCase()}*%0A`;
+            text += `🔖 Orden: *${res.ordenId}*%0A`;
+            text += `👤 Cliente: *${res.cliente}*%0A%0A📦 *Detalle:*%0A`;
+            
+            cart.forEach(i => {
+                text += `• (x${i.qty}) *${i.name}* - ${i.currency} ${(i.price * i.qty).toFixed(2)}%0A`;
             });
 
-            text += `📲 ¡Escríbenos para hacer tu pedido!`;
+            text += `━━━━━━━━━━━━━━━━━━%0A`;
+            text += `✅ *TOTAL: ${baseCurrency} ${res.totalGeneral.toFixed(2)}*%0A`;
+            text += `━━━━━━━━━━━━━━━━━━%0A`;
+
+            customPaymentMethods.forEach(p => {
+                const chk = document.getElementById(`chk_pay_${p.id}`);
+                if (chk && chk.checked) {
+                    text += `%0A📱 *${p.flag} ${p.name}:*%0A`;
+                    p.details.split('\n').forEach(l => { text += `${l}%0A`; });
+                }
+            });
+
             window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
+            cart = [];
+            renderCart();
+            if (document.getElementById('clientNameInput')) document.getElementById('clientNameInput').value = '';
+            showToast('¡Pedido enviado por WhatsApp y guardado en el historial!');
+        };
+
+        window.toggleSalesHistoryModal = function() {
+            const modal = document.getElementById('salesModal');
+            modal.classList.toggle('hidden');
+            if (!modal.classList.contains('hidden')) renderSalesHistory();
         };
 
         function updateSalesStats() {
             document.getElementById('statTotalVentas').textContent = salesHistory.length;
-            const totalIngresosUSD = salesHistory.reduce((acc, item) => acc + parseFloat(item.totalUSD || 0), 0);
-            document.getElementById('statTotalIngresos').innerHTML = `$${totalIngresosUSD.toFixed(2)} USD`;
+            const totalIngresos = salesHistory.reduce((acc, item) => acc + parseFloat(item.total || 0), 0);
+            document.getElementById('statTotalIngresos').innerHTML = `${baseCurrency} ${totalIngresos.toFixed(2)}`;
         }
-
-        window.toggleSalesHistoryModal = function() {
-            filterOnlyPending = false;
-            selectedFilterDate = '';
-            document.getElementById('filterDateInput').value = '';
-            const modal = document.getElementById('salesModal');
-            modal.classList.toggle('hidden');
-            if (!modal.classList.contains('hidden')) {
-                renderSalesHistory();
-            }
-        };
-
-        window.filterPendingSalesToggle = function() {
-            filterOnlyPending = !filterOnlyPending;
-            const btn = document.getElementById('btnFilterPending');
-            if (filterOnlyPending) {
-                btn.className = "bg-amber-600 hover:bg-amber-700 text-white px-2 py-0.5 rounded text-[10px] font-bold shadow transition";
-                btn.innerHTML = `<i class="fas fa-filter mr-1"></i>Viendo pendientes`;
-            } else {
-                btn.className = "bg-red-600 hover:bg-red-700 text-white px-2 py-0.5 rounded text-[10px] font-bold shadow transition";
-                btn.innerHTML = `<i class="fas fa-filter mr-1"></i>Ver pendientes`;
-            }
-            renderSalesHistory();
-        };
-
-        window.applyDateFilter = function() {
-            const val = document.getElementById('filterDateInput').value;
-            if (!val) {
-                alert('Por favor selecciona una fecha');
-                return;
-            }
-            selectedFilterDate = val;
-            renderSalesHistory();
-            showToast(`Filtrando ventas del: ${val}`);
-        };
-
-        window.clearDateFilter = function() {
-            selectedFilterDate = '';
-            document.getElementById('filterDateInput').value = '';
-            renderSalesHistory();
-            showToast('Mostrando todo el historial');
-        };
 
         function renderSalesHistory() {
             const container = document.getElementById('salesHistoryList');
-            let cobradoUSD = 0, pendienteUSD = 0;
-            let totalGananciaUSD = 0;
-            let totalIngresoGlobalUSD = 0;
+            let cobrado = 0, pendiente = 0;
 
             salesHistory.forEach(sale => {
-                let sUSDOriginal = parseFloat(sale.totalUSDOriginal || sale.totalUSD || 0);
+                let sTotal = parseFloat(sale.total || 0);
                 let abono = parseFloat(sale.abonoUSD || 0);
-                let saldoPendienteUSD = sUSDOriginal - abono;
-                if (saldoPendienteUSD < 0) saldoPendienteUSD = 0;
+                let saldoPendiente = sTotal - abono;
+                if (saldoPendiente < 0) saldoPendiente = 0;
 
-                let sCost = parseFloat(sale.costUSD || 0);
-                let sGanancia = sUSDOriginal - sCost;
-
-                totalIngresoGlobalUSD += sUSDOriginal;
-                totalGananciaUSD += sGanancia;
-
-                let pagadoTotal = sale.pagado === true;
-
-                if (pagadoTotal) {
-                    cobradoUSD += sUSDOriginal;
+                if (sale.pagado) {
+                    cobrado += sTotal;
                 } else {
-                    cobradoUSD += abono;
-                    pendienteUSD += saldoPendienteUSD;
+                    cobrado += abono;
+                    pendiente += saldoPendiente;
                 }
             });
 
-            let porcentajeGananciaPromedio = totalIngresoGlobalUSD > 0 ? ((totalGananciaUSD / (totalIngresoGlobalUSD - totalGananciaUSD)) * 100) : 0;
-            if (isNaN(porcentajeGananciaPromedio) || !isFinite(porcentajeGananciaPromedio)) porcentajeGananciaPromedio = 0;
+            document.getElementById('cierreCobrado').textContent = `${baseCurrency} ${cobrado.toFixed(2)}`;
+            document.getElementById('cierrePendiente').textContent = `${baseCurrency} ${pendiente.toFixed(2)}`;
 
-            document.getElementById('cierreCobrado').textContent = `$${cobradoUSD.toFixed(2)} USD`;
-            document.getElementById('cierrePendiente').textContent = `$${pendienteUSD.toFixed(2)} USD`;
-            document.getElementById('cierreGananciaNeta').textContent = `$${totalGananciaUSD.toFixed(2)} USD`;
-            document.getElementById('cierrePorcentajeGanancia').textContent = `${porcentajeGananciaPromedio.toFixed(2)}%`;
-
-            let listToRender = salesHistory;
-
-            if (filterOnlyPending) {
-                listToRender = listToRender.filter(s => !s.pagado && ((parseFloat(s.totalUSDOriginal || s.totalUSD || 0) - parseFloat(s.abonoUSD || 0)) > 0.01));
-            }
-
-            if (selectedFilterDate) {
-                listToRender = listToRender.filter(s => s.dateIso === selectedFilterDate);
-            }
-
-            if (listToRender.length === 0) {
-                container.innerHTML = '<p class="text-gray-400 text-center py-6 text-xs">No hay ventas registradas con los filtros seleccionados.</p>';
+            if (salesHistory.length === 0) {
+                container.innerHTML = '<p class="text-gray-400 text-center py-6 text-xs">No hay ventas registradas.</p>';
                 return;
             }
 
             container.innerHTML = '';
-            listToRender.forEach((sale) => {
+            salesHistory.forEach(sale => {
                 const ordenCorta = sale.idOrden || 'OM-XXXX';
-                const clienteNombre = sale.cliente || 'Cliente General';
+                const cliente = sale.cliente || 'Cliente General';
                 const pagadoTotal = sale.pagado === true;
-                const abono = parseFloat(sale.abonoUSD || 0);
-                const originalUSD = parseFloat(sale.totalUSDOriginal || sale.totalUSD || 0);
+                const totalVenta = parseFloat(sale.total || 0);
 
-                let colorPunto = '#dc3545';
-                let textoEstado = 'Pendiente';
-                if (pagadoTotal) {
-                    colorPunto = '#28a745';
-                    textoEstado = 'Pagada';
-                } else if (abono > 0) {
-                    colorPunto = '#ffc107';
-                    textoEstado = `Abonado ($${abono.toFixed(2)})`;
-                }
+                let colorPunto = pagadoTotal ? '#28a745' : '#dc3545';
+                let textoEstado = pagadoTotal ? 'Pagada' : 'Pendiente';
 
                 const item = document.createElement('div');
-                item.className = 'bg-gray-50 dark:bg-gray-900 border dark:border-gray-700 p-2.5 rounded-lg flex justify-between items-center text-xs cursor-pointer hover:bg-blue-50 dark:hover:bg-gray-700 transition';
-                item.title = 'Haz clic para ver el detalle';
+                item.className = 'bg-gray-50 dark:bg-gray-900 border dark:border-gray-700 p-2.5 rounded-lg flex justify-between items-center text-xs cursor-pointer hover:bg-blue-50 transition';
                 item.onclick = () => showSaleDetail(sale.id);
                 item.innerHTML = `
                     <div class="flex items-center gap-2.5 truncate">
-                        <span style="display:inline-block; width:10px; height:10px; background:${colorPunto}; border-radius:50%;" title="${textoEstado}"></span>
+                        <span style="display:inline-block; width:10px; height:10px; background:${colorPunto}; border-radius:50%;"></span>
                         <div class="truncate">
-                            <p class="font-bold text-gray-800 dark:text-gray-200 truncate"><span class="text-blue-600 font-mono">[${ordenCorta}]</span> ${sale.name} (${clienteNombre})</p>
-                            <p class="text-[11px] text-gray-500 dark:text-gray-400">${sale.date} - <span class="font-semibold" style="color:${colorPunto}">${textoEstado}</span></p>
+                            <p class="font-bold text-gray-800 dark:text-gray-200 truncate"><span class="text-blue-600 font-mono">[${ordenCorta}]</span> ${sale.name} (${cliente})</p>
+                            <p class="text-[11px] text-gray-500">${sale.date} - <span style="color:${colorPunto}">${textoEstado}</span></p>
                         </div>
                     </div>
                     <div class="text-right whitespace-nowrap ml-2">
-                        <span class="font-bold text-emerald-600 block">$${originalUSD.toFixed(2)} USD</span>
-                        <span class="text-[10px] text-gray-400">($${(originalUSD * globalExchangeRate).toFixed(2)} Bs)</span>
+                        <span class="font-bold text-emerald-600 block">${baseCurrency} ${totalVenta.toFixed(2)}</span>
                     </div>
                 `;
                 container.appendChild(item);
@@ -1404,256 +913,60 @@
         window.showSaleDetail = function(saleId) {
             const sale = salesHistory.find(s => s.id === saleId);
             if (!sale) return;
-            const numeroOrden = sale.idOrden || 'OM-XXXX';
-            const clienteNombre = sale.cliente || 'Cliente General';
-            const pagadoTotal = sale.pagado === true;
-
-            const originalUSD = parseFloat(sale.totalUSDOriginal || sale.totalUSD || 0);
-            const abonoActualUSD = parseFloat(sale.abonoUSD || 0);
-            const restanteUSD = originalUSD - abonoActualUSD;
-
             const content = document.getElementById('saleDetailContent');
             
-            let htmlContent = `
-                <div class="space-y-3">
-                    <div>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">Fecha: ${sale.date}</p>
-                        <p class="font-bold text-base text-blue-600 dark:text-blue-400 mt-1">${sale.name}</p>
-                    </div>
-
-                    <div class="bg-gray-50 dark:bg-gray-900 p-2.5 rounded-lg border dark:border-gray-700 flex justify-between items-center">
-                        <span class="text-xs"><strong>Nro. Orden:</strong> <span class="font-mono font-bold text-blue-600">${numeroOrden}</span></span>
-                        <button onclick="copiarNumeroOrden('${numeroOrden}')" class="bg-gray-600 hover:bg-gray-700 text-white px-2.5 py-1 rounded text-xs font-semibold"><i class="fas fa-copy mr-1"></i>Copiar</button>
-                    </div>
-
-                    <p class="text-xs"><strong>Cliente:</strong> ${clienteNombre}</p>
-            `;
-
-            if (sale.items && sale.items.length > 0) {
-                htmlContent += `<div class="border-t dark:border-gray-700 pt-2"><strong class="text-xs text-gray-600 dark:text-gray-300 block mb-1.5">Productos vendidos:</strong><div class="space-y-1.5">`;
-                sale.items.forEach(i => {
-                    let badgeTxt = i.isWeighted ? `(${i.qty})` : `(x${i.qty})`;
-                    let subtotalUSDItem = parseFloat(i.subtotalUSD || 0).toFixed(2);
-                    let subtotalBsItem = (subtotalUSDItem * globalExchangeRate).toFixed(2);
-                    let subtotalCopItem = (subtotalUSDItem * copExchangeRate).toLocaleString('es-CO', {maximumFractionDigits: 0});
-
-                    htmlContent += `
-                        <div class="bg-gray-50 dark:bg-gray-900 p-2 rounded border dark:border-gray-700 flex justify-between items-center text-xs">
-                            <div>
-                                <p class="font-bold"><b>${badgeTxt}</b> ${i.baseName || i.name}</p>
-                                <p class="text-gray-400">Precio: $${parseFloat(i.priceUSD).toFixed(2)} USD</p>
-                            </div>
-                            <div class="text-right">
-                                <span class="font-semibold text-emerald-600 block">$${subtotalUSDItem} USD</span>
-                                <span class="text-[10px] text-gray-400">${subtotalBsItem} Bs | $${subtotalCopItem} COP</span>
-                            </div>
-                        </div>`;
-                });
-                htmlContent += `</div></div>`;
-            } else {
-                htmlContent += `<p class="text-xs text-gray-400 italic border-t dark:border-gray-700 pt-2">Detalle no disponible.</p>`;
-            }
-
-            htmlContent += `
-                    <div class="border-t dark:border-gray-700 pt-2 flex justify-between items-center">
-                        <div>
-                            <span class="font-bold text-gray-800 dark:text-gray-200 block">Total del Pedido:</span>
-                        </div>
-                        <div class="text-right">
-                            <span class="font-bold text-base text-emerald-600 block">$${originalUSD.toFixed(2)} USD</span>
-                            <span class="text-xs font-semibold text-gray-500">($${(originalUSD * globalExchangeRate).toFixed(2)} Bs | $${(originalUSD * copExchangeRate).toLocaleString('es-CO', {maximumFractionDigits: 0})} COP)</span>
-                        </div>
-                    </div>
-
-                    <div class="border-t dark:border-gray-700 pt-3 mt-2 bg-gray-50 dark:bg-gray-900 p-3 rounded-lg">
-                        <p class="text-xs font-bold text-gray-700 dark:text-gray-300 mb-1">💳 Control de Deuda y Abonos ($ USD):</p>
-                        <p class="text-[11px] text-gray-500 mb-2">Restante por pagar: <b class="text-red-500">$${restanteUSD.toFixed(2)} USD</b></p>
-                        
-                        <div class="flex items-center gap-2 mb-2">
-                            <input type="number" id="inputAbonoUSD_${sale.id}" placeholder="Monto abonar en $" step="0.01" min="0" class="w-full text-xs border dark:border-gray-700 dark:bg-gray-800 rounded px-2 py-1.5 focus:outline-none">
-                            <button onclick="registrarAbono('${sale.id}')" class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1.5 rounded font-bold whitespace-nowrap">Abonar $</button>
-                        </div>
-
-                        <button id="btn-estado-${numeroOrden}" 
-                            onclick="alternarEstadoPago('${sale.id}', '${numeroOrden}')" 
-                            class="w-full py-2 px-4 rounded-lg font-bold text-white text-xs shadow transition mt-1"
-                            style="background-color: ${pagadoTotal ? '#28a745' : '#dc3545'};">
-                            ${pagadoTotal ? '✔️ Pedido Pagado por Completo' : '❌ Marcar como Pagado Total'}
-                        </button>
-                    </div>
+            let html = `
+                <div>
+                    <p class="text-xs text-gray-400">Fecha: ${sale.date}</p>
+                    <p class="font-bold text-base text-blue-600 mt-1">${sale.name}</p>
+                    <p class="text-xs mt-1"><strong>Cliente:</strong> ${sale.cliente || 'General'}</p>
+                    <p class="text-xs mt-1"><strong>Nro. Orden:</strong> <span class="font-mono font-bold text-blue-600">${sale.idOrden || 'OM-XXXX'}</span></p>
                 </div>
             `;
 
-            content.innerHTML = htmlContent;
+            if (sale.items && sale.items.length > 0) {
+                html += `<div class="border-t dark:border-gray-700 pt-2"><strong class="text-xs block mb-1">Productos:</strong><div class="space-y-1">`;
+                sale.items.forEach(i => {
+                    html += `<div class="bg-gray-50 dark:bg-gray-900 p-2 rounded flex justify-between text-xs"><span><b>(x${i.qty})</b> ${i.name}</span><span class="font-semibold text-emerald-600">${baseCurrency} ${i.subtotalUSD}</span></div>`;
+                });
+                html += `</div></div>`;
+            }
+
+            html += `
+                <div class="border-t dark:border-gray-700 pt-2 flex justify-between items-center">
+                    <span class="font-bold">Total:</span>
+                    <span class="font-bold text-emerald-600">${baseCurrency} ${parseFloat(sale.total || 0).toFixed(2)}</span>
+                </div>
+                <div class="border-t dark:border-gray-700 pt-2 mt-2">
+                    <button onclick="alternarEstadoPago('${sale.id}')" class="w-full py-2 px-4 rounded-lg font-bold text-white text-xs" style="background-color: ${sale.pagado ? '#28a745' : '#dc3545'}">
+                        ${sale.pagado ? '✔️ Pedido Pagado' : '❌ Marcar como Pagado Total'}
+                    </button>
+                </div>
+            `;
+
+            content.innerHTML = html;
             document.getElementById('saleDetailModal').classList.remove('hidden');
         };
 
-        window.registrarAbono = async function(saleId) {
+        window.alternarEstadoPago = async function(saleId) {
             const sale = salesHistory.find(s => s.id === saleId);
             if (!sale) return;
-
-            const input = document.getElementById(`inputAbonoUSD_${saleId}`);
-            const montoAbonado = parseFloat(input.value) || 0;
-            if (montoAbonado <= 0) {
-                alert('Ingrese un monto válido mayor a 0');
-                return;
-            }
-
-            const originalUSD = parseFloat(sale.totalUSDOriginal || sale.totalUSD || 0);
-            let actualAbono = parseFloat(sale.abonoUSD || 0) + montoAbonado;
-            if (actualAbono >= originalUSD) {
-                actualAbono = originalUSD;
-                sale.pagado = true;
-            }
-
-            sale.abonoUSD = actualAbono;
-            sale.totalUSD = originalUSD.toFixed(2);
-
-            await supabase.from('sales').update({
-                abonoUSD: sale.abonoUSD,
-                pagado: sale.pagado,
-                totalUSD: sale.totalUSD
-            }).eq('id', saleId);
-
-            showToast(`¡Abono registrado con éxito!`);
-            showSaleDetail(saleId);
-            renderSalesHistory();
-            updateSalesStats();
-        };
-
-        window.copiarNumeroOrden = function(orden) {
-            navigator.clipboard.writeText(orden).then(() => {
-                showToast("¡Número de orden copiado: " + orden + "!");
-            });
-        };
-
-        window.alternarEstadoPago = async function(saleId, numeroOrden) {
-            const sale = salesHistory.find(s => s.id === saleId);
-            if (!sale) return;
-
             sale.pagado = !sale.pagado;
-            if (sale.pagado) {
-                sale.abonoUSD = parseFloat(sale.totalUSDOriginal || sale.totalUSD || 0);
-            } else {
-                sale.abonoUSD = 0;
-            }
-
-            await supabase.from('sales').update({ 
-                pagado: sale.pagado,
-                abonoUSD: sale.abonoUSD
-            }).eq('id', saleId);
-
+            await supabase.from('sales').update({ pagado: sale.pagado }).eq('id', saleId);
             showSaleDetail(saleId);
             renderSalesHistory();
             updateSalesStats();
-            showToast('Estado de pago actualizado');
+            showToast('Estado actualizado');
         };
 
-        window.closeSaleDetailModal = function() {
-            document.getElementById('saleDetailModal').classList.add('hidden');
-        };
-
+        window.closeSaleDetailModal = function() { document.getElementById('saleDetailModal').classList.add('hidden'); };
         window.clearSalesHistory = async function() {
-            if (confirm('¿Deseas limpiar todo el registro del historial de ventas en la nube?')) {
-                for (const sale of salesHistory) {
-                    await supabase.from('sales').delete().eq('id', sale.id);
-                }
+            if (confirm('¿Limpiar historial?')) {
+                for (const s of salesHistory) { await supabase.from('sales').delete().eq('id', s.id); }
                 salesHistory = [];
                 renderSalesHistory();
                 updateSalesStats();
-                showToast('Historial borrado');
             }
-        };
-
-        window.downloadElementAsImage = function(elementId, filename) {
-            const element = document.getElementById(elementId);
-            if (!element) return;
-            html2canvas(element, { scale: 2, backgroundColor: isDarkMode ? '#1f2937' : '#ffffff' }).then(canvas => {
-                const link = document.createElement('a');
-                link.download = filename;
-                link.href = canvas.toDataURL('image/png');
-                link.click();
-                showToast('¡Captura descargada con éxito!');
-            });
-        };
-
-        window.downloadSaleDetailImage = function() {
-            const card = document.getElementById('saleDetailCard');
-            if (!card) return;
-            html2canvas(card, { scale: 2, backgroundColor: isDarkMode ? '#1f2937' : '#ffffff', scrollY: -window.scrollY }).then(canvas => {
-                const link = document.createElement('a');
-                link.download = 'Comprobante_Venta.png';
-                link.href = canvas.toDataURL('image/png');
-                link.click();
-                showToast('¡Captura del detalle descargada con éxito!');
-            });
-        };
-
-        // ESCÁNER DE CÓDIGOS OPTIMIZADO PARA MÓVILES
-        window.openScannerModal = function() {
-            document.getElementById('scannerModal').classList.remove('hidden');
-            setTimeout(() => {
-                Quagga.init({
-                    inputStream: {
-                        name: "Live",
-                        type: "LiveStream",
-                        target: document.querySelector('#scanner-container'),
-                        constraints: { 
-                            facingMode: "environment", 
-                            width: { ideal: 1920 }, 
-                            height: { ideal: 1080 } 
-                        }
-                    },
-                    decoder: { 
-                        readers: ["ean_reader", "code_128_reader", "upc_reader", "ean_8_reader"] 
-                    },
-                    locate: true
-                }, function(err) {
-                    if (err) {
-                        alert("Error al iniciar la cámara del escáner.");
-                        stopScanner();
-                        return;
-                    }
-                    Quagga.start();
-                });
-            }, 300);
-            Quagga.onDetected(onBarcodeDetected);
-        };
-
-        function onBarcodeDetected(result) {
-            const code = result.codeResult.code;
-            if (code) {
-                document.getElementById('barcode').value = code;
-                stopScanner();
-                showToast(`¡Código escaneado: ${code}!`);
-                
-                const found = products.find(p => p.barcode === code);
-                if (found) {
-                    document.getElementById('name').value = found.name;
-                    document.getElementById('costUSD').value = found.costUSD || 0;
-                    document.getElementById('priceUSD').value = found.priceUSD;
-                    
-                    if (found.fractionUnit === 'kg') {
-                        document.getElementById('unitKg').checked = true;
-                    } else if (found.fractionUnit === 'lt') {
-                        document.getElementById('unitLt').checked = true;
-                    } else {
-                        document.getElementById('unitNone').checked = true;
-                    }
-
-                    document.getElementById('description').value = found.description;
-                    calculateProfitMargin();
-                    showToast('¡Producto encontrado en inventario!');
-                }
-            }
-        }
-
-        window.stopScanner = function() {
-            try {
-                Quagga.stop();
-                Quagga.offDetected(onBarcodeDetected);
-            } catch(e) {}
-            document.getElementById('scannerModal').classList.add('hidden');
         };
 
         window.editProduct = function(id) {
@@ -1663,51 +976,28 @@
             document.getElementById('name').value = p.name;
             document.getElementById('barcode').value = p.barcode || '';
             document.getElementById('stock').value = p.stock;
-            document.getElementById('costUSD').value = p.costUSD || '';
-            document.getElementById('priceUSD').value = p.priceUSD;
-            
-            if (p.fractionUnit === 'kg') {
-                document.getElementById('unitKg').checked = true;
-                document.getElementById('priceUnitLabel').textContent = 'por Kilo (kg)';
-            } else if (p.fractionUnit === 'lt') {
-                document.getElementById('unitLt').checked = true;
-                document.getElementById('priceUnitLabel').textContent = 'por Litro (lt)';
-            } else {
-                document.getElementById('unitNone').checked = true;
-                document.getElementById('priceUnitLabel').textContent = 'unidad';
-            }
-
+            document.getElementById('costBase').value = p.costBase || '';
+            document.getElementById('priceBase').value = p.priceBase;
             document.getElementById('description').value = p.description || '';
             document.getElementById('formTitle').textContent = 'Editar Producto';
             document.getElementById('saveBtn').textContent = 'Actualizar Producto';
-            
-            calculateProfitMargin();
-            imageFileToUpload = null; 
-            if (p.image) {
-                imagePreviewContainer.innerHTML = `<img src="${p.image}" class="w-full h-full object-cover">`;
-                fileName.textContent = 'Imagen actual cargada';
-            } else {
-                imagePreviewContainer.innerHTML = '<span class="text-xs text-gray-400">Sin foto</span>';
-                fileName.textContent = 'Ninguna imagen seleccionada (Opcional)';
-            }
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
 
         window.deleteProduct = async function(id) {
-            if (confirm('¿Estás seguro de eliminar este producto de la nube?')) {
+            if (confirm('¿Eliminar producto?')) {
                 await supabase.from('products').delete().eq('id', id);
                 products = products.filter(p => p.id !== id);
                 renderProducts();
-                showToast('Producto eliminado');
             }
         };
 
-        function showToast(message) {
-            const toast = document.createElement('div');
-            toast.className = 'bg-gray-800 text-white dark:bg-gray-700 px-4 py-2 rounded-lg shadow-lg mt-2 text-sm';
-            toast.textContent = message;
-            document.getElementById('toastContainer').appendChild(toast);
-            setTimeout(() => toast.remove(), 3500);
+        function showToast(msg) {
+            const t = document.createElement('div');
+            t.className = 'bg-gray-800 text-white px-4 py-2 rounded shadow mt-2 text-sm';
+            t.textContent = msg;
+            document.getElementById('toastContainer').appendChild(t);
+            setTimeout(() => t.remove(), 3000);
         }
     </script>
 </body>
