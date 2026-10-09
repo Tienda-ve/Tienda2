@@ -116,9 +116,7 @@
             </div>
             <div id="cartItemsContainer" class="space-y-2 mb-4 max-h-48 overflow-y-auto pr-2"></div>
             <div class="flex flex-col md:flex-row items-center justify-between gap-3 pt-2 border-t border-blue-400">
-                <div class="flex flex-wrap items-center gap-3 text-xs w-full md:w-auto" id="cartPaymentCheckboxesContainer">
-                    <!-- Checkboxes de métodos de pago -->
-                </div>
+                <div class="flex flex-wrap items-center gap-3 text-xs w-full md:w-auto" id="cartPaymentCheckboxesContainer"></div>
                 <div class="flex flex-wrap items-center gap-2 w-full md:w-auto justify-end">
                     <input type="text" id="clientNameInput" placeholder="Nombre del cliente..." class="text-gray-800 text-xs px-3 py-2 rounded-lg border-0 focus:outline-none focus:ring-2 focus:ring-blue-300 w-full sm:w-44">
                     <button onclick="guardarCarritoEnHistorialManual()" class="bg-amber-500 hover:bg-amber-600 text-white px-3 py-2.5 rounded-xl font-bold text-xs flex items-center gap-1.5 shadow transition whitespace-nowrap" title="Guarda en caja sin abrir WhatsApp">
@@ -158,24 +156,46 @@
                 <input type="text" id="storeNameInput" placeholder="Nombre de tu tienda..." class="w-full border-2 border-indigo-100 dark:border-gray-700 dark:bg-gray-900 rounded-lg px-3 py-1.5 font-bold text-indigo-600 dark:text-indigo-400 text-sm focus:outline-none">
             </section>
 
-            <!-- SELECCIÓN DE MONEDA BASE Y TASA -->
+            <!-- SELECCIÓN DE MONEDA BASE MUNDIAL Y TASA -->
             <section class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 border-l-4 border-blue-500 md:col-span-2">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                     <div>
-                        <label class="block text-sm font-bold text-gray-700 dark:text-gray-300">💱 Moneda Base de la Tienda</label>
-                        <span class="text-xs text-gray-400">Elige en qué moneda fijas tus precios de venta</span>
+                        <label class="block text-sm font-bold text-gray-700 dark:text-gray-300">💱 Moneda Base de la Tienda (Mundial)</label>
+                        <span class="text-xs text-gray-400">Elige o busca la moneda oficial de tu país</span>
                     </div>
-                    <div class="flex items-center gap-3 w-full sm:w-auto">
-                        <select id="baseCurrencySelect" class="border-2 border-blue-200 dark:border-gray-700 dark:bg-gray-900 rounded-lg px-3 py-1.5 font-bold text-blue-600 dark:text-blue-400 text-sm focus:outline-none">
-                            <option value="USD">Dólar ($ USD)</option>
-                            <option value="BS">Bolívares (Bs 🇻🇪)</option>
-                            <option value="COP">Pesos Colombianos (COP 🇨🇴)</option>
-                            <option value="DOP">Pesos Dominicanos (DOP 🇩🇴)</option>
-                            <option value="PEN">Soles (PEN 🇵🇪)</option>
+                    <div class="flex items-center gap-2 w-full sm:w-auto">
+                        <select id="baseCurrencySelect" class="border-2 border-blue-200 dark:border-gray-700 dark:bg-gray-900 rounded-lg px-3 py-1.5 font-bold text-blue-600 dark:text-blue-400 text-sm focus:outline-none w-full sm:w-60">
+                            <option value="USD">🇺🇸 Dólar ($ USD)</option>
+                            <option value="BS">🇻🇪 Bolívares (Bs)</option>
+                            <option value="EUR">🇪🇸 Euro (€ EUR - España)</option>
+                            <option value="ARS">🇦🇷 Peso Argentino (ARS)</option>
+                            <option value="BOB">🇧🇴 Boliviano (BOB)</option>
+                            <option value="UYU">🇺🇾 Peso Uruguayo (UYU)</option>
+                            <option value="COP">🇨🇴 Peso Colombiano (COP)</option>
+                            <option value="CLP">🇨🇱 Peso Chileno (CLP)</option>
+                            <option value="PEN">🇵🇪 Sol Peruano (PEN)</option>
+                            <option value="BRL">🇧🇷 Real Brasileño (BRL)</option>
+                            <option value="MXN">🇲🇽 Peso Mexicano (MXN)</option>
+                            <option value="DOP">🇩🇴 Peso Dominicano (DOP)</option>
+                            <option value="PAB">🇵🇦 Balboa Panameño (PAB)</option>
+                            <option value="CRC">🇨🇷 Colón Costarricense (CRC)</option>
+                            <option value="GTQ">🇬🇹 Quetzal Guatemalteco (GTQ)</option>
+                            <option value="HNL">🇭🇳 Lempira Hondureño (HNL)</option>
+                            <option value="NIO">🇳🇮 Córdoba Nicaragüense (NIO)</option>
+                            <option value="PYG">🇵🇾 Guaraní Paraguayo (PYG)</option>
+                            <option value="CUP">🇨🇺 Peso Cubano (CUP)</option>
+                            <option value="OTHER">🌐 Otra moneda personalizada...</option>
                         </select>
                     </div>
                 </div>
-                <div class="mt-3 pt-3 border-t dark:border-gray-700 flex items-center justify-between gap-3">
+
+                <div id="customCurrencyBox" class="mt-3 pt-3 border-t dark:border-gray-700 hidden flex items-center gap-2">
+                    <span class="text-xs font-semibold">Código o Símbolo Personalizado:</span>
+                    <input type="text" id="customCurrencyInput" placeholder="Ej: VES, GBP, CAD..." class="w-32 border dark:border-gray-700 dark:bg-gray-900 rounded px-2 py-1 text-xs font-bold uppercase text-center">
+                    <button type="button" onclick="saveCustomCurrency()" class="bg-blue-600 text-white px-3 py-1 rounded text-xs font-bold">Aplicar</button>
+                </div>
+
+                <div class="mt-3 pt-3 border-t dark:border-gray-700 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                     <label class="flex items-center gap-2 cursor-pointer text-xs font-semibold">
                         <input type="checkbox" id="useUsdReferenceCheckbox" class="rounded text-blue-600 w-4 h-4"> Usar Dólar ($ USD) como referencia paralela
                     </label>
@@ -234,22 +254,27 @@
                         0.00%
                     </div>
                 </div>
-                <div class="md:col-span-2">
-                    <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Imagen del Producto (Opcional)</label>
-                    <div class="flex items-center gap-3">
-                        <label for="imageFile" class="cursor-pointer bg-blue-50 dark:bg-gray-700 hover:bg-blue-100 text-blue-600 dark:text-blue-300 border border-blue-200 dark:border-gray-600 px-4 py-2 rounded-lg flex items-center gap-2 text-sm">
-                            <i class="fas fa-camera"></i> Seleccionar Imagen
+
+                <!-- TIPO DE VENTA -->
+                <div class="md:col-span-2 lg:col-span-3 bg-blue-50 dark:bg-gray-900 p-4 rounded-lg border border-blue-200 dark:border-gray-700">
+                    <label class="block text-sm font-bold text-gray-800 dark:text-gray-200 mb-2">⚖️ Tipo de venta:</label>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <label class="flex items-center space-x-2 bg-white dark:bg-gray-800 p-3 rounded-lg border dark:border-gray-700 cursor-pointer">
+                            <input type="radio" id="unitNone" name="fractionUnit" value="none" checked class="text-blue-600 w-4 h-4">
+                            <div><span class="text-xs font-bold block text-gray-700 dark:text-gray-300">Unidad Normal</span></div>
                         </label>
-                        <input type="file" id="imageFile" accept="image/*" class="hidden">
-                        <span id="fileName" class="text-xs text-gray-400 truncate">Ninguna imagen seleccionada</span>
+                        <label class="flex items-center space-x-2 bg-white dark:bg-gray-800 p-3 rounded-lg border dark:border-gray-700 cursor-pointer">
+                            <input type="radio" id="unitKg" name="fractionUnit" value="kg" class="text-blue-600 w-4 h-4">
+                            <div><span class="text-xs font-bold block text-amber-600">Kilos (kg)</span></div>
+                        </label>
+                        <label class="flex items-center space-x-2 bg-white dark:bg-gray-800 p-3 rounded-lg border dark:border-gray-700 cursor-pointer">
+                            <input type="radio" id="unitLt" name="fractionUnit" value="lt" class="text-blue-600 w-4 h-4">
+                            <div><span class="text-xs font-bold block text-cyan-600">Litros (lt)</span></div>
+                        </label>
                     </div>
                 </div>
-                <div class="flex items-center justify-center">
-                    <div id="imagePreviewContainer" class="w-28 h-28 border dark:border-gray-700 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-900 flex items-center justify-center">
-                        <span class="text-xs text-gray-400">Sin foto</span>
-                    </div>
-                </div>
-                                <div class="md:col-span-2">
+
+                <div class="md:col-span-2">
                     <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Imagen del Producto (Opcional)</label>
                     <div class="flex items-center gap-3">
                         <label for="imageFile" class="cursor-pointer bg-blue-50 dark:bg-gray-700 hover:bg-blue-100 text-blue-600 dark:text-blue-300 border border-blue-200 dark:border-gray-600 px-4 py-2 rounded-lg flex items-center gap-2 text-sm">
@@ -395,7 +420,20 @@
                     const paySaved = localStorage.getItem(`customPayments_${currentUser.id}`);
                     if (paySaved) customPaymentMethods = JSON.parse(paySaved);
 
-                    document.getElementById('baseCurrencySelect').value = baseCurrency;
+                    const selectEl = document.getElementById('baseCurrencySelect');
+                    let exists = Array.from(selectEl.options).some(o => o.value === baseCurrency);
+                    if (!exists && baseCurrency !== 'OTHER') {
+                        const opt = document.createElement('option');
+                        opt.value = baseCurrency;
+                        opt.textContent = baseCurrency;
+                        selectEl.appendChild(opt);
+                    }
+                    selectEl.value = exists ? baseCurrency : 'OTHER';
+                    if (!exists && baseCurrency !== 'OTHER') {
+                        document.getElementById('customCurrencyBox').classList.remove('hidden');
+                        document.getElementById('customCurrencyInput').value = baseCurrency;
+                    }
+
                     document.getElementById('useUsdReferenceCheckbox').checked = useUsdReference;
                     document.getElementById('localExchangeRate').value = localExchangeRate;
                     document.getElementById('storeNameInput').value = storeName;
@@ -466,13 +504,33 @@
             else htmlRoot.classList.remove('dark');
         }
 
-        document.getElementById('baseCurrencySelect').addEventListener('change', (e) => {
-            baseCurrency = e.target.value;
+        const baseCurrencySelect = document.getElementById('baseCurrencySelect');
+        const customCurrencyBox = document.getElementById('customCurrencyBox');
+
+        baseCurrencySelect.addEventListener('change', (e) => {
+            const val = e.target.value;
+            if (val === 'OTHER') {
+                customCurrencyBox.classList.remove('hidden');
+                return;
+            }
+            customCurrencyBox.classList.add('hidden');
+            baseCurrency = val;
             localStorage.setItem(`baseCurrency_${currentUser.id}`, baseCurrency);
             updateCurrencyUI();
             renderProducts();
             renderCart();
         });
+
+        window.saveCustomCurrency = function() {
+            const customVal = document.getElementById('customCurrencyInput').value.trim().toUpperCase();
+            if (!customVal) return alert('Escribe un código de moneda válido');
+            baseCurrency = customVal;
+            localStorage.setItem(`baseCurrency_${currentUser.id}`, baseCurrency);
+            updateCurrencyUI();
+            renderProducts();
+            renderCart();
+            showToast(`Moneda guardada: ${baseCurrency}`);
+        };
 
         document.getElementById('useUsdReferenceCheckbox').addEventListener('change', (e) => {
             useUsdReference = e.target.checked;
@@ -640,7 +698,7 @@
                 costBase: parseFloat(document.getElementById('costBase').value) || 0,
                 priceBase: parseFloat(document.getElementById('priceBase').value) || 0,
                 currency: baseCurrency,
-                fractionUnit: 'none',
+                fractionUnit: document.querySelector('input[name="fractionUnit"]:checked').value,
                 description: document.getElementById('description').value.trim(),
                 image: finalImageURL || ''
             };
@@ -685,6 +743,10 @@
                     secondaryPriceHtml = `<span class="text-xs text-gray-400 block">(Ref: $${equivUSD.toFixed(2)} USD)</span>`;
                 }
 
+                let unitLabelText = 'unidad';
+                if (p.fractionUnit === 'kg') unitLabelText = 'kg';
+                if (p.fractionUnit === 'lt') unitLabelText = 'lt';
+
                 card.innerHTML = `
                     <div>
                         ${p.image ? `<img src="${p.image}" class="w-full h-48 object-cover">` : `<div class="w-full h-48 bg-gray-100 dark:bg-gray-900 flex items-center justify-center text-gray-400"><i class="fas fa-image fa-2x"></i></div>`}
@@ -692,9 +754,9 @@
                             <h3 class="font-bold text-lg dark:text-white mb-1">${p.name}</h3>
                             <p class="text-gray-500 text-sm mb-2">📝 ${p.description || 'Sin descripción'}</p>
                             <div class="mb-3 text-xs bg-gray-50 dark:bg-gray-900 p-2 rounded">
-                                <span class="font-bold text-green-600 text-base">💰 ${p.currency} ${p.priceBase.toFixed(2)}</span>
+                                <span class="font-bold text-green-600 text-base">💰 ${p.currency} ${p.priceBase.toFixed(2)} <span class="text-xs font-normal text-gray-500">/${unitLabelText}</span></span>
                                 ${secondaryPriceHtml}
-                                <span class="text-gray-500 block">Stock: ${p.stock}</span>
+                                <span class="text-gray-500 block mt-1">Stock: ${p.stock}</span>
                             </div>
                             <button onclick="addToCart('${p.id}')" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-xs py-2 rounded font-bold"><i class="fas fa-cart-plus mr-1"></i> Añadir al Carrito</button>
                         </div>
@@ -713,9 +775,9 @@
             if (!p) return;
             const existing = cart.find(i => i.productId === id);
             if (existing) {
-                existing.qty += 1;
+                existing.qty += (p.fractionUnit !== 'none' ? 0.5 : 1);
             } else {
-                cart.push({ productId: p.id, name: p.name, price: p.priceBase, currency: p.currency, cost: p.costBase || 0, qty: 1 });
+                cart.push({ productId: p.id, name: p.name, price: p.priceBase, currency: p.currency, cost: p.costBase || 0, qty: 1, fractionUnit: p.fractionUnit });
             }
             renderCart();
             showToast(`Añadido: ${p.name}`);
@@ -979,6 +1041,12 @@
             document.getElementById('costBase').value = p.costBase || '';
             document.getElementById('priceBase').value = p.priceBase;
             document.getElementById('description').value = p.description || '';
+            
+            if (p.fractionUnit) {
+                const radio = document.querySelector(`input[name="fractionUnit"][value="${p.fractionUnit}"]`);
+                if (radio) radio.checked = true;
+            }
+
             document.getElementById('formTitle').textContent = 'Editar Producto';
             document.getElementById('saveBtn').textContent = 'Actualizar Producto';
             window.scrollTo({ top: 0, behavior: 'smooth' });
