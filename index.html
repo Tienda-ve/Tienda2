@@ -27,7 +27,7 @@
             <div class="text-center mb-6">
                 <i class="fas fa-store text-4xl text-blue-600 dark:text-blue-400 mb-2"></i>
                 <h2 class="text-2xl font-bold dark:text-white">Gestor de Mi Tienda</h2>
-                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Acceso seguro con control de suscripción mensual</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Acceso seguro con Supabase</p>
             </div>
             <div class="space-y-4">
                 <div>
@@ -57,13 +57,11 @@
             <div class="bg-gray-50 dark:bg-gray-900 p-4 rounded-xl text-left text-xs mb-4 border dark:border-gray-700 space-y-2">
                 <p class="font-bold text-gray-700 dark:text-gray-300 mb-1">📱 Métodos de pago disponibles:</p>
                 
-                <!-- Binance Pay -->
                 <div class="border-b dark:border-gray-700 pb-1.5">
                     <p class="font-semibold text-amber-600 dark:text-amber-400">🟡 Binance Pay:</p>
                     <p><b>Pay ID: 190696956</b></p>
                 </div>
 
-                <!-- Pago Móvil -->
                 <div class="border-b dark:border-gray-700 pb-1.5 pt-1">
                     <p class="font-semibold text-blue-600 dark:text-blue-400">🇻🇪 Pago Móvil:</p>
                     <p id="adminPmBanco">Banco: Banco de Venezuela</p>
@@ -71,7 +69,6 @@
                     <p id="adminPmCedula">Cédula: V-00000000</p>
                 </div>
 
-                <!-- Zinli -->
                 <div class="pt-1">
                     <p class="font-semibold text-indigo-600 dark:text-indigo-400">💳 Zinli:</p>
                     <p id="adminZinli">Correo: tucorreo@zinli.com</p>
@@ -331,7 +328,6 @@
                 </div>
             </div>
 
-            <!-- FILTRO DE HISTORIAL POR FECHA 📅 -->
             <div class="bg-gray-100 dark:bg-gray-900 p-2.5 rounded-lg mb-3 flex flex-wrap items-center justify-between gap-2 text-xs border dark:border-gray-700">
                 <div class="flex items-center gap-2">
                     <span class="font-bold text-gray-700 dark:text-gray-300"><i class="fas fa-calendar-alt text-blue-500 mr-1"></i> Buscar por Fecha:</span>
@@ -383,26 +379,14 @@
 
     <div id="toastContainer"></div>
 
-    <!-- SCRIPT DE FIREBASE Y LÓGICA -->
+    <!-- SCRIPT DE SUPABASE Y LÓGICA -->
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, getDocs, doc, setDoc, getDoc, updateDoc, deleteDoc, query, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+        import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-                const firebaseConfig = {
-            apiKey: "AIzaSyBwQRPLTlyc4eHCBisMuBvqqbiPjLUd5ZE",
-            authDomain: "tiendave1-aa842.firebaseapp.com",
-            projectId: "tiendave1-aa842",
-            storageBucket: "tiendave1-aa842.firebasestorage.app",
-            messagingSenderId: "841195979871",
-            appId: "1:841195979871:web:644d5c5804623114b1c7ea"
-        };
-        
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const storage = getStorage(app);
+        const SUPABASE_URL = 'https://jdnkohkkchyftdqsiuwy.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_qKmCxGdiP_FmewbqUHE2dA_1X8wyxFO';
+
+        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         const adminPaymentData = {
             pagoMovil: { banco: 'Banco de Venezuela', telefono: '0412-0000000', cedula: 'V-00000000' },
@@ -433,21 +417,26 @@
             document.getElementById('adminZinli').textContent = `Correo: ${adminPaymentData.zinli}`;
         }
 
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
+        // Gestión de sesión con Supabase Auth
+        supabase.auth.onAuthStateChange(async (event, session) => {
+            if (session && session.user) {
                 try {
-                    currentUser = user;
-                    const userDocRef = doc(db, "users", user.uid);
-                    const userSnap = await getDoc(userDocRef);
+                    currentUser = session.user;
+                    
+                    // Verificar estatus en la tabla users
+                    let { data: userRow, error: fetchErr } = await supabase
+                        .from('users')
+                        .select('*')
+                        .eq('id', currentUser.id)
+                        .single();
 
                     let isSubscribed = false;
-                    if (userSnap.exists()) {
-                        const userData = userSnap.data();
-                        if (userData.subscriptionActive === true) {
-                            isSubscribed = true;
-                        }
+                    if (userRow) {
+                        isSubscribed = userRow.subscriptionActive === true;
                     } else {
-                        await setDoc(userDocRef, { email: user.email, subscriptionActive: false, createdAt: new Date() });
+                        await supabase.from('users').insert([
+                            { id: currentUser.id, email: currentUser.email, subscriptionActive: false }
+                        ]);
                         isSubscribed = false;
                     }
 
@@ -456,18 +445,18 @@
                     if (!isSubscribed) {
                         document.getElementById('mainAppContainer').classList.add('hidden');
                         document.getElementById('subscriptionScreen').classList.remove('hidden');
-                        document.getElementById('subUserEmail').textContent = user.email;
-                        document.getElementById('subUserCode').textContent = user.uid.substring(0, 6).toUpperCase();
+                        document.getElementById('subUserEmail').textContent = currentUser.email;
+                        document.getElementById('subUserCode').textContent = currentUser.id.substring(0, 6).toUpperCase();
                         return;
                     }
 
                     document.getElementById('subscriptionScreen').classList.add('hidden');
                     document.getElementById('mainAppContainer').classList.remove('hidden');
-                    document.getElementById('userEmailDisplay').textContent = user.email;
+                    document.getElementById('userEmailDisplay').textContent = currentUser.email;
                     
-                    globalExchangeRate = parseFloat(localStorage.getItem(`exchangeRate_${user.uid}`)) || 36.50;
-                    storeName = localStorage.getItem(`storeName_${user.uid}`) || 'Mi Tienda';
-                    const pmSaved = localStorage.getItem(`pagoMovil_${user.uid}`);
+                    globalExchangeRate = parseFloat(localStorage.getItem(`exchangeRate_${currentUser.id}`)) || 36.50;
+                    storeName = localStorage.getItem(`storeName_${currentUser.id}`) || 'Mi Tienda';
+                    const pmSaved = localStorage.getItem(`pagoMovil_${currentUser.id}`);
                     if (pmSaved) pagoMovilData = JSON.parse(pmSaved);
 
                     document.getElementById('globalExchangeRate').value = globalExchangeRate;
@@ -475,7 +464,7 @@
                     updateStoreNameUI();
                     updatePagoMovilUI();
 
-                    await loadUserDataFromFirebase();
+                    await loadUserDataFromSupabase();
                 } catch (err) {
                     console.error("Error verificando estatus:", err);
                 }
@@ -493,7 +482,8 @@
             const errEl = document.getElementById('authError');
             try {
                 errEl.textContent = '';
-                await signInWithEmailAndPassword(auth, email, pass);
+                const { error } = await supabase.auth.signInWithPassword({ email, password: pass });
+                if (error) throw error;
             } catch (e) {
                 errEl.textContent = 'Error al entrar: Verifique sus credenciales.';
             }
@@ -505,13 +495,15 @@
             const errEl = document.getElementById('authError');
             try {
                 errEl.textContent = '';
-                const cred = await createUserWithEmailAndPassword(auth, email, pass);
+                const { data, error } = await supabase.auth.signUp({ email, password: pass });
+                if (error) throw error;
                 
-                await setDoc(doc(db, "users", cred.user.uid), {
-                    email: email,
-                    subscriptionActive: false,
-                    createdAt: new Date()
-                });
+                if (data.user) {
+                    await supabase.from('users').insert([
+                        { id: data.user.id, email: email, subscriptionActive: false }
+                    ]);
+                }
+                showToast('¡Cuenta creada con éxito! Inicia sesión.');
             } catch (e) {
                 errEl.textContent = 'Error al registrarse: ' + e.message;
             }
@@ -520,27 +512,31 @@
         window.enviarComprobanteWhatsApp = function() {
             if (!currentUser) return;
             const emailUser = currentUser.email;
-            const codigoUnico = currentUser.uid.substring(0, 6).toUpperCase();
+            const codigoUnico = currentUser.id.substring(0, 6).toUpperCase();
             
             const texto = `Hola! Acabo de realizar el pago de mi suscripción mensual (Binance Pay ID: 190696956).%0A%0A📧 Correo: *${emailUser}*%0A🔑 Código de Cliente: *${codigoUnico}*%0A%0AAdjunto mi comprobante para la activación.`;
             window.open(`https://api.whatsapp.com/send?phone=${adminPaymentData.whatsappAdmin}&text=${texto}`, '_blank');
         };
 
-        window.logoutUser = () => { signOut(auth); };
+        window.logoutUser = async () => { await supabase.auth.signOut(); };
 
-        async function loadUserDataFromFirebase() {
+        async function loadUserDataFromSupabase() {
             showToast('Sincronizando datos...');
             try {
-                const qProd = query(collection(db, "products"), where("userId", "==", currentUser.uid));
-                const snapProd = await getDocs(qProd);
-                products = [];
-                snapProd.forEach(docSnap => { products.push({ id: docSnap.id, ...docSnap.data() }); });
+                const { data: prodData, error: prodErr } = await supabase
+                    .from('products')
+                    .select('*')
+                    .eq('userId', currentUser.id);
+                if (prodErr) throw prodErr;
+                products = prodData || [];
 
-                const qSales = query(collection(db, "sales"), where("userId", "==", currentUser.uid));
-                const snapSales = await getDocs(qSales);
-                salesHistory = [];
-                snapSales.forEach(docSnap => { salesHistory.push({ id: docSnap.id, ...docSnap.data() }); });
-                salesHistory.sort((a, b) => b.timestamp - a.timestamp);
+                const { data: salesData, error: salesErr } = await supabase
+                    .from('sales')
+                    .select('*')
+                    .eq('userId', currentUser.id)
+                    .order('timestamp', { ascending: false });
+                if (salesErr) throw salesErr;
+                salesHistory = salesData || [];
 
                 renderProducts();
                 updateSalesStats();
@@ -591,7 +587,7 @@
 
         storeNameInput.addEventListener('input', (e) => {
             storeName = e.target.value.trim() || 'Mi Tienda';
-            localStorage.setItem(`storeName_${currentUser.uid}`, storeName);
+            localStorage.setItem(`storeName_${currentUser.id}`, storeName);
             updateStoreNameUI();
         });
 
@@ -615,7 +611,7 @@
                 badge.textContent = `0.00%`;
                 badge.className = "w-full bg-gray-100 dark:bg-gray-900 border dark:border-gray-700 rounded-lg px-3 py-2 font-bold text-emerald-600 flex items-center text-sm";
             }
-        }
+                    }
 
         costUSDInput.addEventListener('input', calculateProfitMargin);
         priceUSDInput.addEventListener('input', calculateProfitMargin);
@@ -636,7 +632,7 @@
                 telefono: document.getElementById('pmTelefono').value.trim() || 'N/A',
                 cedula: document.getElementById('pmCedula').value.trim() || 'N/A'
             };
-            localStorage.setItem(`pagoMovil_${currentUser.uid}`, JSON.stringify(pagoMovilData));
+            localStorage.setItem(`pagoMovil_${currentUser.id}`, JSON.stringify(pagoMovilData));
             updatePagoMovilUI();
             document.getElementById('pagoMovilEditForm').classList.add('hidden');
             showToast('Datos de Pago Móvil actualizados');
@@ -655,7 +651,7 @@
 
         globalExchangeRateInput.addEventListener('input', (e) => {
             globalExchangeRate = parseFloat(e.target.value) || 0;
-            localStorage.setItem(`exchangeRate_${currentUser.uid}`, globalExchangeRate);
+            localStorage.setItem(`exchangeRate_${currentUser.id}`, globalExchangeRate);
             renderProducts();
             renderCart();
         });
@@ -681,10 +677,19 @@
             
             let finalImageURL = '';
             if (imageFileToUpload) {
-                showToast('Subiendo imagen a Storage...');
-                const storageRef = ref(storage, `productos/${currentUser.uid}/${Date.now()}_${imageFileToUpload.name}`);
-                const snapshot = await uploadBytes(storageRef, imageFileToUpload);
-                finalImageURL = await getDownloadURL(snapshot.ref);
+                showToast('Subiendo imagen a Supabase Storage...');
+                const filePath = `productos/${currentUser.id}/${Date.now()}_${imageFileToUpload.name}`;
+                const { data: uploadData, error: uploadErr } = await supabase.storage.from('store-images').upload(filePath, imageFileToUpload);
+                if (uploadErr) {
+                    // Si el bucket no está creado o da error, guardamos como texto Base64 temporalmente
+                    const reader = new FileReader();
+                    reader.readAsDataURL(imageFileToUpload);
+                    await new Promise(resolve => reader.onload = resolve);
+                    finalImageURL = reader.result;
+                } else {
+                    const { data: publicURLData } = supabase.storage.from('store-images').getPublicUrl(filePath);
+                    finalImageURL = publicURLData.publicUrl;
+                }
             } else if (docId) {
                 const existing = products.find(p => p.id === docId);
                 if (existing) finalImageURL = existing.image;
@@ -693,7 +698,7 @@
             const selectedUnit = document.querySelector('input[name="fractionUnit"]:checked').value;
 
             const productData = {
-                userId: currentUser.uid,
+                userId: currentUser.id,
                 name: document.getElementById('name').value.trim(),
                 barcode: document.getElementById('barcode').value.trim(),
                 stock: parseFloat(document.getElementById('stock').value) || 0,
@@ -706,15 +711,19 @@
 
             try {
                 if (docId) {
-                    await updateDoc(doc(db, "products", docId), productData);
+                    const { error } = await supabase.from('products').update(productData).eq('id', docId);
+                    if (error) throw error;
                     const idx = products.findIndex(p => p.id === docId);
                     if (idx > -1) products[idx] = { id: docId, ...productData };
                     document.getElementById('editDocId').value = '';
                     document.getElementById('formTitle').textContent = 'Agregar Nuevo Producto';
                     document.getElementById('saveBtn').textContent = 'Guardar Producto';
                 } else {
-                    const docRef = await addDoc(collection(db, "products"), productData);
-                    products.push({ id: docRef.id, ...productData });
+                    const { data, error } = await supabase.from('products').insert([productData]).select();
+                    if (error) throw error;
+                    if (data && data[0]) {
+                        products.push(data[0]);
+                    }
                 }
 
                 productForm.reset();
@@ -728,7 +737,7 @@
                 showToast('¡Producto guardado en la nube con éxito!');
             } catch (err) {
                 console.error(err);
-                alert('Error al guardar el producto en Firestore.');
+                alert('Error al guardar el producto en Supabase.');
             }
         });
 
@@ -804,7 +813,7 @@
                     `;
                 }
 
-                                     let badgeTag = '';
+                let badgeTag = '';
                 if (isKg) badgeTag = `<span class="bg-amber-100 text-amber-800 text-[10px] px-2 py-0.5 rounded font-bold">KILOS</span>`;
                 if (isLt) badgeTag = `<span class="bg-cyan-100 text-cyan-800 text-[10px] px-2 py-0.5 rounded font-bold">LITROS</span>`;
 
@@ -871,7 +880,7 @@
             p.stock = parseFloat((p.stock + amount).toFixed(2));
             if (p.stock < 0) p.stock = 0;
             
-            await updateDoc(doc(db, "products", id), { stock: p.stock });
+            await supabase.from('products').update({ stock: p.stock }).eq('id', id);
             renderProducts();
         };
 
@@ -1067,7 +1076,7 @@
                 if (pObj) {
                     pObj.stock -= multiplier;
                     if (pObj.stock < 0) pObj.stock = 0;
-                    await updateDoc(doc(db, "products", pObj.id), { stock: pObj.stock });
+                    await supabase.from('products').update({ stock: pObj.stock }).eq('id', pObj.id);
                 }
             }
 
@@ -1085,7 +1094,7 @@
             text += `%0A📲 ¡Esperamos su confirmación para procesar el pedido!`;
 
             const newSale = {
-                userId: currentUser.uid,
+                userId: currentUser.id,
                 idOrden: numeroOrden,
                 name: `Pedido Múltiple (${cart.length} productos)`,
                 cliente: clienteFinal,
@@ -1102,8 +1111,10 @@
                 abonoUSD: 0
             };
 
-            const docRef = await addDoc(collection(db, "sales"), newSale);
-            salesHistory.unshift({ id: docRef.id, ...newSale });
+            const { data, error } = await supabase.from('sales').insert([newSale]).select();
+            if (!error && data && data[0]) {
+                salesHistory.unshift(data[0]);
+            }
 
             window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
             
@@ -1247,7 +1258,7 @@
                 return;
             }
 
-            container.innerHTML = '';
+        container.innerHTML = '';
             listToRender.forEach((sale) => {
                 const ordenCorta = sale.idOrden || 'OM-XXXX';
                 const clienteNombre = sale.cliente || 'Cliente General';
@@ -1401,12 +1412,12 @@
             sale.total = (originalUSD * globalExchangeRate).toFixed(2);
             sale.totalUSD = originalUSD.toFixed(2);
 
-            await updateDoc(doc(db, "sales", saleId), {
+            await supabase.from('sales').update({
                 abonoUSD: sale.abonoUSD,
                 pagado: sale.pagado,
                 total: sale.total,
                 totalUSD: sale.totalUSD
-            });
+            }).eq('id', saleId);
 
             showToast(`¡Abono registrado con éxito!`);
             showSaleDetail(saleId);
@@ -1431,10 +1442,10 @@
                 sale.abonoUSD = 0;
             }
 
-            await updateDoc(doc(db, "sales", saleId), { 
+            await supabase.from('sales').update({ 
                 pagado: sale.pagado,
                 abonoUSD: sale.abonoUSD
-            });
+            }).eq('id', saleId);
 
             showSaleDetail(saleId);
             renderSalesHistory();
@@ -1449,7 +1460,7 @@
         window.clearSalesHistory = async function() {
             if (confirm('¿Deseas limpiar todo el registro del historial de ventas en la nube?')) {
                 for (const sale of salesHistory) {
-                    await deleteDoc(doc(db, "sales", sale.id));
+                    await supabase.from('sales').delete().eq('id', sale.id);
                 }
                 salesHistory = [];
                 renderSalesHistory();
@@ -1581,7 +1592,7 @@
 
         window.deleteProduct = async function(id) {
             if (confirm('¿Estás seguro de eliminar este producto de la nube?')) {
-                await deleteDoc(doc(db, "products", id));
+                await supabase.from('products').delete().eq('id', id);
                 products = products.filter(p => p.id !== id);
                 renderProducts();
                 showToast('Producto eliminado');
