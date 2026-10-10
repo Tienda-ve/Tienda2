@@ -1555,42 +1555,57 @@
 
                 await loadUserDataFromSupabase();
 
-                let text = `🛒 *PEDIDO - ${shopName.toUpperCase()}*%0A🔖 Orden: *${ordenId}*%0A👤 Cliente: *${cliente}*%0A📅 Fecha: ${fechaStr}%0A%0A📦 *Detalle del Carrito:*%0A`;
+                            let lineasMensaje = [
+                `🛒 *PEDIDO - ${shopName.toUpperCase()}*`,
+                `🔖 Orden: *${ordenId}*`,
+                `👤 Cliente: *${cliente}*`,
+                `📅 Fecha: ${fechaStr}`,
+                ``,
+                `📦 *Detalle del Carrito:*`
+            ];
 
-                cart.forEach((i) => {
-                    const isWeighted = Boolean(i.isWeighted);
-                    const mult = Number(isWeighted ? (i.qtyFraction ?? i.qty ?? 0) : (i.qty ?? 0));
-                    const subtotalUSD = Number((Number(i.priceUSD ?? 0) * mult).toFixed(2));
-                    const qtyText = isWeighted ? `${i.gramsTotal ?? mult * 1000 ?? 0}g` : `x${i.qty}`;
-                    
-                    text += `• *${i.name || 'Producto'} (${qtyText})*%0A  Subtotal: *${formatMoneyClean(subtotalUSD)}* ($${subtotalUSD.toFixed(2)})%0A`;
-                });
+            cart.forEach((i) => {
+                const isWeighted = Boolean(i.isWeighted);
+                const mult = Number(isWeighted ? (i.qtyFraction ?? i.qty ?? 0) : (i.qty ?? 0));
+                const subtotalUSD = Number((Number(i.priceUSD ?? 0) * mult).toFixed(2));
+                const qtyText = isWeighted ? `${i.gramsTotal ?? mult * 1000 ?? 0}g` : `x${i.qty}`;
+                
+                lineasMensaje.push(`• *${i.name \vert{}\vert{} 'Producto'} (${qtyText})*`);
+                lineasMensaje.push(`  Subtotal: *${formatMoneyClean(subtotalUSD)}* ($${subtotalUSD.toFixed(2)})`);
+            });
 
-                text += `━━━━━━━━━━━━━━━━━━%0A✅ *TOTAL A PAGAR: ${formatMoneyClean(totalGeneralUSD)} ($${totalGeneralUSD.toFixed(2)})*%0A━━━━━━━━━━━━━━━━━━%0A`;
+            lineasMensaje.push(`━━━━━━━━━━━━━━━━━━`);
+            lineasMensaje.push(`✅ *TOTAL A PAGAR: ${formatMoneyClean(totalGeneralUSD)} ($${totalGeneralUSD.toFixed(2)})*`);
+            lineasMensaje.push(`━━━━━━━━━━━━━━━━━━`);
 
-                let paymentsAdded = false;
-                if (Array.isArray(customPaymentMethods)) {
-                    customPaymentMethods.forEach((p) => {
-                        const chk = document.getElementById(`chk_pay_${p.id}`);
-                        if (chk && chk.checked) {
-                            paymentsAdded = true;
-                            text += `%0A📱 *Datos de ${p.name || 'Pago'}:*%0A`;
-                            const details = String(p.details || '').trim();
-                            if (details) {
-                                details.split('\n').forEach((line) => {
-                                    let cleanLine = line.trim();
-                                    if (cleanLine) {
-                                        text += `${cleanLine}%0A`;
-                                    }
-                                });
-                            }
+            let paymentsAdded = false;
+            if (Array.isArray(customPaymentMethods)) {
+                customPaymentMethods.forEach((p) => {
+                    const chk = document.getElementById(`chk_pay_${p.id}`);
+                    if (chk && chk.checked) {
+                        paymentsAdded = true;
+                        lineasMensaje.push(``);
+                        lineasMensaje.push(`📱 *Datos de ${p.name || 'Pago'}:*`);
+                        const details = String(p.details || '').trim();
+                        if (details) {
+                            details.split('\n').forEach((line) => {
+                                let cleanLine = line.trim();
+                                if (cleanLine) {
+                                    lineasMensaje.push(cleanLine);
+                                }
+                            });
                         }
-                    });
-                }
+                    }
+                });
+            }
 
-                if (paymentsAdded) {
-                    text += `%0A📲 ¡Esperamos su confirmación para procesar el pedido!`;
-                }
+            if (paymentsAdded) {
+                lineasMensaje.push(``);
+                lineasMensaje.push(`📲 ¡Esperamos su confirmación para procesar el pedido!`);
+            }
+
+            let text = lineasMensaje.join('\n');
+
 
                 window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
                 cart = [];
