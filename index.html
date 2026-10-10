@@ -612,7 +612,8 @@
                         userRow = { subscriptionActive: false };
                     }
 
-                    let isSubscribed = userRow ? userRow.subscriptionActive === true : false;
+                    let isSubscribed = userRow ? (userRow.subscriptionactive === true || userRow.subscriptionActive === true) : false;
+
 
                     document.getElementById('authScreen').classList.add('hidden');
                     if (!isSubscribed) {
