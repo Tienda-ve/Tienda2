@@ -665,13 +665,27 @@
             }
         });
 
-        document.getElementById('loginBtn').addEventListener('click', async () => {
+                document.getElementById('loginBtn').addEventListener('click', async () => {
             const email = document.getElementById('authEmail').value.trim();
             const pass = document.getElementById('authPassword').value.trim();
+            const errorDiv = document.getElementById('authError');
+            errorDiv.textContent = '';
+
+            if (!email || !pass) {
+                errorDiv.textContent = 'Por favor ingresa correo y contraseña.';
+                return;
+            }
+
             try {
-                const { error } = await supabase.auth.signInWithPassword({ email, password: pass });
+                const { data, error } = await supabase.auth.signInWithPassword({ email, password: pass });
                 if (error) throw error;
-            } catch (e) { document.getElementById('authError').textContent = 'Error al entrar.'; }
+                if (data && data.session) {
+                    showToast('¡Inicio de sesión exitoso!');
+                }
+            } catch (e) {
+                console.error("Error de login:", e);
+                errorDiv.textContent = 'Error: ' + e.message;
+            }
         });
 
         document.getElementById('registerBtn').addEventListener('click', async () => {
