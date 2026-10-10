@@ -45,17 +45,37 @@
 
     <!-- SUSCRIPCIÓN PENDIENTE -->
     <div id="subscriptionScreen" class="min-h-screen flex items-center justify-center p-4 hidden">
-        <div class="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-xl max-w-md w-full text-center border dark:border-gray-700">
-            <i class="fas fa-lock text-4xl text-amber-500 mb-3"></i>
-            <h2 class="text-2xl font-bold dark:text-white mb-2">Activación de Suscripción</h2>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">
-                Tu cuenta (<span id="subUserEmail" class="font-semibold text-gray-700 dark:text-gray-300"></span>) tiene el Código: <b id="subUserCode" class="text-blue-600 dark:text-blue-400 font-mono">...</b>.
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-xl max-w-md w-full text-center border dark:border-gray-700">
+            <i class="fas fa-lock text-3xl text-amber-500 mb-2"></i>
+            <h2 class="text-xl font-bold dark:text-white mb-1">Activación de Suscripción</h2>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">
+                Cuenta: <span id="subUserEmail" class="font-semibold text-gray-700 dark:text-gray-300"></span> | Código: <b id="subUserCode" class="text-blue-600 dark:text-blue-400 font-mono">...</b>
             </p>
-            <div class="bg-gray-50 dark:bg-gray-900 p-4 rounded-xl text-left text-xs mb-4 border dark:border-gray-700 space-y-2">
-                <p class="font-bold text-gray-700 dark:text-gray-300 mb-1">📱 Binance Pay:</p>
-                <p><b>Pay ID: 190696956</b></p>
+
+            <!-- CAJA DE PRECIOS -->
+            <div class="bg-blue-50 dark:bg-gray-900 p-3 rounded-xl border border-blue-200 dark:border-blue-900 mb-3 text-left text-xs">
+                <div class="flex justify-between items-center mb-1">
+                    <span class="text-gray-600 dark:text-gray-300">🏷️ Plan Mensual Regular:</span>
+                    <span class="font-bold text-gray-800 dark:text-gray-200 line-through">$3.99 / mes</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="font-bold text-emerald-600 dark:text-emerald-400">🔥 Oferta Cliente Nuevo:</span>
+                    <span class="font-bold text-emerald-600 dark:text-emerald-400 text-sm">$1.99 / mes</span>
+                </div>
             </div>
-            <button onclick="enviarComprobanteWhatsApp()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-lg font-bold text-sm shadow flex items-center justify-center gap-2 mb-3">
+
+            <!-- DATOS DE BINANCE PAY Y ALTERNATIVA -->
+            <div class="bg-gray-50 dark:bg-gray-900 p-3 rounded-xl text-left text-xs mb-4 border dark:border-gray-700 space-y-2">
+                <p class="font-bold text-gray-700 dark:text-gray-300 flex items-center gap-1">
+                    <i class="fas fa-wallet text-amber-500"></i> Binance Pay:
+                </p>
+                <p class="font-mono bg-white dark:bg-gray-800 p-1.5 rounded border text-center font-bold">Pay ID: 190696956</p>
+                <p class="text-[11px] text-gray-500 dark:text-gray-400 text-center mt-2 pt-2 border-t dark:border-gray-700">
+                    ¿No tienes cuenta de Binance? Escríbenos al correo <b class="text-blue-600 dark:text-blue-400">tiendave65@gmail.com</b> para coordinar otra forma de pago.
+                </p>
+            </div>
+
+            <button onclick="enviarComprobanteWhatsApp()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-lg font-bold text-sm shadow flex items-center justify-center gap-2 mb-2.5">
                 <i class="fab fa-whatsapp text-lg"></i> Enviar Comprobante por WhatsApp
             </button>
             <button onclick="logoutUser()" class="text-xs text-red-500 hover:underline">Cerrar sesión</button>
@@ -81,6 +101,7 @@
             
             <div class="mt-4 flex flex-wrap justify-center gap-2.5">
                 <button onclick="sendCatalogWhatsApp()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-md text-xs font-semibold shadow flex items-center gap-1.5"><i class="fab fa-whatsapp"></i> Catálogo</button>
+                <button onclick="openSupplierModal()" class="bg-amber-600 hover:bg-amber-700 text-white px-3 py-1.5 rounded-md text-xs font-semibold shadow flex items-center gap-1.5"><i class="fas fa-truck"></i> Pedido Proveedor</button>
                 <button onclick="toggleClientsModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-md text-xs font-semibold shadow flex items-center gap-1.5"><i class="fas fa-users"></i> Clientes (CRM)</button>
                 <button onclick="toggleBIModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-md text-xs font-semibold shadow flex items-center gap-1.5"><i class="fas fa-chart-pie"></i> Reportes (BI)</button>
                 <button onclick="toggleSalesHistoryModal()" class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded-md text-xs font-semibold shadow flex items-center gap-1.5"><i class="fas fa-chart-line"></i> Historial / Cierre</button>
@@ -88,7 +109,7 @@
             </div>
         </header>
 
-      <!-- BANNER ALERTA STOCK BAJO -->
+        <!-- BANNER ALERTA STOCK BAJO -->
         <div id="lowStockBanner" class="hidden mb-6 bg-red-50 dark:bg-gray-800 border-l-4 border-red-500 p-4 rounded-xl shadow-sm">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
@@ -98,7 +119,10 @@
                         <p id="lowStockText" class="text-xs text-gray-600 dark:text-gray-300">Hay productos por debajo del stock mínimo configurado.</p>
                     </div>
                 </div>
-                <button onclick="filterLowStockProducts()" class="bg-red-600 text-white px-3 py-1 rounded text-xs font-bold hover:bg-red-700">Filtrar Críticos</button>
+                <div class="flex gap-2">
+                    <button onclick="openSupplierModal()" class="bg-amber-600 text-white px-3 py-1 rounded text-xs font-bold hover:bg-amber-700">Ver Pedido Proveedor</button>
+                    <button onclick="filterLowStockProducts()" class="bg-red-600 text-white px-3 py-1 rounded text-xs font-bold hover:bg-red-700">Filtrar Críticos</button>
+                </div>
             </div>
         </div>
 
@@ -147,8 +171,9 @@
 
                 <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
                     <button onclick="printThermalTicket()" class="bg-slate-800 hover:bg-slate-900 text-white px-3.5 py-2 rounded-xl font-bold text-xs flex items-center gap-1.5 shadow"><i class="fas fa-print"></i> Ticket Térmico</button>
-                    <div class="flex items-center gap-2">
-                        <button onclick="saveCartForLater()" class="bg-amber-500 hover:bg-amber-600 text-white px-3.5 py-2 rounded-xl font-bold text-xs flex items-center gap-1.5"><i class="fas fa-save"></i> Guardar</button>
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <button onclick="saveCartForLater()" class="bg-amber-500 hover:bg-amber-600 text-white px-3 py-2 rounded-xl font-bold text-xs flex items-center gap-1.5"><i class="fas fa-save"></i> Guardar</button>
+                        <button onclick="saveCartAsPaidSale()" class="bg-purple-600 hover:bg-purple-700 text-white px-3.5 py-2 rounded-xl font-bold text-xs flex items-center gap-1.5 shadow"><i class="fas fa-check-circle"></i> Guardar Pagado</button>
                         <button onclick="sendCartWhatsApp()" class="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2 rounded-xl font-bold text-xs flex items-center gap-1.5 shadow-lg"><i class="fab fa-whatsapp text-sm"></i> Enviar Factura</button>
                     </div>
                 </div>
@@ -236,7 +261,7 @@
             </section>
         </div>
 
-      <!-- FORMULARIO DE PRODUCTOS CON REABASTECIMIENTO Y ALERTAS -->
+        <!-- FORMULARIO DE PRODUCTOS CON REABASTECIMIENTO Y ALERTAS -->
         <section class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 mb-8">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-xl font-semibold text-gray-700 dark:text-gray-200"><i class="fas fa-plus-circle mr-2"></i><span id="formTitle">Agregar Nuevo Producto</span></h2>
@@ -356,6 +381,26 @@
             
             <div class="mt-3 pt-2 border-t text-right">
                 <button onclick="toggleClientsModal()" class="bg-gray-200 dark:bg-gray-700 px-3 py-1 rounded text-xs font-semibold">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL REPORTE PROVEEDOR EDITABLE -->
+    <div id="supplierModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-xl w-full p-6 max-h-[85vh] flex flex-col">
+            <div class="flex justify-between items-center mb-3 border-b pb-2">
+                <h3 class="text-base font-bold"><i class="fas fa-truck text-amber-500 mr-2"></i>Lista de Pedido a Proveedor</h3>
+                <button onclick="closeSupplierModal()" class="text-gray-400 text-lg">&times;</button>
+            </div>
+            <p class="text-xs text-gray-500 mb-3">Revisa, ajusta cantidades o elimina productos antes de enviar el pedido por WhatsApp.</p>
+            
+            <div id="supplierItemsContainer" class="overflow-y-auto flex-1 space-y-2.5 pr-1 mb-3"></div>
+            
+            <div class="border-t pt-3 flex justify-between items-center gap-3">
+                <button onclick="closeSupplierModal()" class="bg-gray-200 dark:bg-gray-700 px-4 py-2 rounded text-xs font-semibold">Cerrar</button>
+                <button onclick="sendSupplierWhatsApp()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded text-xs font-bold flex items-center gap-1.5 shadow">
+                    <i class="fab fa-whatsapp"></i> Enviar Pedido a Proveedor
+                </button>
             </div>
         </div>
     </div>
@@ -533,6 +578,7 @@
         let clientsList = [];
         let cart = [];
         let pendingCarts = [];
+        let supplierEditList = [];
         let storeName = 'Mi Tienda';
         let useUSD = true;
         let useRate1 = true;
@@ -633,8 +679,8 @@
 
       window.enviarComprobanteWhatsApp = function() {
             if (!currentUser) return;
-            const texto = `Hola! Pago suscripción.%0A📧 Correo: *${currentUser.email}*%0A🔑 Código: *${currentUser.id.substring(0, 6).toUpperCase()}*`;
-            window.open(`https://api.whatsapp.com/send?phone=${adminPaymentData.whatsappAdmin}&text=${texto}`, '_blank');
+            let texto = `Hola! Pago suscripción.\n📧 Correo: *${currentUser.email}*\n🔑 Código: *${currentUser.id.substring(0, 6).toUpperCase()}*`;
+            window.open(`https://api.whatsapp.com/send?phone=${adminPaymentData.whatsappAdmin}&text=${encodeURIComponent(texto)}`, '_blank');
         };
 
         window.logoutUser = async () => { await supabase.auth.signOut(); };
@@ -754,7 +800,7 @@
             if (useRate1 && rate1Value > 0) {
                 let p1 = getCurrencyPrefix(rate1Currency);
                 let val1 = (usdAmount * rate1Value).toLocaleString('es-VE', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-                parts.push(`<strong class="text-emerald-600 dark:text-emerald-400 font-bold">${p1} ${val1}</strong>`);
+                parts.push(`<strong class="text-emerald-600 dark:text-emerald-400 font-bold">${p1}${val1}</strong>`);
             }
             if (useUSD) {
                 parts.push(`$${usdAmount.toFixed(2)}`);
@@ -762,7 +808,7 @@
             if (useRate2 && rate2Value > 0) {
                 let p2 = getCurrencyPrefix(rate2Currency);
                 let val2 = (usdAmount * rate2Value).toLocaleString('es-CO', {maximumFractionDigits: 2});
-                parts.push(`${p2} ${val2}`);
+                parts.push(`${p2}${val2}`);
             }
             if (parts.length === 0) {
                 return `$${usdAmount.toFixed(2)}`;
@@ -774,12 +820,12 @@
             if (useRate1 && rate1Value > 0) {
                 let p1 = getCurrencyPrefix(rate1Currency);
                 let val1 = (usdAmount * rate1Value).toFixed(2);
-                return `${p1} ${val1}`;
+                return `${p1}${val1}`;
             }
             return `$${usdAmount.toFixed(2)}`;
         };
 
-      const costUSDInput = document.getElementById('costUSD');
+        const costUSDInput = document.getElementById('costUSD');
         const priceUSDInput = document.getElementById('priceUSD');
 
         function updateFormEquivPreview() {
@@ -860,7 +906,7 @@
                 card.innerHTML = `
                     <div>
                         <div class="font-bold mb-1 text-sm flex items-center justify-between">
-                            <span>${p.flag} ${p.name}</span>
+                            <span>${p.flag}${p.name}</span>
                             <div class="flex items-center gap-2">
                                 <button onclick="editPaymentMethod('${p.id}')" class="text-blue-500 hover:text-blue-700 text-xs"><i class="fas fa-edit"></i></button>
                                 <button onclick="deletePaymentMethod('${p.id}')" class="text-red-500 hover:text-red-700 text-xs"><i class="fas fa-trash"></i></button>
@@ -872,7 +918,7 @@
 
                 const label = document.createElement('label');
                 label.className = 'flex items-center gap-1.5 cursor-pointer bg-blue-900 bg-opacity-40 px-2 py-1 rounded border border-blue-400 hover:bg-opacity-60 transition';
-                label.innerHTML = `<input type="checkbox" id="chk_pay_${p.id}" checked class="rounded text-emerald-500 focus:ring-0 w-3.5 h-3.5 cursor-pointer"> <span>${p.flag} ${p.name}</span>`;
+                label.innerHTML = `<input type="checkbox" id="chk_pay_${p.id}" checked class="rounded text-emerald-500 focus:ring-0 w-3.5 h-3.5 cursor-pointer"> <span>${p.flag}${p.name}</span>`;
                 chkContainer.appendChild(label);
             });
         }
@@ -938,7 +984,7 @@
                 await supabase.from('products').insert([productData]);
             }
 
-            productForm.reset();
+          productForm.reset();
             imageFileToUpload = null;
             fileName.textContent = 'Ninguna imagen seleccionada';
             imagePreviewContainer.innerHTML = 'Sin foto';
@@ -1013,15 +1059,13 @@
                         ${p.image ? `<img src="${p.image}" class="w-full h-44 object-cover">` : `<div class="w-full h-32 bg-gray-100 dark:bg-gray-900 flex items-center justify-center text-gray-400"><i class="fas fa-image fa-2x"></i></div>`}
                         <div class="p-4">
                             <div class="flex justify-between items-start mb-1">
-                                <h3 class="font-bold text-lg dark:text-white">${p.name}</h3>
-                                ${isLowStock ? `<span class="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">Bajo Stock</span>` : ''}
+                                <h3 class="font-bold text-lg dark:text-white">${p.name}</h3>${isLowStock ? `<span class="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">Bajo Stock</span>` : ''}
                             </div>
                             ${p.description ? `<p class="text-gray-500 text-xs mb-2">📝 ${p.description}</p>` : ''}
                             <div class="mb-3 text-xs bg-gray-50 dark:bg-gray-900 p-2 rounded border dark:border-gray-700">
                                 <span class="text-sm block font-bold">${priceFormatted}</span>
                                 <div class="flex justify-between items-center text-gray-500 mt-1">
-                                    <span>Stock: <b class="${isLowStock ? 'text-red-500' : ''}">${p.stock}</b> (mín: ${p.min_stock || 5})</span>
-                                    ${cost > 0 ? `<span class="text-emerald-600 dark:text-emerald-400 font-bold">Margen: +${marginPercent}%</span>` : ''}
+                                    <span>Stock: <b class="${isLowStock ? 'text-red-500' : ''}">${p.stock}</b> (mín: ${p.min_stock \vert{}\vert{} 5})</span>${cost > 0 ? `<span class="text-emerald-600 dark:text-emerald-400 font-bold">Margen: +${marginPercent}%</span>` : ''}
                                 </div>
                             </div>
                             ${selectorHtml}
@@ -1202,6 +1246,84 @@
             showToast(`¡Stock actualizado: +${addQty} unidades!`);
         };
 
+        /* PEDIDO A PROVEEDOR EDITABLE */
+        window.openSupplierModal = function() {
+            const lowItems = products.filter(p => p.stock <= (p.min_stock || 5));
+            supplierEditList = lowItems.map(p => ({
+                id: p.id,
+                name: p.name,
+                stock: p.stock,
+                minStock: p.min_stock || 5,
+                suggestedQty: Math.max(1, ((p.min_stock || 5) * 2) - p.stock)
+            }));
+            renderSupplierModalList();
+            document.getElementById('supplierModal').classList.remove('hidden');
+        };
+
+        window.closeSupplierModal = function() {
+            document.getElementById('supplierModal').classList.add('hidden');
+        };
+
+        function renderSupplierModalList() {
+            const container = document.getElementById('supplierItemsContainer');
+            if(!container) return;
+            container.innerHTML = '';
+
+            if(supplierEditList.length === 0) {
+                container.innerHTML = '<p class="text-gray-400 text-center py-6 text-xs">No hay productos en stock crítico para reponer.</p>';
+                return;
+            }
+
+            supplierEditList.forEach((item, idx) => {
+                const row = document.createElement('div');
+                row.className = 'bg-gray-50 dark:bg-gray-900 border p-2.5 rounded-lg flex items-center justify-between text-xs gap-2';
+                row.innerHTML = `
+                    <div class="truncate flex-1">
+                        <p class="font-bold text-gray-800 dark:text-gray-200 truncate">${item.name}</p>
+                        <p class="text-[11px] text-red-500">Stock actual: ${item.stock} (Mín: ${item.minStock})</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <input type="number" id="suppQty_${idx}" value="${item.suggestedQty}" step="0.01" min="0.1" onchange="updateSupplierQty(${idx}, this.value)" class="w-20 text-xs font-bold text-center border rounded px-2 py-1 dark:bg-gray-800">
+                        <button onclick="removeSupplierItem(${idx})" class="text-red-500 hover:text-red-700 px-1"><i class="fas fa-trash"></i></button>
+                    </div>`;
+                container.appendChild(row);
+            });
+        }
+
+        window.updateSupplierQty = function(idx, val) {
+            if(supplierEditList[idx]) {
+                supplierEditList[idx].suggestedQty = parseFloat(val) || 1;
+            }
+        };
+
+        window.removeSupplierItem = function(idx) {
+            supplierEditList.splice(idx, 1);
+            renderSupplierModalList();
+        };
+
+        window.sendSupplierWhatsApp = function() {
+            if(supplierEditList.length === 0) return alert('La lista está vacía');
+            let lines = [
+                `🛒 *PEDIDO DE REABASTECIMIENTO*`,
+                `🏪 Tienda: *${storeName}*`,
+                `📅 Fecha: ${new Date().toLocaleDateString('es-VE')}`,
+                ``,
+                `📦 *Productos a Reponer:*`
+            ];
+
+            supplierEditList.forEach(i => {
+                lines.push(`• *${i.name}* (Cantidad sugerida:${i.suggestedQty})`);
+            });
+
+            lines.push(``);
+            lines.push(`📲 ¡Agradecemos la pronta entrega de esta mercancía!`);
+
+            let text = lines.join('\n');
+            window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
+            closeSupplierModal();
+            showToast('Pedido de proveedor generado');
+        };
+
       /* CRM Y CLIENTES */
         window.toggleClientsModal = function() {
             const modal = document.getElementById('clientsModal');
@@ -1216,7 +1338,7 @@
             clientsList.forEach(c => {
                 const opt = document.createElement('option');
                 opt.value = c.id;
-                opt.textContent = `${c.name} ${c.doc_id ? '(' + c.doc_id + ')' : ''}`;
+                opt.textContent = `${c.name}${c.doc_id ? '(' + c.doc_id + ')' : ''}`;
                 sel.appendChild(opt);
             });
         }
@@ -1273,7 +1395,7 @@
                 div.innerHTML = `
                     <div>
                         <p class="font-bold text-gray-800 dark:text-gray-200">${c.name} <span class="text-gray-400 font-mono">(${c.doc_id || 'Sin CI'})</span></p>
-                        <p class="text-gray-500 text-[11px]">📞 ${c.phone || 'Sin telf'} | 🏠 ${c.address || 'Sin dirección'}</p>
+                        <p class="text-gray-500 text-[11px]">📞 ${c.phone \vert{}\vert{} 'Sin telf'} \vert{} 🏠 ${c.address || 'Sin dirección'}</p>
                     </div>
                     <div class="flex gap-2">
                         <button onclick="editClient('${c.id}')" class="text-blue-500 hover:text-blue-700"><i class="fas fa-edit"></i></button>
@@ -1281,7 +1403,7 @@
                     </div>`;
                 container.appendChild(div);
             });
-        }
+                    }
 
         window.editClient = function(id) {
             const c = clientsList.find(item => item.id === id);
@@ -1359,11 +1481,10 @@
             const gananciaReal = totalIngresoSales - totalCostoSales;
             document.getElementById('biFinancialSummary').innerHTML = `
                 <p><b>Ventas Brutas Totales:</b> $${totalIngresoSales.toFixed(2)}</p>
-                <p><b>Costo de Mercancía Vendida:</b> $${totalCostoSales.toFixed(2)}</p>
-                <p class="text-emerald-600 font-bold"><b>Ganancia Neta Estimada:</b> $${gananciaReal.toFixed(2)}</p>`;
+                <p><b>Costo de Mercancía Vendida:</b> $${totalCostoSales.toFixed(2)}</p>                 <p class="text-emerald-600 font-bold"><b>Ganancia Neta Estimada:</b> $${gananciaReal.toFixed(2)}</p>`;
         }
 
-        /* IMPRESIÓN DE TICKET TÉRMICO (MODIFICADO SIN BACKTICKS PARA MÓVIL) */
+        /* IMPRESIÓN DE TICKET TÉRMICO */
         window.printThermalTicket = function() {
             if(cart.length === 0) return alert('El carrito está vacío');
             const clientName = document.getElementById('clientNameInput').value.trim() || 'Cliente General';
@@ -1440,7 +1561,7 @@
                 
                 let itemsListHtml = pc.items.map(i => {
                     let m = i.isWeighted ? i.qtyFraction : i.qty;
-                    return `<li class="text-[11px] text-gray-500 dark:text-gray-400">• ${i.name} (x${m}) - ${formatMoneyClean(i.priceUSD * m)}</li>`;
+                    return `<li class="text-[11px] text-gray-500 dark:text-gray-400">• ${i.name} (x${m}) -${formatMoneyClean(i.priceUSD * m)}</li>`;
                 }).join('');
 
                 const div = document.createElement('div');
@@ -1483,6 +1604,78 @@
                 if(currentUser) localStorage.setItem(`pendingCarts_${currentUser.id}`, JSON.stringify(pendingCarts));
                 updatePendingCartsBadge();
                 renderPendingCartsList();
+            }
+        };
+
+        window.saveCartAsPaidSale = async function() {
+            if (!Array.isArray(cart) || cart.length === 0 || !currentUser) return;
+            const clientInput = document.getElementById('clientNameInput');
+            const cliente = (clientInput?.value || '').trim() || 'Cliente General';
+            const rate = Number(rate1Value || 1);
+
+            let totalGeneralUSD = 0;
+            let totalCostUSD = 0;
+
+            for (const item of cart) {
+                const prod = products.find(p => p.id === item.productId);
+                if (prod) {
+                    const decrement = item.isWeighted ? item.qtyFraction : item.qty;
+                    const newStock = Math.max(0, parseFloat((prod.stock - decrement).toFixed(2)));
+                    prod.stock = newStock;
+                    await supabase.from('products').update({ stock: newStock }).eq('id', prod.id);
+                }
+            }
+
+            const itemsDetail = cart.map((i) => {
+                const isWeighted = Boolean(i.isWeighted);
+                const mult = Number(isWeighted ? (i.qtyFraction ?? i.qty ?? 0) : (i.qty ?? 0));
+                const priceUSD = Number(i.priceUSD ?? 0);
+                const costUSD = Number(i.costUSD ?? 0);
+                const subtotal = priceUSD * mult;
+
+                totalGeneralUSD += subtotal;
+                totalCostUSD += costUSD * mult;
+
+                return {
+                    name: i.name || 'Producto',
+                    qty: isWeighted ? `${i.gramsTotal ?? mult * 1000 ?? 0}g` : (i.qty ?? 0),
+                    priceUSD,
+                    subtotalUSD: subtotal
+                };
+            });
+
+            const now = new Date();
+            const fechaStr = now.toLocaleDateString('es-VE') + ' - ' + now.toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit' });
+            const ordenId = 'OM-' + Math.random().toString(36).substring(2, 7).toUpperCase();
+
+            const nuevaVenta = {
+                userId: currentUser.id,
+                idOrden: ordenId,
+                name: `Venta Directa (${cart.length} productos)`,
+                cliente,
+                totalUSDOriginal: Number(totalGeneralUSD.toFixed(2)),
+                totalUSD: Number(totalGeneralUSD.toFixed(2)),
+                total: Number((totalGeneralUSD * rate).toFixed(2)),
+                costUSD: Number(totalCostUSD.toFixed(2)),
+                date: fechaStr,
+                timestamp: Date.now(),
+                items: itemsDetail,
+                pagado: true,
+                abonoUSD: Number(totalGeneralUSD.toFixed(2))
+            };
+
+            try {
+                const { error } = await supabase.from('sales').insert([nuevaVenta]);
+                if (error) throw error;
+
+                await loadUserDataFromSupabase();
+                cart = [];
+                renderCart();
+                if (clientInput) clientInput.value = '';
+                showToast('¡Venta guardada y pagada con éxito!');
+            } catch (err) {
+                console.error(err);
+                alert('Error al guardar la venta pagada');
             }
         };
 
@@ -1555,58 +1748,56 @@
 
                 await loadUserDataFromSupabase();
 
-                            let lineasMensaje = [
-                `🛒 *PEDIDO - ${shopName.toUpperCase()}*`,
-                `🔖 Orden: *${ordenId}*`,
-                `👤 Cliente: *${cliente}*`,
-                `📅 Fecha: ${fechaStr}`,
-                ``,
-                `📦 *Detalle del Carrito:*`
-            ];
+                let lineasMensaje = [
+                    `🛒 *PEDIDO - ${shopName.toUpperCase()}*`,
+                    `🔖 Orden: *${ordenId}*`,
+                    `👤 Cliente: *${cliente}*`,
+                    `📅 Fecha: ${fechaStr}`,
+                    ``,
+                    `📦 *Detalle del Carrito:*`
+                ];
 
-            cart.forEach((i) => {
-                const isWeighted = Boolean(i.isWeighted);
-                const mult = Number(isWeighted ? (i.qtyFraction ?? i.qty ?? 0) : (i.qty ?? 0));
-                const subtotalUSD = Number((Number(i.priceUSD ?? 0) * mult).toFixed(2));
-                const qtyText = isWeighted ? `${i.gramsTotal ?? mult * 1000 ?? 0}g` : `x${i.qty}`;
-                
-                lineasMensaje.push(`• *${i.name \vert{}\vert{} 'Producto'} (${qtyText})*`);
-                lineasMensaje.push(`  Subtotal: *${formatMoneyClean(subtotalUSD)}* ($${subtotalUSD.toFixed(2)})`);
-            });
-
-            lineasMensaje.push(`━━━━━━━━━━━━━━━━━━`);
-            lineasMensaje.push(`✅ *TOTAL A PAGAR: ${formatMoneyClean(totalGeneralUSD)} ($${totalGeneralUSD.toFixed(2)})*`);
-            lineasMensaje.push(`━━━━━━━━━━━━━━━━━━`);
-
-            let paymentsAdded = false;
-            if (Array.isArray(customPaymentMethods)) {
-                customPaymentMethods.forEach((p) => {
-                    const chk = document.getElementById(`chk_pay_${p.id}`);
-                    if (chk && chk.checked) {
-                        paymentsAdded = true;
-                        lineasMensaje.push(``);
-                        lineasMensaje.push(`📱 *Datos de ${p.name || 'Pago'}:*`);
-                        const details = String(p.details || '').trim();
-                        if (details) {
-                            details.split('\n').forEach((line) => {
-                                let cleanLine = line.trim();
-                                if (cleanLine) {
-                                    lineasMensaje.push(cleanLine);
-                                }
-                            });
-                        }
-                    }
+                cart.forEach((i) => {
+                    const isWeighted = Boolean(i.isWeighted);
+                    const mult = Number(isWeighted ? (i.qtyFraction ?? i.qty ?? 0) : (i.qty ?? 0));
+                    const subtotalUSD = Number((Number(i.priceUSD ?? 0) * mult).toFixed(2));
+                    const qtyText = isWeighted ? `${i.gramsTotal ?? mult * 1000 ?? 0}g` : `x${i.qty}`;
+                    
+                    lineasMensaje.push(`• *${i.name \vert{}\vert{} 'Producto'} (${qtyText})*`);
+                    lineasMensaje.push(`  Subtotal: *${formatMoneyClean(subtotalUSD)}* ($${subtotalUSD.toFixed(2)})`);
                 });
-            }
 
-            if (paymentsAdded) {
-                lineasMensaje.push(``);
-                lineasMensaje.push(`📲 ¡Esperamos su confirmación para procesar el pedido!`);
-            }
+                lineasMensaje.push(`━━━━━━━━━━━━━━━━━━`);
+                lineasMensaje.push(`✅ *TOTAL A PAGAR: ${formatMoneyClean(totalGeneralUSD)} ($${totalGeneralUSD.toFixed(2)})*`);
+                lineasMensaje.push(`━━━━━━━━━━━━━━━━━━`);
 
-            let text = lineasMensaje.join('\n');
+                let paymentsAdded = false;
+                if (Array.isArray(customPaymentMethods)) {
+                    customPaymentMethods.forEach((p) => {
+                        const chk = document.getElementById(`chk_pay_${p.id}`);
+                        if (chk && chk.checked) {
+                            paymentsAdded = true;
+                            lineasMensaje.push(``);
+                            lineasMensaje.push(`📱 *Datos de ${p.name || 'Pago'}:*`);
+                            const details = String(p.details || '').trim();
+                            if (details) {
+                                details.split('\n').forEach((line) => {
+                                    let cleanLine = line.trim();
+                                    if (cleanLine) {
+                                        lineasMensaje.push(cleanLine);
+                                    }
+                                });
+                            }
+                        }
+                    });
+                }
 
+                if (paymentsAdded) {
+                    lineasMensaje.push(``);
+                    lineasMensaje.push(`📲 ¡Esperamos su confirmación para procesar el pedido!`);
+                }
 
+                let text = lineasMensaje.join('\n');
                 window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
                 cart = [];
                 renderCart();
@@ -1692,8 +1883,7 @@
                         </div>
                     </div>
                     <div class="text-right whitespace-nowrap ml-2">
-                        <span class="font-bold text-emerald-600 block">${formatMoneyClean(totalVenta)}</span>
-                        <span class="text-[10px] text-gray-400 block">$${totalVenta.toFixed(2)}</span>
+                        <span class="font-bold text-emerald-600 block">${formatMoneyClean(totalVenta)}</span>                         <span class="text-[10px] text-gray-400 block">$${totalVenta.toFixed(2)}</span>
                     </div>`;
                 container.appendChild(item);
             });
@@ -1729,7 +1919,7 @@
             if (sale.items && sale.items.length > 0) {
                 html += `<div class="border-t pt-2 dark:border-gray-700"><strong class="text-xs block mb-1">Productos:</strong><div class="space-y-1">`;
                 sale.items.forEach(i => {
-                    html += `<div class="bg-gray-50 dark:bg-gray-900 p-2 rounded flex justify-between text-xs border dark:border-gray-700"><span><b>(${i.qty})</b> ${i.name}</span><span class="font-semibold text-emerald-600">${formatMoneyClean(parseFloat(i.subtotalUSD))}</span></div>`;
+                    html += `<div class="bg-gray-50 dark:bg-gray-900 p-2 rounded flex justify-between text-xs border dark:border-gray-700"><span><b>(${i.qty})</b>${i.name}</span><span class="font-semibold text-emerald-600">${formatMoneyClean(parseFloat(i.subtotalUSD))}</span></div>`;
                 });
                 html += `</div></div>`;
             }
@@ -1738,8 +1928,7 @@
                 <div class="border-t pt-2 dark:border-gray-700 flex justify-between items-center">
                     <span class="font-bold">Total Venta:</span>
                     <div class="text-right">
-                        <span class="font-bold text-emerald-600 block">${formatMoneyClean(originalUSD)}</span>
-                        <span class="text-[11px] text-gray-400 block">$${originalUSD.toFixed(2)}</span>
+                        <span class="font-bold text-emerald-600 block">${formatMoneyClean(originalUSD)}</span>                         <span class="text-[11px] text-gray-400 block">$${originalUSD.toFixed(2)}</span>
                     </div>
                 </div>
                 <div class="border-t pt-3 mt-2 bg-gray-50 dark:bg-gray-900 p-3 rounded-lg border dark:border-gray-700">
@@ -1773,8 +1962,14 @@
             const abonoActualUSD = parseFloat(sale.abonoUSD || 0);
             const restanteUSD = originalUSD - abonoActualUSD;
 
-            const text = `Hola *${sale.cliente || 'Cliente'}* 👋🏼, te saludamos de *${storeName.toUpperCase()}*.%0A%0ATe recordamos que tu pedido *[${sale.idOrden || 'Orden'}]* tiene un saldo pendiente de: *${formatMoneyClean(restanteUSD)} ($${restanteUSD.toFixed(2)})*.%0A%0A📲 ¡Agradecemos tu confirmación de pago!`;
-            window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
+            let lineasMensaje = [
+                `Hola *${sale.cliente || 'Cliente'}* 👋🏼, te saludamos de *${storeName.toUpperCase()}*.`,
+                ``,
+                `Te recordamos que tu pedido *[${sale.idOrden || 'Orden'}]* tiene un saldo pendiente de: *${formatMoneyClean(restanteUSD)} ($${restanteUSD.toFixed(2)})*.`,
+                ``,
+                `📲 ¡Agradecemos tu confirmación de pago!`
+            ];
+            window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(lineasMensaje.join('\n'))}`, '_blank');
         };
 
         window.registrarAbono = async function(saleId) {
@@ -1864,12 +2059,16 @@
 
         window.sendCatalogWhatsApp = function() {
             if (products.length === 0) return alert('No hay productos en inventario');
-            let text = `📋 *CATÁLOGO DE PRECIOS - ${storeName.toUpperCase()}*%0A%0A`;
+            let lineas = [
+                `📋 *CATÁLOGO DE PRECIOS - ${storeName.toUpperCase()}*`,
+                ``
+            ];
             products.forEach((p, idx) => { 
-                text += `${idx + 1}. *${p.name}* - ${formatMoneyClean(p.priceUSD)} ($${p.priceUSD.toFixed(2)})%0A`; 
+                lineas.push(`${idx + 1}. *${p.name}* - ${formatMoneyClean(p.priceUSD)} ($${p.priceUSD.toFixed(2)})`);
             });
-            text += `%0A📲 ¡Contáctanos para realizar tu pedido!`;
-            window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
+            lineas.push(``);
+            lineas.push(`📲 ¡Contáctanos para realizar tu pedido!`);
+            window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(lineas.join('\n'))}`, '_blank');
         };
 
         function showToast(msg) {
