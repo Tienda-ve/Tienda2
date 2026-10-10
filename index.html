@@ -600,20 +600,21 @@
 
         applyTheme();
 
-        supabase.auth.onAuthStateChange(async (event, session) => {
+                supabase.auth.onAuthStateChange(async (event, session) => {
+            const errorDiv = document.getElementById('authError');
             if (session && session.user) {
                 currentUser = session.user;
                 try {
-                    // CAMBIO CLAVE: Buscamos por correo electrónico para garantizar acceso inmediato si ya fue aprobado
-                    let { data: userRow } = await supabase.from('users').select('*').eq('email', currentUser.email).maybeSingle();
+                    let { data: userRow, error: selectError } = await supabase.from('users').select('*').eq('email', currentUser.email).maybeSingle();
+                    if (selectError) throw selectError;
                     
                     if (!userRow) {
-                        await supabase.from('users').insert([{ id: currentUser.id, email: currentUser.email, subscriptionActive: false }]);
+                        const { error: insertError } = await supabase.from('users').insert([{ id: currentUser.id, email: currentUser.email, subscriptionActive: false }]);
+                        if (insertError) throw insertError;
                         userRow = { subscriptionActive: false };
                     }
 
                     let isSubscribed = userRow ? (userRow.subscriptionactive === true || userRow.subscriptionActive === true) : false;
-
 
                     document.getElementById('authScreen').classList.add('hidden');
                     if (!isSubscribed) {
@@ -656,7 +657,10 @@
                     renderCustomPaymentMethodsUI();
                     updatePendingCartsBadge();
                     await loadUserDataFromSupabase();
-                } catch (err) { console.error("Error en auth:", err); }
+                } catch (err) { 
+                    console.error("Error en auth:", err);
+                    if(errorDiv) errorDiv.textContent = 'Error de base de datos: ' + err.message;
+                }
             } else {
                 currentUser = null;
                 document.getElementById('authScreen').classList.remove('hidden');
