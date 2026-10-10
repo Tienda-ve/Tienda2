@@ -338,7 +338,7 @@
                 </div>
             </form>
         </section>
-        
+
         <!-- LISTADO DE PRODUCTOS -->
         <section>
             <h2 class="text-xl font-semibold mb-4 text-gray-700 dark:text-gray-200"><i class="fas fa-boxes mr-2"></i>Inventario de Productos</h2>
@@ -604,7 +604,14 @@
             if (session && session.user) {
                 currentUser = session.user;
                 try {
-                    let { data: userRow } = await supabase.from('users').select('*').eq('id', currentUser.id).single();
+                    // CAMBIO CLAVE: Buscamos por correo electrónico para garantizar acceso inmediato si ya fue aprobado
+                    let { data: userRow } = await supabase.from('users').select('*').eq('email', currentUser.email).maybeSingle();
+                    
+                    if (!userRow) {
+                        await supabase.from('users').insert([{ id: currentUser.id, email: currentUser.email, subscriptionActive: false }]);
+                        userRow = { subscriptionActive: false };
+                    }
+
                     let isSubscribed = userRow ? userRow.subscriptionActive === true : false;
 
                     document.getElementById('authScreen').classList.add('hidden');
@@ -648,7 +655,7 @@
                     renderCustomPaymentMethodsUI();
                     updatePendingCartsBadge();
                     await loadUserDataFromSupabase();
-                } catch (err) { console.error(err); }
+                } catch (err) { console.error("Error en auth:", err); }
             } else {
                 currentUser = null;
                 document.getElementById('authScreen').classList.remove('hidden');
@@ -945,7 +952,7 @@
             }
         });
 
-      productForm.addEventListener('submit', async (e) => {
+        productForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             if (!currentUser) return;
             const docId = document.getElementById('editDocId').value;
@@ -1080,9 +1087,9 @@
                     </div>`;
                 productList.appendChild(card);
             });
-      }
+        }
 
-      function renderQuickShortcuts() {
+        function renderQuickShortcuts() {
             const container = document.getElementById('quickProductShortcuts');
             if (!container) return;
             container.innerHTML = '';
@@ -1482,7 +1489,7 @@
             document.getElementById('biFinancialSummary').innerHTML = `
                 <p><b>Ventas Brutas Totales:</b> $${totalIngresoSales.toFixed(2)}</p>
                 <p><b>Costo de Mercancía Vendida:</b> $${totalCostoSales.toFixed(2)}</p>                 <p class="text-emerald-600 font-bold"><b>Ganancia Neta Estimada:</b> $${gananciaReal.toFixed(2)}</p>`;
-        }
+      }
 
         /* IMPRESIÓN DE TICKET TÉRMICO */
         window.printThermalTicket = function() {
@@ -1887,8 +1894,8 @@
                     </div>`;
                 container.appendChild(item);
             });
-        }
-        
+                        }
+
         window.copyToClipboard = function(text) {
             navigator.clipboard.writeText(text).then(() => {
                 showToast(`¡Copiado: ${text}!`);
@@ -2081,3 +2088,5 @@
     </script>
 </body>
 </html>
+
+        
