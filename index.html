@@ -85,7 +85,7 @@
             </div>
         </header>
 
-        <!-- BUSCADOR Y ATAJOS RESTABLECIDOS -->
+        <!-- BUSCADOR Y ATAJOS -->
         <div class="mb-6">
             <div class="relative max-w-xl mx-auto mb-3">
                 <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400"><i class="fas fa-search"></i></span>
@@ -118,10 +118,10 @@
         </div>
 
         <!-- RESUMEN DE VENTAS Y ESTADÍSTICAS -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 border-l-4 border-purple-500 flex items-center justify-between">
                 <div>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 uppercase font-semibold">Total Ventas Realizadas</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 uppercase font-semibold">Total Ventas</p>
                     <h3 id="statTotalVentas" class="text-2xl font-bold text-purple-600 dark:text-purple-400">0</h3>
                 </div>
                 <i class="fas fa-shopping-bag text-purple-200 dark:text-purple-900 text-3xl"></i>
@@ -133,9 +133,16 @@
                 </div>
                 <i class="fas fa-money-bill-wave text-emerald-200 dark:text-emerald-900 text-3xl"></i>
             </div>
-        </div>
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 border-l-4 border-amber-500 flex items-center justify-between">
+                <div>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 uppercase font-semibold">Ganancia Estimada</p>
+                    <h3 id="statTotalGanancias" class="text-lg font-bold text-amber-600 dark:text-amber-400">$0.00</h3>
+                </div>
+                <i class="fas fa-chart-line text-amber-200 dark:text-amber-900 text-3xl"></i>
+            </div>
+    </div>
 
-        <!-- CONFIGURACIÓN DE MULTIDIVISAS (HASTA 3 TASAS DE AMÉRICA) -->
+        <!-- CONFIGURACIÓN DE MULTIDIVISAS -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
             <section class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 border-l-4 border-indigo-500 flex flex-col justify-between">
                 <div>
@@ -144,37 +151,33 @@
                 <input type="text" id="storeNameInput" placeholder="Nombre..." class="w-full border-2 border-indigo-100 dark:border-gray-700 dark:bg-gray-900 rounded-lg px-3 py-1.5 font-bold text-indigo-600 text-sm focus:outline-none">
             </section>
 
-            <!-- TASA 1: USD / BASE -->
             <section class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 border-l-4 border-green-500 flex flex-col justify-between">
                 <div class="flex justify-between items-center mb-1">
-                    <label class="text-xs font-bold text-gray-700 dark:text-gray-300">🇺🇸 Dólar (Base USD)</label>
+                    <label class="text-xs font-bold text-gray-700 dark:text-gray-300">🇺🇸 Dólar (Base)</label>
                     <input type="checkbox" id="useUSD" checked class="rounded text-green-600 w-4 h-4">
                 </div>
-                <span class="text-[11px] text-gray-400">Moneda principal de referencia</span>
+                <span class="text-[11px] text-gray-400">Referencia principal</span>
             </section>
 
-            <!-- TASA 2 (Ej: Bolívar VES 🇻🇪) -->
-            <section class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 border-l-4 border-blue-500 flex flex-col justify-between">
+            <section class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 border-l-4 border-emerald-500 flex flex-col justify-between">
                 <div class="flex justify-between items-center mb-1">
-                    <label class="text-xs font-bold text-gray-700 dark:text-gray-300">🇻🇪 Tasa Local 1 (VES)</label>
-                    <input type="checkbox" id="useRate1" checked class="rounded text-blue-600 w-4 h-4">
+                    <label class="text-xs font-bold text-emerald-700 dark:text-emerald-400">🇻🇪 Tasa Local (VES)</label>
+                    <input type="checkbox" id="useRate1" checked class="rounded text-emerald-600 w-4 h-4">
                 </div>
-                <input type="number" id="rate1Value" step="0.01" value="36.50" class="w-full border dark:border-gray-700 dark:bg-gray-900 rounded px-2 py-1 font-bold text-blue-600 text-sm text-center focus:outline-none">
+                <input type="number" id="rate1Value" step="0.01" value="36.50" class="w-full border-2 border-emerald-200 dark:border-emerald-700 dark:bg-gray-900 rounded px-2 py-1 font-bold text-emerald-600 text-sm text-center focus:outline-none">
             </section>
 
-            <!-- TASA 3 (Ej: Peso Colombiano COP 🇨🇴) -->
             <section class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 border-l-4 border-amber-500 flex flex-col justify-between">
                 <div class="flex justify-between items-center mb-1">
-                    <label class="text-xs font-bold text-gray-700 dark:text-gray-300">🇨🇴 Tasa Local 2 (COP)</label>
+                    <label class="text-xs font-bold text-gray-700 dark:text-gray-300">🇨🇴 Tasa Alternativa (COP)</label>
                     <input type="checkbox" id="useRate2" checked class="rounded text-amber-600 w-4 h-4">
                 </div>
                 <input type="number" id="rate2Value" step="1" value="4100" class="w-full border dark:border-gray-700 dark:bg-gray-900 rounded px-2 py-1 font-bold text-amber-600 text-sm text-center focus:outline-none">
             </section>
 
-            <!-- MÉTODOS DE PAGO -->
             <section class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 border-l-4 border-emerald-500 md:col-span-4">
                 <div class="flex justify-between items-center mb-3">
-                    <span class="text-sm font-bold text-gray-800 dark:text-gray-200"><i class="fas fa-globe-americas text-emerald-500 mr-1"></i> Métodos de Pago Internacionales</span>
+                    <span class="text-sm font-bold text-gray-800 dark:text-gray-200"><i class="fas fa-globe-americas text-emerald-500 mr-1"></i> Métodos de Pago</span>
                     <button type="button" onclick="openAddPaymentModal()" class="bg-emerald-600 text-white text-xs px-3 py-1.5 rounded-lg font-semibold shadow"><i class="fas fa-plus"></i> Agregar Método</button>
                 </div>
                 <div id="customPaymentMethodsList" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3"></div>
@@ -199,14 +202,14 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Inventario Inicial</label>
-                    <input type="number" id="stock" step="0.01" min="0" value="0" required placeholder="Coloque la cantidad de este producto que hay en tu tienda" class="w-full border dark:border-gray-700 dark:bg-gray-900 rounded-lg px-3 py-2 text-sm focus:outline-none">
+                    <input type="number" id="stock" step="0.01" min="0" value="0" required class="w-full border dark:border-gray-700 dark:bg-gray-900 rounded-lg px-3 py-2 text-sm focus:outline-none">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Costo Base ($ USD)</label>
+                    <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Costo Base ($)</label>
                     <input type="number" id="costUSD" step="0.01" min="0" placeholder="Ej: 1.50" class="w-full border dark:border-gray-700 dark:bg-gray-900 rounded-lg px-3 py-2 text-sm focus:outline-none">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Precio de Venta ($ USD)</label>
+                    <label class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Precio de Venta ($)</label>
                     <input type="number" id="priceUSD" step="0.01" min="0" required placeholder="Ej: 2.20" class="w-full border dark:border-gray-700 dark:bg-gray-900 rounded-lg px-3 py-2 text-sm focus:outline-none">
                 </div>
                 <div>
@@ -279,11 +282,11 @@
         </div>
     </div>
 
-    <!-- MODAL CARRITOS PENDIENTES CON DETALLES -->
+    <!-- MODAL CARRITOS PENDIENTES -->
     <div id="pendingCartsModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-xl w-full p-5 max-h-[85vh] flex flex-col">
             <div class="flex justify-between items-center mb-2 border-b pb-2">
-                <h3 class="text-base font-bold"><i class="fas fa-clock mr-2 text-amber-500"></i>Carritos Guardados (Para más tarde)</h3>
+                <h3 class="text-base font-bold"><i class="fas fa-clock mr-2 text-amber-500"></i>Carritos Guardados</h3>
                 <button onclick="togglePendingCartsModal()" class="text-gray-400 text-lg">&times;</button>
             </div>
             <div id="pendingCartsListContainer" class="overflow-y-auto flex-1 space-y-3 pr-1 py-2"></div>
@@ -297,13 +300,13 @@
     <div id="salesModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
         <div id="salesModalContentCard" class="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-2xl w-full p-5 max-h-[85vh] flex flex-col">
             <div class="flex justify-between items-center mb-2 border-b pb-2">
-                <h3 class="text-base font-bold"><i class="fas fa-chart-pie mr-2 text-purple-600"></i>Cierre de Caja e Historial</h3>
+                <h3 class="text-base font-bold"><i class="fas fa-chart-pie mr-2 text-purple-600"></i>C cierre de Caja e Historial</h3>
                 <button onclick="toggleSalesHistoryModal()" class="text-gray-400 text-lg">&times;</button>
             </div>
             <div class="bg-purple-50 dark:bg-gray-900 border rounded-lg p-3 mb-3 grid grid-cols-2 gap-2 text-xs">
                 <div><span class="font-bold text-purple-700 uppercase block">✔️ Cobrado:</span><h4 id="cierreCobrado" class="text-sm font-bold text-emerald-600">$0.00</h4></div>
                 <div>
-                    <div class="flex justify-between items-center"><span class="font-bold text-red-700 uppercase block">❌ Por Cobrar:</span><button onclick="filterPendingSalesToggle()" id="btnFilterPending" class="bg-red-600 text-white px-2 py-0.5 rounded text-[10px] font-bold">Ver pendientes</button></div>
+                    <div class="flex justify-between items-center"><span class="font-bold text-red-700 uppercase block">❌ Por Cobrar (Deudas):</span><button onclick="filterPendingSalesToggle()" id="btnFilterPending" class="bg-red-600 text-white px-2 py-0.5 rounded text-[10px] font-bold">Ver pendientes</button></div>
                     <h4 id="cierrePendiente" class="text-sm font-bold text-red-600">$0.00</h4>
                 </div>
             </div>
@@ -373,8 +376,8 @@
 
         supabase.auth.onAuthStateChange(async (event, session) => {
             if (session && session.user) {
+                currentUser = session.user;
                 try {
-                    currentUser = session.user;
                     let { data: userRow } = await supabase.from('users').select('*').eq('id', currentUser.id).single();
                     let isSubscribed = userRow ? userRow.subscriptionActive === true : false;
 
@@ -423,6 +426,7 @@
                 document.getElementById('subscriptionScreen').classList.add('hidden');
             }
         });
+
         document.getElementById('loginBtn').addEventListener('click', async () => {
             const email = document.getElementById('authEmail').value.trim();
             const pass = document.getElementById('authPassword').value.trim();
@@ -452,6 +456,7 @@
         window.logoutUser = async () => { await supabase.auth.signOut(); };
 
         async function loadUserDataFromSupabase() {
+            if (!currentUser) return;
             try {
                 const { data: prodData } = await supabase.from('products').select('*').eq('userId', currentUser.id);
                 if (prodData) products = prodData;
@@ -474,36 +479,35 @@
             else htmlRoot.classList.remove('dark');
         }
 
-        // EVENTOS DE TASAS MULTIDIVISA
         document.getElementById('useUSD').addEventListener('change', (e) => {
             useUSD = e.target.checked;
-            localStorage.setItem(`useUSD_${currentUser.id}`, useUSD);
+            if(currentUser) localStorage.setItem(`useUSD_${currentUser.id}`, useUSD);
             renderProducts(); renderCart(); updateSalesStats();
         });
         document.getElementById('useRate1').addEventListener('change', (e) => {
             useRate1 = e.target.checked;
-            localStorage.setItem(`useRate1_${currentUser.id}`, useRate1);
+            if(currentUser) localStorage.setItem(`useRate1_${currentUser.id}`, useRate1);
             renderProducts(); renderCart(); updateSalesStats();
         });
         document.getElementById('useRate2').addEventListener('change', (e) => {
             useRate2 = e.target.checked;
-            localStorage.setItem(`useRate2_${currentUser.id}`, useRate2);
+            if(currentUser) localStorage.setItem(`useRate2_${currentUser.id}`, useRate2);
             renderProducts(); renderCart(); updateSalesStats();
         });
         document.getElementById('rate1Value').addEventListener('input', (e) => {
             rate1Value = parseFloat(e.target.value) || 0;
-            localStorage.setItem(`rate1Value_${currentUser.id}`, rate1Value);
+            if(currentUser) localStorage.setItem(`rate1Value_${currentUser.id}`, rate1Value);
             renderProducts(); renderCart(); updateSalesStats();
         });
         document.getElementById('rate2Value').addEventListener('input', (e) => {
             rate2Value = parseFloat(e.target.value) || 0;
-            localStorage.setItem(`rate2Value_${currentUser.id}`, rate2Value);
+            if(currentUser) localStorage.setItem(`rate2Value_${currentUser.id}`, rate2Value);
             renderProducts(); renderCart(); updateSalesStats();
         });
 
         document.getElementById('storeNameInput').addEventListener('input', (e) => {
             storeName = e.target.value.trim() || 'Mi Tienda';
-            localStorage.setItem(`storeName_${currentUser.id}`, storeName);
+            if(currentUser) localStorage.setItem(`storeName_${currentUser.id}`, storeName);
             updateStoreNameUI();
         });
 
@@ -512,30 +516,37 @@
             document.getElementById('storeTitleHeader').innerHTML = `<i class="fas fa-store mr-2"></i>${storeName}`;
         }
 
-        // FUNCIÓN FORMATEADORA MULTIDIVISA SEGÚN SELECCIÓN
+        // FORMATEADOR DESTACANDO LA TASA LOCAL EN VERDE Y REDUCIENDO REDUNDANCIAS
         window.formatMoney = function(usdAmount) {
             let parts = [];
-            if (useUSD) {
-                parts.push(`$${usdAmount.toFixed(2)} USD`);
-            }
             if (useRate1 && rate1Value > 0) {
                 let val1 = (usdAmount * rate1Value).toFixed(2);
-                parts.push(`Bs. ${val1}`);
+                parts.push(`<strong class="text-emerald-600 dark:text-emerald-400 font-bold">Bs. ${val1}</strong>`);
+            }
+            if (useUSD) {
+                parts.push(`$${usdAmount.toFixed(2)}`);
             }
             if (useRate2 && rate2Value > 0) {
                 let val2 = (usdAmount * rate2Value).toLocaleString('es-CO', {maximumFractionDigits: 0});
                 parts.push(`COP $${val2}`);
             }
             if (parts.length === 0) {
-                return `$${usdAmount.toFixed(2)} USD`;
+                return `$${usdAmount.toFixed(2)}`;
             }
             return parts.join(' | ');
+        };
+
+        window.formatMoneyClean = function(usdAmount) {
+            if (useRate1 && rate1Value > 0) {
+                return `Bs. ${(usdAmount * rate1Value).toFixed(2)}`;
+            }
+            return `$${usdAmount.toFixed(2)}`;
         };
 
         const priceUSDInput = document.getElementById('priceUSD');
         priceUSDInput.addEventListener('input', (e) => {
             let val = parseFloat(e.target.value) || 0;
-            document.getElementById('formEquivPreview').textContent = formatMoney(val);
+            document.getElementById('formEquivPreview').innerHTML = formatMoney(val);
         });
 
         window.openAddPaymentModal = function() {
@@ -560,7 +571,7 @@
             } else {
                 customPaymentMethods.push({ id: 'pay_' + Date.now(), name: nameVal, flag: flagVal, details: detailsVal });
             }
-            localStorage.setItem(`customPayments_${currentUser.id}`, JSON.stringify(customPaymentMethods));
+            if(currentUser) localStorage.setItem(`customPayments_${currentUser.id}`, JSON.stringify(customPaymentMethods));
             renderCustomPaymentMethodsUI();
             closePaymentModal();
             showToast('Método guardado');
@@ -569,6 +580,7 @@
         function renderCustomPaymentMethodsUI() {
             const container = document.getElementById('customPaymentMethodsList');
             const chkContainer = document.getElementById('cartPaymentCheckboxesContainer');
+            if(!container || !chkContainer) return;
             container.innerHTML = ''; chkContainer.innerHTML = '';
 
             customPaymentMethods.forEach(p => {
@@ -608,6 +620,7 @@
 
         productForm.addEventListener('submit', async (e) => {
             e.preventDefault();
+            if (!currentUser) return;
             const docId = document.getElementById('editDocId').value;
             let finalImageURL = '';
 
@@ -621,7 +634,7 @@
                 if (ext) finalImageURL = ext.image || '';
             }
 
-                                     const selectedUnit = document.querySelector('input[name="fractionUnit"]:checked').value;
+            const selectedUnit = document.querySelector('input[name="fractionUnit"]:checked').value;
             const productData = {
                 userId: currentUser.id,
                 name: document.getElementById('name').value.trim(),
@@ -711,7 +724,7 @@
                             <h3 class="font-bold text-lg dark:text-white mb-1">${p.name}</h3>
                             <p class="text-gray-500 text-sm mb-2">📝 ${p.description || 'Sin descripción'}</p>
                             <div class="mb-3 text-xs bg-gray-50 dark:bg-gray-900 p-2 rounded">
-                                <span class="font-bold text-green-600 text-sm block">${priceFormatted}</span>
+                                <span class="text-sm block">${priceFormatted}</span>
                                 <span class="text-gray-500 block mt-1">Stock: ${p.stock}</span>
                             </div>
                             ${selectorHtml}
@@ -725,7 +738,7 @@
             });
         };
 
-                function renderQuickShortcuts() {
+        function renderQuickShortcuts() {
             const container = document.getElementById('quickProductShortcuts');
             if (!container) return;
             container.innerHTML = '';
@@ -756,7 +769,7 @@
                 };
                 container.appendChild(btn);
             });
-                }
+        }
 
         window.changeQty = function(id, delta) {
             const span = document.getElementById(`qtyVal_${id}`);
@@ -803,6 +816,7 @@
         function renderCart() {
             const panel = document.getElementById('cartPanel');
             const container = document.getElementById('cartItemsContainer');
+            if(!panel || !container) return;
             if (cart.length === 0) { panel.classList.add('hidden'); return; }
 
             panel.classList.remove('hidden');
@@ -828,13 +842,13 @@
                     </div>`;
                 container.appendChild(row);
             });
-            document.getElementById('cartTotalBadge').textContent = `Total: ${formatMoney(totalUSD)}`;
+            document.getElementById('cartTotalBadge').textContent = `Total: ${formatMoneyClean(totalUSD)}`;
         }
 
         window.removeFromCart = function(idx) {
             cart.splice(idx, 1);
             renderCart();
-            showToast('Producto eliminado del carrito');
+            showToast('Producto eliminado');
         };
 
         window.clearCart = function() { cart = []; renderCart(); };
@@ -843,12 +857,12 @@
             if (cart.length === 0) return alert('El carrito está vacío');
             const clientName = document.getElementById('clientNameInput').value.trim() || 'Cliente General';
             pendingCarts.push({ id: 'pc_' + Date.now(), client: clientName, items: [...cart], date: new Date().toLocaleString('es-VE') });
-            localStorage.setItem(`pendingCarts_${currentUser.id}`, JSON.stringify(pendingCarts));
+            if(currentUser) localStorage.setItem(`pendingCarts_${currentUser.id}`, JSON.stringify(pendingCarts));
             updatePendingCartsBadge();
             cart = [];
             renderCart();
             document.getElementById('clientNameInput').value = '';
-            showToast('¡Carrito guardado para más tarde!');
+            showToast('¡Carrito guardado!');
         };
 
         window.togglePendingCartsModal = function() {
@@ -858,12 +872,13 @@
         };
 
         function updatePendingCartsBadge() {
-            document.getElementById('pendingCartsCountBadge').textContent = pendingCarts.length;
+            const badge = document.getElementById('pendingCartsCountBadge');
+            if(badge) badge.textContent = pendingCarts.length;
         }
 
-        // CARRITOS GUARDADOS CON DETALLE COMPLETO
         function renderPendingCartsList() {
             const container = document.getElementById('pendingCartsListContainer');
+            if(!container) return;
             container.innerHTML = '';
             if (pendingCarts.length === 0) {
                 container.innerHTML = '<p class="text-gray-400 text-center py-6 text-xs">No hay carritos guardados.</p>';
@@ -874,7 +889,7 @@
                 
                 let itemsListHtml = pc.items.map(i => {
                     let m = i.isWeighted ? i.qtyFraction : i.qty;
-                    return `<li class="text-[11px] text-gray-500 dark:text-gray-400">• ${i.name} (x${m}) - ${formatMoney(i.priceUSD * m)}</li>`;
+                    return `<li class="text-[11px] text-gray-500 dark:text-gray-400">• ${i.name} (x${m}) - ${formatMoneyClean(i.priceUSD * m)}</li>`;
                 }).join('');
 
                 const div = document.createElement('div');
@@ -883,7 +898,7 @@
                     <div class="flex justify-between items-center">
                         <div>
                             <p class="font-bold text-gray-800 dark:text-gray-200 text-sm">👤 ${pc.client} <span class="text-gray-400 text-xs">(${pc.date})</span></p>
-                            <p class="text-emerald-600 font-bold mt-0.5">Total: ${formatMoney(totalPC)}</p>
+                            <p class="text-emerald-600 font-bold mt-0.5">Total: ${formatMoneyClean(totalPC)}</p>
                         </div>
                         <div class="flex gap-2">
                             <button onclick="restorePendingCart(${idx})" class="bg-blue-600 text-white px-3 py-1.5 rounded font-bold">Cargar</button>
@@ -904,7 +919,7 @@
             cart = [...pc.items];
             document.getElementById('clientNameInput').value = pc.client;
             pendingCarts.splice(idx, 1);
-            localStorage.setItem(`pendingCarts_${currentUser.id}`, JSON.stringify(pendingCarts));
+            if(currentUser) localStorage.setItem(`pendingCarts_${currentUser.id}`, JSON.stringify(pendingCarts));
             updatePendingCartsBadge();
             renderCart();
             togglePendingCartsModal();
@@ -914,137 +929,107 @@
         window.deletePendingCart = function(idx) {
             if (confirm('¿Eliminar este carrito guardado?')) {
                 pendingCarts.splice(idx, 1);
-                localStorage.setItem(`pendingCarts_${currentUser.id}`, JSON.stringify(pendingCarts));
+                if(currentUser) localStorage.setItem(`pendingCarts_${currentUser.id}`, JSON.stringify(pendingCarts));
                 updatePendingCartsBadge();
                 renderPendingCartsList();
             }
         };
 
         window.sendCartWhatsApp = async function () {
-    if (!Array.isArray(cart) || cart.length === 0) return;
+            if (!Array.isArray(cart) || cart.length === 0 || !currentUser) return;
 
-    const clientInput = document.getElementById('clientNameInput');
-    const cliente = (clientInput?.value || '').trim() || 'Cliente General';
+            const clientInput = document.getElementById('clientNameInput');
+            const cliente = (clientInput?.value || '').trim() || 'Cliente General';
+            const rate = Number(rate1Value || 1);
+            const shopName = storeName || 'Tienda';
 
-    const formatMoneySafe = typeof formatMoney === 'function' ? formatMoney : (value) => Number(value || 0).toFixed(2);
-    const rate = Number(rate1Value || 1);
-    const current = currentUser || { id: null };
-    const shopName = storeName || 'Tienda';
+            let totalGeneralUSD = 0;
+            let totalCostUSD = 0;
 
-    let totalGeneralUSD = 0;
-    let totalCostUSD = 0;
+            const itemsDetail = cart.map((i) => {
+                const isWeighted = Boolean(i.isWeighted);
+                const mult = Number(isWeighted ? (i.qtyFraction ?? i.qty ?? 0) : (i.qty ?? 0));
+                const priceUSD = Number(i.priceUSD ?? 0);
+                const costUSD = Number(i.costUSD ?? 0);
+                const subtotal = priceUSD * mult;
 
-    const itemsDetail = cart.map((i) => {
-        const isWeighted = Boolean(i.isWeighted);
-        const mult = Number(isWeighted ? (i.qtyFraction ?? i.qty ?? 0) : (i.qty ?? 0));
-        const priceUSD = Number(i.priceUSD ?? 0);
-        const costUSD = Number(i.costUSD ?? 0);
-        const subtotal = priceUSD * mult;
+                totalGeneralUSD += subtotal;
+                totalCostUSD += costUSD * mult;
 
-        totalGeneralUSD += subtotal;
-        totalCostUSD += costUSD * mult;
-
-        return {
-            name: i.name || 'Producto',
-            qty: isWeighted ? `${i.gramsTotal ?? mult * 1000 ?? 0}g` : (i.qty ?? 0),
-            priceUSD,
-            subtotalUSD: subtotal
-        };
-    });
-
-    const now = new Date();
-    const fechaStr =
-        now.toLocaleDateString('es-VE') +
-        ' a las ' +
-        now.toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit' });
-
-    const ordenId =
-        'OM-' +
-        now.getTime().toString(36).toUpperCase() +
-        '-' +
-        Math.random().toString(36).substring(2, 6).toUpperCase();
-
-    const nuevaVenta = {
-        userId: current.id,
-        idOrden: ordenId,
-        name: `Pedido (${cart.length} productos)`,
-        cliente,
-        totalUSDOriginal: Number(totalGeneralUSD.toFixed(2)),
-        totalUSD: Number(totalGeneralUSD.toFixed(2)),
-        total: Number((totalGeneralUSD * rate).toFixed(2)),
-        costUSD: Number(totalCostUSD.toFixed(2)),
-        date: fechaStr,
-        timestamp: Date.now(),
-        items: itemsDetail.map((it) => ({
-            name: it.name,
-            qty: it.qty,
-            priceUSD: Number(it.priceUSD.toFixed(2)),
-            subtotalUSD: Number(it.subtotalUSD.toFixed(2))
-        })),
-        pagado: false,
-        abonoUSD: 0
-    };
-
-    try {
-        if (window.supabase && typeof window.supabase.from === 'function') {
-            const { data, error } = await supabase.from('sales').insert([nuevaVenta]).select();
-
-            if (error) {
-                console.error('Error al registrar venta en Supabase:', error);
-                alert('Error al guardar en Supabase: ' + (error.message || error));
-                return;
-            }
-
-            console.log('Venta registrada:', data);
-        } else {
-            console.warn('Supabase no está disponible, se omite el registro a la base de datos.');
-        }
-
-        if (typeof loadUserDataFromSupabase === 'function') {
-            await loadUserDataFromSupabase();
-        }
-
-        let text = `🛒 *PEDIDO - ${shopName.toUpperCase()}*%0A🔖 Orden: *${ordenId}*%0A👤 Cliente: *${cliente}*%0A📅 ${fechaStr}%0A%0A`;
-
-        cart.forEach((i) => {
-            const isWeighted = Boolean(i.isWeighted);
-            const mult = Number(isWeighted ? (i.qtyFraction ?? i.qty ?? 0) : (i.qty ?? 0));
-            const subtotal = Number((Number(i.priceUSD ?? 0) * mult).toFixed(2));
-            const qtyText = isWeighted ? `${i.gramsTotal ?? mult * 1000 ?? 0}g` : i.qty;
-            text += `• *${i.name || 'Producto'}* - ${qtyText} x ${formatMoneySafe(i.priceUSD ?? 0)} = ${formatMoneySafe(subtotal)}%0A`;
-        });
-
-        text += `━━━━━━━━━━━━━━━━━━%0A✅ *TOTAL: ${formatMoneySafe(totalGeneralUSD)} USD*%0A`;
-
-        if (Array.isArray(customPaymentMethods)) {
-            customPaymentMethods.forEach((p) => {
-                const chk = document.getElementById(`chk_pay_${p.id}`);
-                if (chk && chk.checked) {
-                    text += `%0A📱 *${p.flag || ''} ${p.name || 'Pago'}:*%0A`;
-                    const details = String(p.details || '');
-                    if (details.trim()) {
-                        details.split('\n').forEach((line) => {
-                            text += `${line}%0A`;
-                        });
-                    }
-                }
+                return {
+                    name: i.name || 'Producto',
+                    qty: isWeighted ? `${i.gramsTotal ?? mult * 1000 ?? 0}g` : (i.qty ?? 0),
+                    priceUSD,
+                    subtotalUSD: subtotal
+                };
             });
-        }
 
-        const encodedText = encodeURIComponent(text);
-        window.open(`https://api.whatsapp.com/send?text=${encodedText}`, '_blank');
+            const now = new Date();
+            const fechaStr = now.toLocaleDateString('es-VE') + ' a las ' + now.toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit' });
+            const ordenId = 'OM-' + now.getTime().toString(36).toUpperCase() + '-' + Math.random().toString(36).substring(2, 6).toUpperCase();
 
-        cart = [];
-        renderCart();
+            const nuevaVenta = {
+                userId: currentUser.id,
+                idOrden: ordenId,
+                name: `Pedido (${cart.length} productos)`,
+                cliente,
+                totalUSDOriginal: Number(totalGeneralUSD.toFixed(2)),
+                totalUSD: Number(totalGeneralUSD.toFixed(2)),
+                total: Number((totalGeneralUSD * rate).toFixed(2)),
+                costUSD: Number(totalCostUSD.toFixed(2)),
+                date: fechaStr,
+                timestamp: Date.now(),
+                items: itemsDetail,
+                pagado: false,
+                abonoUSD: 0
+            };
 
-        if (clientInput) clientInput.value = '';
-        showToast('¡Pedido enviado y guardado!');
+            try {
+                const { error } = await supabase.from('sales').insert([nuevaVenta]);
+                if (error) {
+                    console.error('Error al registrar venta en Supabase:', error);
+                    alert('Error al guardar en Supabase: ' + error.message);
+                    return;
+                }
 
-    } catch (error) {
-        console.error('Error en sendCartWhatsApp:', error);
-        alert('Ocurrió un error al procesar el pedido: ' + (error.message || error));
-    }
-};
+                await loadUserDataFromSupabase();
+
+                let text = `🛒 *PEDIDO - ${shopName.toUpperCase()}*%0A🔖 Orden: *${ordenId}*%0A👤 Cliente: *${cliente}*%0A📅 ${fechaStr}%0A%0A`;
+
+                cart.forEach((i) => {
+                    const isWeighted = Boolean(i.isWeighted);
+                    const mult = Number(isWeighted ? (i.qtyFraction ?? i.qty ?? 0) : (i.qty ?? 0));
+                    const subtotal = Number((Number(i.priceUSD ?? 0) * mult).toFixed(2));
+                    const qtyText = isWeighted ? `${i.gramsTotal ?? mult * 1000 ?? 0}g` : i.qty;
+                    text += `• *${i.name || 'Producto'}* - ${qtyText} x ${formatMoneyClean(i.priceUSD ?? 0)} = ${formatMoneyClean(subtotal)}%0A`;
+                });
+
+                text += `━━━━━━━━━━━━━━━━━━%0A✅ *TOTAL: ${formatMoneyClean(totalGeneralUSD)}*%0A`;
+
+                if (Array.isArray(customPaymentMethods)) {
+                    customPaymentMethods.forEach((p) => {
+                        const chk = document.getElementById(`chk_pay_${p.id}`);
+                        if (chk && chk.checked) {
+                            text += `%0A📱 *${p.flag || ''} ${p.name || 'Pago'}:*%0A`;
+                            const details = String(p.details || '');
+                            if (details.trim()) {
+                                details.split('\n').forEach((line) => { text += `${line}%0A`; });
+                            }
+                        }
+                    });
+                }
+
+                window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
+                cart = [];
+                renderCart();
+                if (clientInput) clientInput.value = '';
+                showToast('¡Pedido enviado y guardado!');
+
+            } catch (error) {
+                console.error('Error en sendCartWhatsApp:', error);
+                alert('Ocurrió un error al procesar el pedido.');
+            }
+        };
 
         window.toggleSalesHistoryModal = function() {
             filterOnlyPending = false;
@@ -1061,11 +1046,16 @@
         function updateSalesStats() {
             document.getElementById('statTotalVentas').textContent = salesHistory.length;
             const totalIngresos = salesHistory.reduce((acc, item) => acc + parseFloat(item.totalUSD || 0), 0);
+            const totalCostos = salesHistory.reduce((acc, item) => acc + parseFloat(item.costUSD || 0), 0);
+            const totalGanancias = totalIngresos - totalCostos;
+
             document.getElementById('statTotalIngresos').innerHTML = formatMoney(totalIngresos);
+            document.getElementById('statTotalGanancias').innerHTML = formatMoney(totalGanancias > 0 ? totalGanancias : 0);
         }
 
         function renderSalesHistory() {
             const container = document.getElementById('salesHistoryList');
+            if(!container) return;
             let cobrado = 0, pendiente = 0;
 
             salesHistory.forEach(sale => {
@@ -1078,8 +1068,8 @@
                 else { cobrado += abono; pendiente += saldo; }
             });
 
-            document.getElementById('cierreCobrado').textContent = formatMoney(cobrado);
-            document.getElementById('cierrePendiente').textContent = formatMoney(pendiente);
+            document.getElementById('cierreCobrado').innerHTML = formatMoney(cobrado);
+            document.getElementById('cierrePendiente').innerHTML = formatMoney(pendiente);
 
             let listToShow = salesHistory;
             if (filterOnlyPending) listToShow = listToShow.filter(s => !s.pagado);
@@ -1095,9 +1085,12 @@
                 const cliente = sale.cliente || 'Cliente General';
                 const pagadoTotal = sale.pagado === true;
                 const totalVenta = parseFloat(sale.totalUSDOriginal || sale.totalUSD || 0);
+                let abonoActual = parseFloat(sale.abonoUSD || 0);
+                let saldoRestante = totalVenta - abonoActual;
+                if (saldoRestante < 0) saldoRestante = 0;
 
                 let colorPunto = pagadoTotal ? '#28a745' : '#dc3545';
-                let textoEstado = pagadoTotal ? 'Pagada' : 'Pendiente (Deuda)';
+                let textoEstado = pagadoTotal ? 'Pagada' : `Deuda: ${formatMoneyClean(saldoRestante)} (Abonado: ${formatMoneyClean(abonoActual)})`;
 
                 const item = document.createElement('div');
                 item.className = 'bg-gray-50 dark:bg-gray-900 border p-2.5 rounded-lg flex justify-between items-center text-xs cursor-pointer hover:bg-blue-50';
@@ -1107,11 +1100,11 @@
                         <span style="display:inline-block; width:10px; height:10px; background:${colorPunto}; border-radius:50%;"></span>
                         <div class="truncate">
                             <p class="font-bold text-gray-800 dark:text-gray-200 truncate"><span class="text-blue-600 font-mono">[${ordenCorta}]</span> ${sale.name} (${cliente})</p>
-                            <p class="text-[11px] text-gray-500">${sale.date} - <span style="color:${colorPunto}">${textoEstado}</span></p>
+                            <p class="text-[11px] text-gray-500">${sale.date} - <span style="color:${colorPunto}; font-weight:bold;">${textoEstado}</span></p>
                         </div>
                     </div>
                     <div class="text-right whitespace-nowrap ml-2">
-                        <span class="font-bold text-emerald-600 block">${formatMoney(totalVenta)}</span>
+                        <span class="font-bold text-emerald-600 block">${formatMoneyClean(totalVenta)}</span>
                     </div>`;
                 container.appendChild(item);
             });
@@ -1137,23 +1130,24 @@
             if (sale.items && sale.items.length > 0) {
                 html += `<div class="border-t pt-2"><strong class="text-xs block mb-1">Productos:</strong><div class="space-y-1">`;
                 sale.items.forEach(i => {
-                    html += `<div class="bg-gray-50 dark:bg-gray-900 p-2 rounded flex justify-between text-xs"><span><b>(${i.qty})</b> ${i.name}</span><span class="font-semibold text-emerald-600">${formatMoney(parseFloat(i.subtotalUSD))}</span></div>`;
+                    html += `<div class="bg-gray-50 dark:bg-gray-900 p-2 rounded flex justify-between text-xs"><span><b>(${i.qty})</b> ${i.name}</span><span class="font-semibold text-emerald-600">${formatMoneyClean(parseFloat(i.subtotalUSD))}</span></div>`;
                 });
                 html += `</div></div>`;
             }
 
             html += `
                 <div class="border-t pt-2 flex justify-between items-center">
-                    <span class="font-bold">Total:</span>
-                    <span class="font-bold text-emerald-600">${formatMoney(originalUSD)}</span>
+                    <span class="font-bold">Total Venta:</span>
+                    <span class="font-bold text-emerald-600">${formatMoneyClean(originalUSD)}</span>
                 </div>
                 <div class="border-t pt-3 mt-2 bg-gray-50 dark:bg-gray-900 p-3 rounded-lg">
                     <p class="text-xs font-bold mb-1">💳 Control de Deuda y Abonos:</p>
-                    <p class="text-[11px] text-gray-500 mb-2">Restante: <b class="text-red-500">${formatMoney(restanteUSD)}</b></p>
+                    <p class="text-[11px] text-gray-600 dark:text-gray-300 mb-1">Abonado hasta ahora: <b class="text-emerald-600">${formatMoneyClean(abonoActualUSD)}</b></p>
+                    <p class="text-[11px] text-gray-600 dark:text-gray-300 mb-2">Restante por pagar: <b class="text-red-500">${formatMoneyClean(restanteUSD)}</b></p>
                     
                     <div class="flex items-center gap-2 mb-2">
-                        <input type="number" id="inputAbonoUSD_${sale.id}" placeholder="Monto abonar en $" step="0.01" min="0" class="w-full text-xs border rounded px-2 py-1.5">
-                        <button onclick="registrarAbono('${sale.id}')" class="bg-blue-600 text-white text-xs px-3 py-1.5 rounded font-bold">Abonar $</button>
+                        <input type="number" id="inputAbonoUSD_${sale.id}" placeholder="Monto a abonar en $" step="0.01" min="0" class="w-full text-xs border rounded px-2 py-1.5 dark:bg-gray-800">
+                        <button onclick="registrarAbono('${sale.id}')" class="bg-blue-600 text-white text-xs px-3 py-1.5 rounded font-bold">Abonar</button>
                     </div>
 
                     <button onclick="alternarEstadoPago('${sale.id}')" class="w-full py-2 px-4 rounded-lg font-bold text-white text-xs shadow transition mt-1" style="background-color: ${pagadoTotal ? '#28a745' : '#dc3545'};">
@@ -1219,7 +1213,7 @@
             if (p.image) imagePreviewContainer.innerHTML = `<img src="${p.image}" class="w-full h-full object-cover">`;
             document.getElementById('formTitle').textContent = 'Editar Producto';
             document.getElementById('saveBtn').textContent = 'Actualizar Producto';
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            window.scrollTo({ top: { behavior: 'smooth' } });
         };
 
         window.deleteProduct = async function(id) {
@@ -1251,7 +1245,7 @@
         window.sendCatalogWhatsApp = function() {
             if (products.length === 0) return alert('No hay productos');
             let text = `📋 *CATÁLOGO DE PRECIOS - ${storeName.toUpperCase()}*%0A%0A`;
-            products.forEach((p, idx) => { text += `${idx + 1}. *${p.name}* - ${formatMoney(p.priceUSD)}%0A`; });
+            products.forEach((p, idx) => { text += `${idx + 1}. *${p.name}* - ${formatMoneyClean(p.priceUSD)}%0A`; });
             window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
         };
 
