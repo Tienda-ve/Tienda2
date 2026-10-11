@@ -1402,9 +1402,8 @@
                 div.innerHTML = `
                     <div>
                         <p class="font-bold text-gray-800 dark:text-gray-200">${c.name} <span class="text-gray-400 font-mono">(${c.doc_id || 'Sin CI'})</span></p>
-                        <p class="text-gray-500 text-[11px]">📞 ${c.phone \vert{}\vert{} 'Sin telf'} \vert{} 🏠 ${c.address || 'Sin dirección'}</p>
-                    </div>
-                    <div class="flex gap-2">
+                        <p class="text-gray-500 text-[11px]">📞 ${c.phone || 'Sin telf'} | 🏠 ${c.address || 'Sin dirección'}</p>
+                        <div class="flex gap-2">
                         <button onclick="editClient('${c.id}')" class="text-blue-500 hover:text-blue-700"><i class="fas fa-edit"></i></button>
                         <button onclick="deleteClient('${c.id}')" class="text-red-500 hover:text-red-700"><i class="fas fa-trash"></i></button>
                     </div>`;
