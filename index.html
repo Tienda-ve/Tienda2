@@ -52,7 +52,6 @@
                 Cuenta: <span id="subUserEmail" class="font-semibold text-gray-700 dark:text-gray-300"></span> | Código: <b id="subUserCode" class="text-blue-600 dark:text-blue-400 font-mono">...</b>
             </p>
 
-            <!-- CAJA DE PRECIOS -->
             <div class="bg-blue-50 dark:bg-gray-900 p-3 rounded-xl border border-blue-200 dark:border-blue-900 mb-3 text-left text-xs">
                 <div class="flex justify-between items-center mb-1">
                     <span class="text-gray-600 dark:text-gray-300">🏷️ Plan Mensual Regular:</span>
@@ -64,15 +63,11 @@
                 </div>
             </div>
 
-            <!-- DATOS DE BINANCE PAY Y ALTERNATIVA -->
             <div class="bg-gray-50 dark:bg-gray-900 p-3 rounded-xl text-left text-xs mb-4 border dark:border-gray-700 space-y-2">
                 <p class="font-bold text-gray-700 dark:text-gray-300 flex items-center gap-1">
                     <i class="fas fa-wallet text-amber-500"></i> Binance Pay:
                 </p>
                 <p class="font-mono bg-white dark:bg-gray-800 p-1.5 rounded border text-center font-bold">Pay ID: 190696956</p>
-                <p class="text-[11px] text-gray-500 dark:text-gray-400 text-center mt-2 pt-2 border-t dark:border-gray-700">
-                    ¿No tienes cuenta de Binance? Escríbenos al correo <b class="text-blue-600 dark:text-blue-400">tiendave65@gmail.com</b> para coordinar otra forma de pago.
-                </p>
             </div>
 
             <button onclick="enviarComprobanteWhatsApp()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-lg font-bold text-sm shadow flex items-center justify-center gap-2 mb-2.5">
@@ -155,7 +150,6 @@
                     <div class="flex flex-wrap items-center gap-3 text-xs bg-blue-800 bg-opacity-40 p-2.5 rounded-lg border border-blue-400" id="cartPaymentCheckboxesContainer"></div>
                 </div>
                 
-                <!-- SELECCIÓN DE CLIENTE CRM -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div>
                         <label class="block text-[11px] font-bold mb-1">👤 Seleccionar Cliente Frecuente (CRM):</label>
@@ -261,7 +255,7 @@
             </section>
         </div>
 
-        <!-- FORMULARIO DE PRODUCTOS CON REABASTECIMIENTO Y ALERTAS -->
+        <!-- FORMULARIO DE PRODUCTOS -->
         <section class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 mb-8">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-xl font-semibold text-gray-700 dark:text-gray-200"><i class="fas fa-plus-circle mr-2"></i><span id="formTitle">Agregar Nuevo Producto</span></h2>
@@ -461,7 +455,7 @@
         </div>
     </div>
 
-  <!-- MODAL PAGO ESTRUCTURADO -->
+    <!-- MODAL PAGO ESTRUCTURADO -->
     <div id="paymentModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-md w-full p-6">
             <h3 class="text-lg font-bold mb-4 flex items-center gap-2"><i class="fas fa-credit-card text-emerald-500"></i> <span id="paymentModalTitle">Agregar Método de Pago</span></h3>
@@ -600,7 +594,7 @@
 
         applyTheme();
 
-                supabase.auth.onAuthStateChange(async (event, session) => {
+        supabase.auth.onAuthStateChange(async (event, session) => {
             const errorDiv = document.getElementById('authError');
             if (session && session.user) {
                 currentUser = session.user;
@@ -609,22 +603,12 @@
                     if (selectError) throw selectError;
                     
                     if (!userRow) {
-                        const { error: insertError } = await supabase.from('users').insert([{ id: currentUser.id, email: currentUser.email, subscriptionActive: false }]);
+                        const { error: insertError } = await supabase.from('users').insert([{ id: currentUser.id, email: currentUser.email, subscriptionActive: true }]);
                         if (insertError) throw insertError;
-                        userRow = { subscriptionActive: false };
+                        userRow = { subscriptionActive: true };
                     }
-
-                    let isSubscribed = userRow ? (userRow.subscriptionactive === true || userRow.subscriptionActive === true) : false;
 
                     document.getElementById('authScreen').classList.add('hidden');
-                    if (!isSubscribed) {
-                        document.getElementById('mainAppContainer').classList.add('hidden');
-                        document.getElementById('subscriptionScreen').classList.remove('hidden');
-                        document.getElementById('subUserEmail').textContent = currentUser.email;
-                        document.getElementById('subUserCode').textContent = currentUser.id.substring(0, 6).toUpperCase();
-                        return;
-                    }
-
                     document.getElementById('subscriptionScreen').classList.add('hidden');
                     document.getElementById('mainAppContainer').classList.remove('hidden');
                     document.getElementById('userEmailDisplay').textContent = currentUser.email;
@@ -669,7 +653,7 @@
             }
         });
 
-                document.getElementById('loginBtn').addEventListener('click', async () => {
+        document.getElementById('loginBtn').addEventListener('click', async () => {
             const email = document.getElementById('authEmail').value.trim();
             const pass = document.getElementById('authPassword').value.trim();
             const errorDiv = document.getElementById('authError');
@@ -698,12 +682,12 @@
             try {
                 const { data, error } = await supabase.auth.signUp({ email, password: pass });
                 if (error) throw error;
-                if (data.user) await supabase.from('users').insert([{ id: data.user.id, email: email, subscriptionActive: false }]);
-                showToast('¡Cuenta creada!');
+                if (data.user) await supabase.from('users').insert([{ id: data.user.id, email: email, subscriptionActive: true }]);
+                showToast('¡Cuenta creada e iniciada!');
             } catch (e) { document.getElementById('authError').textContent = 'Error: ' + e.message; }
         });
 
-      window.enviarComprobanteWhatsApp = function() {
+        window.enviarComprobanteWhatsApp = function() {
             if (!currentUser) return;
             let texto = `Hola! Pago suscripción.\n📧 Correo: *${currentUser.email}*\n🔑 Código: *${currentUser.id.substring(0, 6).toUpperCase()}*`;
             window.open(`https://api.whatsapp.com/send?phone=${adminPaymentData.whatsappAdmin}&text=${encodeURIComponent(texto)}`, '_blank');
@@ -819,7 +803,7 @@
                 case 'ARS': return 'ARS $';
                 default: return curr;
             }
-        }
+            }
 
         window.formatMoney = function(usdAmount) {
             let parts = [];
@@ -1010,7 +994,7 @@
                 await supabase.from('products').insert([productData]);
             }
 
-          productForm.reset();
+            productForm.reset();
             imageFileToUpload = null;
             fileName.textContent = 'Ninguna imagen seleccionada';
             imagePreviewContainer.innerHTML = 'Sin foto';
@@ -1080,7 +1064,7 @@
                         </div>`;
                 }
 
-                card.innerHTML = `
+                               card.innerHTML = `
                     <div>
                         ${p.image ? `<img src="${p.image}" class="w-full h-44 object-cover">` : `<div class="w-full h-32 bg-gray-100 dark:bg-gray-900 flex items-center justify-center text-gray-400"><i class="fas fa-image fa-2x"></i></div>`}
                         <div class="p-4">
@@ -1240,7 +1224,6 @@
 
         window.clearCart = function() { cart = []; renderCart(); };
 
-        /* REABASTECIMIENTO / RESTOCK */
         window.openRestockModal = function(id) {
             const p = products.find(item => item.id === id);
             if(!p) return;
@@ -1272,7 +1255,6 @@
             showToast(`¡Stock actualizado: +${addQty} unidades!`);
         };
 
-        /* PEDIDO A PROVEEDOR EDITABLE */
         window.openSupplierModal = function() {
             const lowItems = products.filter(p => p.stock <= (p.min_stock || 5));
             supplierEditList = lowItems.map(p => ({
@@ -1314,7 +1296,7 @@
                     </div>`;
                 container.appendChild(row);
             });
-        }
+            }
 
         window.updateSupplierQty = function(idx, val) {
             if(supplierEditList[idx]) {
@@ -1350,7 +1332,6 @@
             showToast('Pedido de proveedor generado');
         };
 
-      /* CRM Y CLIENTES */
         window.toggleClientsModal = function() {
             const modal = document.getElementById('clientsModal');
             modal.classList.toggle('hidden');
@@ -1364,7 +1345,7 @@
             clientsList.forEach(c => {
                 const opt = document.createElement('option');
                 opt.value = c.id;
-                opt.textContent = `${c.name}${c.doc_id ? '(' + c.doc_id + ')' : ''}`;
+                opt.textContent = `${c.name}${c.doc_id ? ' (' + c.doc_id + ')' : ''}`;
                 sel.appendChild(opt);
             });
         }
@@ -1429,7 +1410,7 @@
                     </div>`;
                 container.appendChild(div);
             });
-                    }
+        }
 
         window.editClient = function(id) {
             const c = clientsList.find(item => item.id === id);
@@ -1450,14 +1431,13 @@
             }
         };
 
-        /* REPORTES BI CON CHART.JS */
         window.toggleBIModal = function() {
             const modal = document.getElementById('biModal');
             modal.classList.toggle('hidden');
             if(!modal.classList.contains('hidden')) renderBICharts();
         };
 
-      function renderBICharts() {
+        function renderBICharts() {
             const productSalesMap = {};
             let totalCobrado = 0, totalDeuda = 0, totalCostoSales = 0, totalIngresoSales = 0;
 
@@ -1508,9 +1488,8 @@
             document.getElementById('biFinancialSummary').innerHTML = `
                 <p><b>Ventas Brutas Totales:</b> $${totalIngresoSales.toFixed(2)}</p>
                 <p><b>Costo de Mercancía Vendida:</b> $${totalCostoSales.toFixed(2)}</p>                 <p class="text-emerald-600 font-bold"><b>Ganancia Neta Estimada:</b> $${gananciaReal.toFixed(2)}</p>`;
-      }
+        }
 
-        /* IMPRESIÓN DE TICKET TÉRMICO */
         window.printThermalTicket = function() {
             if(cart.length === 0) return alert('El carrito está vacío');
             const clientName = document.getElementById('clientNameInput').value.trim() || 'Cliente General';
@@ -1551,7 +1530,7 @@
             printWin.document.close();
         };
 
-      window.saveCartForLater = function() {
+        window.saveCartForLater = function() {
             if (cart.length === 0) return alert('El carrito está vacío');
             const clientName = document.getElementById('clientNameInput').value.trim() || 'Cliente General';
             pendingCarts.push({ id: 'pc_' + Date.now(), client: clientName, items: [...cart], date: new Date().toLocaleString('es-VE') });
@@ -1612,7 +1591,7 @@
             });
         }
 
-      window.restorePendingCart = function(idx) {
+        window.restorePendingCart = function(idx) {
             const pc = pendingCarts[idx];
             cart = [...pc.items];
             document.getElementById('clientNameInput').value = pc.client;
@@ -1836,7 +1815,7 @@
             }
         };
 
-      window.toggleSalesHistoryModal = function() {
+        window.toggleSalesHistoryModal = function() {
             filterOnlyPending = false;
             const modal = document.getElementById('salesModal');
             modal.classList.toggle('hidden');
@@ -1873,7 +1852,7 @@
                 else { cobrado += abono; pendiente += saldo; }
             });
 
-            document.getElementById('cierreCobrado').innerHTML = formatMoney(cobrado);
+        document.getElementById('cierreCobrado').innerHTML = formatMoney(cobrado);
             document.getElementById('cierrePendiente').innerHTML = formatMoney(pendiente);
 
             let listToShow = salesHistory;
@@ -1913,7 +1892,7 @@
                     </div>`;
                 container.appendChild(item);
             });
-                        }
+        }
 
         window.copyToClipboard = function(text) {
             navigator.clipboard.writeText(text).then(() => {
@@ -1950,7 +1929,7 @@
                 html += `</div></div>`;
             }
 
-          html += `
+            html += `
                 <div class="border-t pt-2 dark:border-gray-700 flex justify-between items-center">
                     <span class="font-bold">Total Venta:</span>
                     <div class="text-right">
@@ -2065,7 +2044,7 @@
             }
         };
 
-      window.openScannerModal = function() {
+        window.openScannerModal = function() {
             document.getElementById('scannerModal').classList.remove('hidden');
             setTimeout(() => {
                 Quagga.init({ inputStream: { name: "Live", type: "LiveStream", target: document.querySelector('#scanner-container'), constraints: { facingMode: "environment" } }, decoder: { readers: ["ean_reader", "code_128_reader"] } }, function(err) {
